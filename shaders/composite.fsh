@@ -379,7 +379,7 @@ void main()
 	#ifdef CLOUDS
 		color = getClouds(color, fragpos2.rgb, land, 3);
 	#endif
-//
+
 	#ifdef STARS
 		color = getStars(color, fragpos2.rgb, land);
 	#endif
