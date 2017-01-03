@@ -5,8 +5,6 @@
 
 #define DYNAMIC_HANDLIGHT
 
-//test
-
 //-------------------------------------------------//
 
 #include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
