@@ -23,7 +23,7 @@ mat2 rotationMatrix2 = mat2(vec2(cos(radiance2), -sin(radiance2)),
 	
 	wave += 1.0 - noise(coord0) * 10.0;
 	wave += 1.0 - noise(coord1) * 10.0;
-	wave += 1.0 - noise(coord2 * 4.0) * 7.5;
+	wave += pow(noise(coord2 * 4.0) * 6.5, 0.5) * 2.0;
 
 	wave *= mix(0.3,1.0,iswater) * 0.1;
 	wave *= 0.157;

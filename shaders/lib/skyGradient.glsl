@@ -90,6 +90,39 @@ float calcMoon(vec3 fragpos, vec3 moonVec){
 
 }
 
+/*
+float fakeMie(vec3 fragpos){
+	return pow(dot(normalize(fragpos), sunVec) * 0.5 + 0.5, 3.14 * 10.0);
+}
+
+vec3 getFakeRayLeigh(vec3 fragpos){
+	vec3 fogColor = vec3(0.3, 0.5, 1.0);
+		fogColor = mix(fogColor, vec3(dot(fogColor, vec3(0.33333))), 0.2);
+		
+	vec3 uVec = normalize(fragpos);
+		
+	float horizon = 0.4 / max(dot(uVec, upVec), 0.0);
+	
+	horizon = clamp(horizon, 0.0, 100.0);
+
+	vec3 color = fogColor * horizon;
+	
+	color = mix(color, color / 0.5 + color, -0.3);
+	vec3 rayleigh = pow(color, 1.0 - color);
+	
+	color = mix(rayleigh / (0.5 + rayleigh), color / (0.5 + color), clamp(dot(sunVec, upVec) * 0.95 + 0.05, 0.0, 1.0));
+	color = mix(color, vec3(0.0), 1.0 - clamp(dot(sunVec, upVec) * 0.8 + 0.2, 0.0, 1.0));
+	
+	color *= 1.0 + pow(dot(uVec, sunVec) * 0.5 + 0.5, 2.0);
+	color += sunlight * fakeMie(fragpos) * clamp(dot(sunVec, upVec) * 0.95 + 0.05, 0.0, 1.0);
+	
+	color = color / (0.5 + color);
+	
+	return clamp(color, 0.0, 1.0);
+	
+}
+*/
+
 vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 fogColor, out vec3 sunMax, out float moonMax){
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +136,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	const float v = 4.0;
 
 	// Wavelength of the primary colors RGB in nanometers.
-	const vec3 primaryWavelengths = vec3(680, 550, 450) * 1.0E-9;
+	const vec3 primaryWavelengths = vec3(650, 550, 450) * 1.0E-9;
 	
 	float n = 1.00029; // refractive index of air
 	float N = 2.54743E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
@@ -170,6 +203,8 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	sky += pow(fogColor * 0.5, vec3(0.4545)) * ((nightLightScattering + 0.5 * (1.0 - nightLightScattering)) * clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0));
 
 	color = mix(sky, pow(fogColor, vec3(0.4545)), rainStrength);
+	
+	//color = getFakeRayLeigh(fragpos) + (sun * sunMax + moon * moonMax) * sunMoonMult;
 
 	return color;
 }
