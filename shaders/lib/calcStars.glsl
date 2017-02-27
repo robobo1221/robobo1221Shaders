@@ -1,6 +1,6 @@
 #define STARS
 
-#define DRAW_GALAXY
+//#define DRAW_GALAXY
 
 #ifdef STARS
 	vec3 getStars(vec3 color, vec3 fpos, float land){
@@ -41,6 +41,7 @@
 					galaxyNoise += oldGalaxy;
 					galaxyNoise = min(galaxyNoise, 1.0 - galaxyNoise);
 					galaxyNoise = max(galaxyNoise * 8.0 - 1.5,0.0);
+					galaxyNoise *= 0.5;
 				
 					vec3 galaxy = vec3(galaxyNoise);
 						galaxy *= mix(normalize(vec3(0.8, 0.5, 1.0)), vec3(0.1, 0.5, 1.0) * 100.0, pow(oldGalaxy * 0.75 + 0.25, 3.0));

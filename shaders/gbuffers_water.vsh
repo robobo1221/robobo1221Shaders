@@ -9,10 +9,10 @@ varying vec3 tangent;
 varying vec3 binormal;
 
 varying vec3 wpos;
-
-varying vec4 verts;
+varying vec3 viewVector;
 
 varying float mat;
+varying float dist;
 
 uniform vec3 cameraPosition;
 
@@ -63,8 +63,15 @@ void main(){
 		tangent  = normalize(gl_NormalMatrix * vec3( -1.0,  0.0,  0.0));
 		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
 	}
+
+	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
+	  tangent.y, binormal.y, normal.y,
+	  tangent.z, binormal.z, normal.z);
 	
-	verts = gl_Vertex;
+	viewVector = ( gl_ModelViewMatrix * gl_Vertex).xyz;
+	viewVector = (tbnMatrix * viewVector);
+
+	dist = length(gl_ModelViewMatrix * gl_Vertex);
 	
 	if (mc_Entity.x == 8.0 || mc_Entity.x == 9.0) mat = 0.2;
 	if (mat != 0.2) mat = 0.3;

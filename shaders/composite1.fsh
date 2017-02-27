@@ -82,6 +82,8 @@ uniform int worldTime;
 uniform float far;
 uniform float near;
 
+float comp = 1.0-near/far/far;
+
 float timefract = worldTime;
 
 mat2 time = mat2(vec2(
@@ -298,8 +300,8 @@ float pixeldepthRef2 = texture2D(depthtex1, refTexC.st).x;
 	vec3 specular = texture2D(gaux3, refTexC.st).rgb;
 #endif
 
-float land = float(pow(pixeldepthRef, 2.0) < pow(pixeldepthRef, 1.0));
-float land2 = float(pow(pixeldepthRef2, 2.0) < pow(pixeldepthRef2, 1.0));
+float land = float(pixeldepthRef < comp);
+float land2 = float(pixeldepthRef2 < comp);
 
 vec4 fragposRef = getFragpos(refTexC.st, pixeldepthRef);
 vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
@@ -432,17 +434,15 @@ vec3 renderGaux4(vec3 color){
 	}
 #endif
 
+float getWaterScattering(float NdotL){
+	const float wrap = 0.1;
+	const float scatterWidth = 0.5;
+	
+	float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
+	return smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
+}
+
 #ifdef WATER_DEPTH_FOG
-	float calcWaterSSS(float NdotL){
-
-		const float wrap = 0.2;
-		const float scatterWidth = 0.425;
-
-		float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
-		float scatter = smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
-
-		return scatter;
-	}
 
 	vec3 getWaterDepthFog(vec3 color, vec3 fragpos, vec3 fragpos2){
 
@@ -458,12 +458,12 @@ vec3 renderGaux4(vec3 color){
 
 		float NdotL = dot(normal, lightVector);
 
-		float SSS = calcWaterSSS(NdotL);
+		float SSS = pow(getWaterScattering(NdotL), 2.0);
 
 		vec3 fogColor = vec3(ambientlight * 0.05) * lightCol * 0.666;
 			fogColor = fogColor * (pow(aux2.b, skyLightAtten) + 0.25) * 0.75;
-			fogColor = mix(fogColor, fogColor * lightCol * 2.5, SSS * (1.0 - rainStrength) * shadows);
-			fogColor = mix(fogColor, fogColor * lightCol * 10.0,sunAngleCosine * shadows  * transition_fading * (1.0 - max(NdotL,0.0)) * (1.0 - rainStrength));
+			fogColor = mix(fogColor, fogColor * lightCol * 3.75, SSS * (1.0 - rainStrength) * shadows);
+			fogColor = mix(fogColor, fogColor * lightCol * 10.0,sunAngleCosine * shadows  * transition_fading * (1.0 - pow(max(NdotL,0.0), 2.0)) * (1.0 - rainStrength));
 
 		vec3 fogColor2 = vec3(0.1, 0.5, 0.8);
 
@@ -527,9 +527,7 @@ vec3 renderGaux4(vec3 color){
 						color = texture2D(gcolor, pos.st) * MAX_COLOR_RANGE;
 						color.rgb = pow(color.rgb, vec3(2.2));
 
-						pixeldepth = texture2D(gdepthtex, pos.st).x;
-
-						land = pow(pixeldepth, 2.0) < pow(pixeldepth, 1.0);
+						land = texture2D(gdepthtex, pos.st).x < comp;
 
 						#ifdef FOG
 							color.rgb = getFog(ambientlight, color.rgb, pos.st, float(land));

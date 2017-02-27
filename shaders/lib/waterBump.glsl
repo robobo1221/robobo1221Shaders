@@ -13,9 +13,9 @@ mat2 rotationMatrix2 = mat2(vec2(cos(radiance2), -sin(radiance2)),
 	float wave = 0.0;
 	vec2 movement = abs(vec2(0.0, -frameTimeCounter * 0.0003));
 	
-	vec2 coord0 = posxz * waveZ * rotationMatrix + movement * waveM * 697.0;
-	vec2 coord1 = posxz * waveZ * rotationMatrix2 + movement * 0.9 * waveM * 697.0;
-	vec2 coord2 = posxz * waveZ + movement * 0.5 * waveM * 697.0;
+	vec2 coord0 = fract(posxz / 1024.0 * waveZ) * 1024.0 * rotationMatrix + movement * waveM * 697.0;
+	vec2 coord1 = fract(posxz / 1024.0 * waveZ) * 1024.0 * rotationMatrix2 + movement * 0.9 * waveM * 697.0;
+	vec2 coord2 = fract(posxz / 1024.0 * waveZ) * 1024.0 + movement * 0.5 * waveM * 697.0;
 	
 	coord0.y *= 3.0;
 	coord1.y *= 3.0;
@@ -23,7 +23,7 @@ mat2 rotationMatrix2 = mat2(vec2(cos(radiance2), -sin(radiance2)),
 	
 	wave += 1.0 - noise(coord0) * 10.0;
 	wave += 1.0 - noise(coord1) * 10.0;
-	wave += pow(noise(coord2 * 4.0) * 6.5, 0.5) * 2.0;
+	wave += pow(noise(coord2 * 4.0) * 6.5, 0.5) * 1.7;
 
 	wave *= mix(0.3,1.0,iswater) * 0.1;
 	wave *= 0.157;

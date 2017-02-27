@@ -42,13 +42,13 @@ vec3 makeBloom(float lod,vec2 offset){
 void main() {
 vec3 blur = vec3(0);
 	#ifdef BLOOM
-	 blur += pow(makeBloom(2,vec2(0,0)), vec3(1.0));
-	 blur += pow(makeBloom(3,vec2(0.3,0)), vec3(0.9));
-	 blur += pow(makeBloom(4,vec2(0,0.3)), vec3(0.8));
-	 blur += pow(makeBloom(5,vec2(0.1,0.3)), vec3(0.7));
-	 blur += pow(makeBloom(6,vec2(0.2,0.3)), vec3(0.6));
+		blur += pow(makeBloom(2,vec2(0,0)), vec3(1.0));
+		blur += pow(makeBloom(3,vec2(0.3,0)), vec3(0.9));
+		blur += pow(makeBloom(4,vec2(0,0.3)), vec3(0.8));
+		blur += pow(makeBloom(5,vec2(0.1,0.3)), vec3(0.7));
+		blur += pow(makeBloom(6,vec2(0.2,0.3)), vec3(0.6));
 	#endif
-blur = pow(blur,vec3(0.4545));
+	blur = pow(blur,vec3(0.4545));
 /* DRAWBUFFERS:3 */
 	gl_FragData[0] = vec4(blur,1.0);
 }

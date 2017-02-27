@@ -3,7 +3,7 @@ vec4 waterColor = vec4(1.0,1.0,1.0,0.11);
 
 #define PRALLAX_WATER //Makes waves on water look 3D
 	#define PW_DEPTH 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0]
-	#define PW_POINTS 16 //[8 12 16 32]
+	#define PW_POINTS 6 //[4 6 8 16 32]
 
 varying vec4 texcoord;
 varying vec4 lmcoord;
@@ -13,42 +13,35 @@ varying vec3 normal;
 varying vec3 tangent;
 varying vec3 binormal;
 
-varying vec4 verts;
-
+varying vec3 viewVector;
 varying vec3 wpos;
 
+varying float dist;
 varying float mat;
 
 uniform sampler2D texture;
 
 uniform float frameTimeCounter;
-
 #include "lib/noise.glsl"
 #include "lib/waterBump.glsl"
 
 #ifdef PRALLAX_WATER
-	vec2 paralaxCoords(vec3 pos, vec3 tangentVector, float iswater) {
-		float waveZ = mix(2.0,0.25,iswater);
-		float waveM = mix(0.0,2.0,iswater);
-		float waveS = mix(0.0,1.0,iswater) * PW_DEPTH;
+vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 
-		float waterHeight = getWaterBump(pos.xz - pos.y, waveM, waveZ, iswater) * 2.0;
-		
-		vec3 paralaxCoord = vec3(0.0, 0.0, 1.0);
-		vec3 stepSize = vec3(waveS, waveS, 1.0);
-		vec3 step = tangentVector * stepSize;
-		
-		const int steps = int(PW_POINTS);
-		
-		for (int i = 0; waterHeight < paralaxCoord.z && i < steps; i++) {
-			paralaxCoord.xy = paralaxCoord.xy + step.xy * clamp((paralaxCoord.z - waterHeight) / (stepSize.z * 0.2f / (-tangentVector.z + 0.05f)), 0.0, 1.0);
-			paralaxCoord.z += step.z;
-			vec3 paralaxPosition = pos + vec3(paralaxCoord.x, 0.0f, paralaxCoord.y);
-			waterHeight = getWaterBump(paralaxPosition.xz - paralaxPosition.y, waveM, waveZ, iswater) * 2.0;
-		}
-		pos += vec3(paralaxCoord.x, 0.0f, paralaxCoord.y);
-		return pos.xz - pos.y;
+	float waveZ = mix(2.0,0.25,iswater);
+	float waveM = mix(0.0,2.0,iswater);
+
+	const int steps = PW_POINTS;
+
+	vec3 parallaxPos = posxz;
+	float waterHeight = getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * 0.5;
+	
+	for(int i = 0; i < steps; i++){
+		parallaxPos.xz += waterHeight * viewVector.xy / dist * (1.0 / float(steps)) * 22.0 * PW_DEPTH;
+		waterHeight = getWaterBump(parallaxPos.xz - parallaxPos.y, waveM, waveZ, iswater) * 0.5;
 	}
+	return parallaxPos;
+}
 #endif
 
 void main(){
@@ -60,11 +53,8 @@ void main(){
 	
 	vec3 posxz = wpos.xyz;
 	
-	vec4 modelView = gl_ModelViewMatrix * verts;
-		vec3 tangentVector = normalize(tbnMatrix * modelView.xyz);
-	
 	#ifdef PRALLAX_WATER	
-		posxz.xz = paralaxCoords(posxz, tangentVector, iswater);
+		posxz = getParallaxDisplacement(posxz, iswater);
 	#endif
 
 	vec4 albedo = texture2D(texture, texcoord.st);
@@ -73,7 +63,7 @@ void main(){
 	vec3 bump;
 		bump = getWaveHeight(posxz.xz - posxz.y,iswater);
 	
-	const float bumpmult = 0.1;
+	const float bumpmult = 0.13457;
 	
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 						  

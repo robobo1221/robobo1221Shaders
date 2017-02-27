@@ -85,6 +85,8 @@ uniform float near;
 uniform int isEyeInWater;
 uniform int worldTime;
 
+float comp = 1.0-near/far/far;
+
 float timefract = worldTime;
 
 mat2 time = mat2(vec2(
@@ -111,7 +113,7 @@ vec3 normal2 = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = texture2D(gaux1, texcoord.st);
 vec4 aux2 = texture2D(gdepth, texcoord.st);
 
-float land = float(pow(pixeldepth2, 2.0) < pow(pixeldepth2, 1.0));
+float land = float(pixeldepth2 < comp);
 float translucent = float(aux.g > 0.09 && aux.g < 0.11);
 float emissive = float(aux.g > 0.34 && aux.g < 0.36);
 
@@ -271,7 +273,7 @@ vec3 getShading(vec3 color){
 	vec3 lightCol = mix(sunlight, moonlight, time[1].y);
 
 	vec3 sunlightDirect = lightCol * sunlightAmount;
-	vec3 indirectLight = mix(ambientlight, lightCol, mix(mix(0.7, 0.0, rainStrength),0.0,time[1].y)) * 0.2 * skyLightMap * shadowDarkness + minLight * (1.0 - skyLightMap);
+	vec3 indirectLight = mix(ambientlight, lightCol, mix(mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * 0.2 * skyLightMap * shadowDarkness + minLight * (1.0 - skyLightMap);
 
 	return mix(indirectLight, sunlightDirect * (1.0 + getSubSurfaceScattering() * translucent), shadows * diffuse) + emissiveLightmap;
 }
@@ -316,7 +318,7 @@ vec3 getShading(vec3 color){
 
 			float weight = 128.0 / rSD.y;
 
-			vec2 diffthresh = vec2(0.0005, -0.001);	// Fixes light leakage from walls
+			vec2 diffthresh = vec2(0.00005, -0.001);	// Fixes light leakage from walls
 			
 			vec4 worldposition = vec4(0.0);
 

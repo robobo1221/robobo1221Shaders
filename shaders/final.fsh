@@ -242,6 +242,22 @@ void main(){
 	#ifdef VIGNETTE
 		color = getVignette(color, newTexcoord);
 	#endif
+	
+	//float noise = normalize(cross(dFdx(vec3(cos(texcoord.x * 1024.0))), dFdy(vec3(cos(texcoord.y * 1024.0))))).x;
+	//      noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1025.0))), dFdy(vec3(cos(texcoord.y * 1025.0))))).x;
+	//      noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1026.0))), dFdy(vec3(cos(texcoord.y * 1026.0))))).x;
+	//      noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1027.0))), dFdy(vec3(cos(texcoord.y * 1027.0))))).x;
+	//	  noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1028.0))), dFdy(vec3(cos(texcoord.y * 1028.0))))).x;
+	//	  noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1029.0))), dFdy(vec3(cos(texcoord.y * 1029.0))))).x;
+	//	  noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1030.0))), dFdy(vec3(cos(texcoord.y * 1030.0))))).x;
+	//	  noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1031.0))), dFdy(vec3(cos(texcoord.y * 1031.0))))).x;
+	//	  noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1032.0))), dFdy(vec3(cos(texcoord.y * 1032.0))))).x;
+	//	  noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1033.0))), dFdy(vec3(cos(texcoord.y * 1033.0))))).x;
+	//	  noise += normalize(cross(dFdx(vec3(cos(texcoord.x * 1034.0))), dFdy(vec3(cos(texcoord.y * 1034.0))))).x;
+	//	  noise /= 11.0;
+	
+	
+	//color = vec3(noise);
 
 	gl_FragColor = vec4(color, 1.0);
 }
