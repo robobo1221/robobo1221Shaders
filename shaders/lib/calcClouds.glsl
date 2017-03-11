@@ -5,6 +5,7 @@
 
 
 #ifdef CLOUDS
+
 	float subSurfaceScattering(vec3 lPos, vec3 uPos, float size){
 		return pow(clamp(dot(lPos, uPos),0.0,1.0),size);
 	}
@@ -26,21 +27,22 @@
 			float cosT = clamp(dot(fposition.rgb,upVec),0.0,1.0);
 			float cosSunUpAngle = clamp(smoothstep(-0.05,0.5,dot(sunVec, upVec)* 0.95 + 0.05) * 10.0, 0.0, 1.0);
 
-			vec3 cloudCol = mix(mix(sunlight, moonlight * 2.0, time[1].y), vec3(0.1) * (1.0 - time[1].y * 0.8), rainStrength) * (1.0 - (time[1].x + time[0].x) * 0.5);
-			cloudCol *= mix(1.0, 0.5, rainStrength * time[1].y);
+			vec3 cloudCol = mix(mix(sunlight, moonlight * 2.0, time[1].y), vec3(1.0) * (1.0 - time[1].y * 0.96), rainStrength) * (1.0 - (time[1].x + time[0].x) * 0.5);
+				 cloudCol *= mix(1.0, 0.5, rainStrength * time[1].y);
+				 cloudCol *= 0.175  * 0.5;
 
-			float height = (cloudHeight / wVec.y);
-
-			float weight = 0.0;
-			float density = 0.0;
-			float totalcloud = 0.0;
+			float density = 	0.0f;
+			float totalcloud = 	0.0f;
+			float height = 		0.0f;
 
 			vec3 cloudPosition = vec3(0.0);
 			
 			if (cosT <= 1.0) {
 				for (int i = 0; i < itterations; i++){
+				
+					height = cloudHeight / wVec.y - ((totalcloud * 15000.0 / itterations * bayer16x16(texcoord.st)) * 2.0 - 1.0);
 
-					cloudPosition = wVec * (height - i * 150 / itterations * (1.0 - pow(cosT, 2.0)));
+					cloudPosition = wVec * height;
 
 					vec2 coord = (cloudPosition.xz + cameraPosition.xz * 2.5) / 200000.0;
 						coord += wind;
@@ -49,33 +51,37 @@
 					noise += texture2D(noisetex, coord * 3.5).x / 3.5;
 					noise += texture2D(noisetex, coord * 6.125).x / 6.125;
 					noise += texture2D(noisetex, coord * 12.25).x / 12.25;
-					noise /= clamp(texture2D(noisetex,coord / 3.1).x * 1.0,0.0,1.0);
+					noise += texture2D(noisetex, coord * 24.50).x / 24.50;
+					noise /= clamp(texture2D(noisetex,coord / 5.0).x,0.0,1.0);
 
-					noise /= (0.13 * CLOUD_COVERAGE);
+					noise /= 0.15 * CLOUD_COVERAGE;
 
-					float cl = max(noise-0.7,0.0);
-					cl = max(cl,0.)*0.04 * (1.0 - rainStrength * 0.5);
-					density = pow(max(1-cl*2.5,0.),2.0) / 11.0 / 3.0;
+					float cl = max(noise-1.0,0.0);
+					cl = max(cl,0.)*0.05 * (1.0 - rainStrength * 0.5);
+					density = pow(max(1.0 - cl * 2.0,0.),2.0) * 0.0303030;
 					density *= 2.0 * CLOUD_DENSITY;
 
 					totalcloud += density;
+					
 					if (totalcloud > (1.0 - 1.0 / itterations + 0.1)) break;
-
-					weight++;
 				}
 			}
 
-			totalcloud /= weight;
-			totalcloud = mix(totalcloud,0.0,pow(1-density, 100.0));
+			totalcloud /= itterations;
+			totalcloud = mix(totalcloud,0.0,pow(1.0 - totalcloud, 100.0));
 
-			float sss = subSurfaceScattering(moonVec, fposition.rgb, 50.0) * (1.0 - rainStrength);
+			float sss = subSurfaceScattering(moonVec, fposition.rgb, 6.0) * (1.0 - rainStrength);
 
-			cloudCol = mix(cloudCol, sunlight * 10.0,
-			pow(cosT, 0.5) * subSurfaceScattering(sunVec, fposition.rgb, 15.0) * pow(1.0 - density, 100.0) * (1.0 - rainStrength) * cosSunUpAngle);
+			cloudCol = mix(cloudCol, sunlight * 3.0,
+			pow(cosT, 0.5) * subSurfaceScattering(sunVec, fposition.rgb, 10.0) * pow(1.0 - totalcloud, 600.0) * (1.0 - rainStrength) * cosSunUpAngle);
 			
-			cloudCol *= 1.0 + pow(1.0 - density, 25.0) * 5.0 * (1.0 + sss * 10.0 * pow(1.0 - totalcloud, 200.0) * transition_fading * (1.0 - rainStrength) * pow(cosT, 0.5));
+			float scatterMask = pow(1.0 - totalcloud, 100.0);
+			
+			cloudCol *= 1.0 + scatterMask * (1.0 - rainStrength * (1.0 - cosSunUpAngle)) * 6.0 * (1.0 + sss * 5.0 * (1.0 - cosSunUpAngle)) * sqrt(cosT);
+			cloudCol = mix(cloudCol, ambientlight * 0.25, (1.0 - scatterMask) * 0.3);
+			cloudCol *= 0.75;
 
-			return pow(mix(pow(color, vec3(2.2)), pow(cloudCol, vec3(2.2)),totalcloud * cosT * 0.25), vec3(0.4545));
+			return mix(color, cloudCol ,clamp(totalcloud * 500.0, 0.0, 1.0) * sqrt(cosT));
 		} else {
 			return color;
 		}

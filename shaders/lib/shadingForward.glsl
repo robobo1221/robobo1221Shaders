@@ -1,10 +1,10 @@
-	vec3 shadows = getShadow(pixeldepth, normal2,5.0, false, true);
+	vec3 shadowsForward = getShadow(pixeldepth, normal2,5.0, false, true);
 	
 	#ifdef DYNAMIC_HANDLIGHT
 		float handItemLightFactor2 = getHandItemLightFactor(fragpos, normal2) * handLightMult;
-		float forwardEmissive = getEmissiveLightmap(aux2) + handItemLightFactor2;
+		float forwardEmissive = getEmissiveLightmap(aux2, false) + handItemLightFactor2;
 	#else
-		float forwardEmissive = getEmissiveLightmap(aux2);
+		float forwardEmissive = getEmissiveLightmap(aux2, false);
 	#endif
 
 vec3 getShadingForward(vec3 normal, vec3 color){
@@ -24,5 +24,5 @@ vec3 getShadingForward(vec3 normal, vec3 color){
 	vec3 sunlightDirect = lightCol * sunlightAmount * 0.5;
 	vec3 indirectLight = mix(ambientlight, lightCol, mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y)) * 0.05 * skyLightMap * shadowDarkness + minLight * (1.0 - skyLightMap);
 
-	return mix(indirectLight, sunlightDirect, shadows * diffuse) + emissiveLightmap;
+	return mix(indirectLight, sunlightDirect, shadowsForward * diffuse) + emissiveLightmap;
 }

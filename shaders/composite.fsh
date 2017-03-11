@@ -1,4 +1,5 @@
 #version 120
+
 #include "lib/colorRange.glsl"
 
 #define SHADOW_BIAS 0.85
@@ -27,7 +28,7 @@ const int 		RGBA16						= 0;
 const int 		RGBA8						= 0;
 
 const int 		gcolorFormat				= RGBA16;
-const int 		gaux1Format					= R11F_G11F_B10F;
+const int 		gaux1Format					= RGBA16;
 const int 		gaux2Format					= RGBA8;
 const int 		gaux3Format					= R11F_G11F_B10F;
 const int 		gaux4Format					= RGBA8;
@@ -102,7 +103,7 @@ mat2 time = mat2(vec2(
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
 
 
-vec3 ambientlight = mix(ambientColor, vec3(0.3) * (1.0 - time[1].y * 0.98), rainStrength);
+vec3 ambientlight = mix(ambientColor, vec3(0.2) * (1.0 - time[1].y * 0.97), rainStrength);
 
 float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
@@ -131,33 +132,51 @@ float getDepth(float depth) {
     return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 }
 
-float getEmissiveLightmap(vec4 aux){
+#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
+
+float bayer16x16(vec2 p){
+
+	p *= vec2(viewWidth,viewHeight);
+	
+    vec2 m0 = vec2(mod(floor(p/8.), 2.));
+    vec2 m1 = vec2(mod(floor(p/4.), 2.));
+    vec2 m2 = vec2(mod(floor(p/2.), 2.));
+    vec2 m3 = vec2(mod(floor(p)   , 2.));
+
+    return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
+}
+
+float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 
 	float lightmap = aux.r;
-
-	lightmap 		= clamp(lightmap * 1.10f, 0.0f, 1.0f);
+	
 	lightmap 		= 1.0f - lightmap;
-	lightmap 		*= 5.6f;
-	lightmap 		= 1.0f / pow((lightmap + 0.8f), 2.0f);
-	lightmap 		-= 0.02435f;
-
+	lightmap 		*= 5.5f;
+	lightmap 		= 1.0 / pow((lightmap + 0.8f), 2.0);
+	lightmap 		= clamp(lightmap, 0.0f, 1.0f);
+	lightmap		= (lightmap / 1.0) / (1.0 - lightmap);
+	lightmap 		-= 0.03435f;
 	lightmap 		= max(0.0f, lightmap);
+	
 	lightmap 		*= 0.08 * (1.0 + mix(dynamicExposure,1.0,time[1].y) / 0.08) * 0.23;
 	lightmap 		= clamp(lightmap, 0.0f, 1.0f);
-	lightmap 		= pow(lightmap , 0.9f);
+	lightmap 		= pow(lightmap , 4.0f) * 5.0 + lightmap;
 	lightmap 		= pow(lightmap, emissiveLightAtten) * emissiveLightMult;
+	
+	lightmap		= isForwardRendered ? lightmap * (1.0 - emissive) + emissive : lightmap; //Prevent glowstone and all emissive stuff to clip with the lightmap
+	lightmap		= isForwardRendered ? lightmap * (1.0 - handLightMult * hand) + handLightMult * hand : lightmap; //Also do this to the hand
 
 	return lightmap;
 }
 
 float getSkyLightmap(){
 
-	return pow(aux.z, skyLightAtten) * (1.0 + mix(dynamicExposure,0.0,time[1].y) * 1.0);
+	return pow(aux.z, skyLightAtten);
 }
 
 float getSkyLightmap2(){
 
-	return pow(aux2.z, skyLightAtten) * (1.0 + mix(dynamicExposure,0.0,time[1].y) * 1.0);
+	return pow(aux2.z, skyLightAtten);
 }
 
 vec4 nvec4(vec3 pos) {
@@ -204,17 +223,18 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 			handItemLightFactor = 1.0 - handItemLightFactor / 25.0;
 			handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor);
 		
-			handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor));
+			handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor), true);
 			
 			handItemLightFactor *= pow(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), normalize(handItemLightFactor)), 0.0, 1.0), 2.0) * 1.6;
+			handItemLightFactor *= 1.0 - emissive; //Temp fix for emissive blocks getting lit up while you hold a lightsource.
 		
 		return handItemLightFactor * handLightMult;
 	}
 
 	float handItemLightFactor = getHandItemLightFactor(fragpos2, normal);
-	float emissiveLM = getEmissiveLightmap(aux) + handItemLightFactor;
+	float emissiveLM = getEmissiveLightmap(aux, true) + handItemLightFactor;
 #else
-	float emissiveLM = getEmissiveLightmap(aux);
+	float emissiveLM = getEmissiveLightmap(aux, true);
 #endif
 
 #include "lib/noise.glsl"
@@ -223,9 +243,9 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 #include "lib/nightDesat.glsl"
 #include "lib/shadingForward.glsl"
 #include "lib/gaux2Forward.glsl"
+#include "lib/skyGradient.glsl"
 #include "lib/calcClouds.glsl"
 #include "lib/calcStars.glsl"
-#include "lib/skyGradient.glsl"
 
 float getSubSurfaceScattering(){
 	return clamp(pow(dot(normalize(fragpos.rgb), lightVector), 12.0),0.0,1.0) * transition_fading * 3.0;
@@ -259,13 +279,14 @@ float diffuseorennayar(vec3 pos, vec3 lvector, vec3 normal, float spec, float ro
 	return clamp(cos_theta_i*(a+b_term),0.0,1.0);
 }
 
+vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
+
 vec3 getShading(vec3 color){
 
 	float skyLightMap = getSkyLightmap();
 
 	float diffuse = mix(diffuseorennayar(fragpos.rgb, lightVector, normal, 0.0, 0.0), 1.0, translucent) * (1.0 - rainStrength) * transition_fading;
 		diffuse = clamp((diffuse - 0.03) * 3.0,0.0,1.0) * mix(1.0, skyLightMap * 0.9 + 0.1, isEyeInWater * (1.0 - iswater));
-	vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
 
 	vec3 emissiveLightmap = emissiveLM * emissiveLightColor;
 		emissiveLightmap = getEmessiveGlow(color,emissiveLightmap, emissiveLightmap, emissive);
@@ -280,26 +301,7 @@ vec3 getShading(vec3 color){
 
 #ifdef VOLUMETRIC_LIGHT
 
-	// dirived from: http://devlog-martinsh.blogspot.nl/2011/03/glsl-8x8-bayer-matrix-dithering.html
-	float find_closest(vec2 pos)
-	{
-		const int ditherPattern[64] = int[64](
-			0, 32, 8, 40, 2, 34, 10, 42,
-			48, 16, 56, 24, 50, 18, 58, 26,
-			12, 44, 4, 36, 14, 46, 6, 38,
-			60, 28, 52, 20, 62, 30, 54, 22,
-			3, 35, 11, 43, 1, 33, 9, 41,
-			51, 19, 59, 27, 49, 17, 57, 25,
-			15, 47, 7, 39, 13, 45, 5, 37,
-			63, 31, 55, 23, 61, 29, 53, 21);
-
-		ivec2 positon = ivec2(mod(pos * vec2(viewWidth, viewHeight), 8.0f));
-
-		int dither = ditherPattern[int(positon.x) + int(positon.y) * 8];
-
-		return float(dither) / 64.0f;
-	}
-
+#undef g
 	float getVolumetricRays() {
 
 		///////////////////////Setting up functions///////////////////////
@@ -307,7 +309,7 @@ vec3 getShading(vec3 color){
 			vec3 rSD = vec3(0.0);
 				rSD.x = 0.0;
 				rSD.y = 4.0 / VL_QUALITY;
-				rSD.z = find_closest(texcoord.st);
+				rSD.z = bayer16x16(texcoord.st);
 				
 			
 			rSD.z *= rSD.y;
@@ -378,12 +380,12 @@ void main()
 	else
 		color = skyGradient;
 		
-	#ifdef CLOUDS
-		color = getClouds(color, fragpos2.rgb, land, 3);
-	#endif
-
 	#ifdef STARS
 		color = getStars(color, fragpos2.rgb, land);
+	#endif
+		
+	#ifdef CLOUDS
+		color = getClouds(color, fragpos2.rgb, land, 3);
 	#endif
 	
 	color = renderGaux2(color, normal2);
@@ -392,5 +394,5 @@ void main()
 
 /* DRAWBUFFERS:05 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
-	gl_FragData[1] = vec4(shadows, 1.0);
+	gl_FragData[1] = vec4(shadowsForward, 1.0);
 }

@@ -9,7 +9,7 @@ float RayleighPhase(float cosViewSunAngle)
 			   16π
 	*/
 
-	return (3.0 / (16.0*pi)) * (1.0 + pow(max(cosViewSunAngle, 0.0), 2.0));
+	return (3.0 / (16.0 * pi)) * (1.0 + pow(max(cosViewSunAngle, 0.0), 2.0));
 }
 
 float hgPhase(float cosViewSunAngle, float g)
@@ -29,7 +29,7 @@ float hgPhase(float cosViewSunAngle, float g)
 vec3 totalMie(vec3 lambda, vec3 K, float T, float v)
 {
 	float c = (0.2 * T ) * 10E-18;
-	return 0.434 * c * pi * pow((2.0 * pi) / lambda, vec3(v - 2.0)) * K;
+	return 0.4343 * c * pi * pow((2.0 * pi) / lambda, vec3(v - 2.0)) * K;
 }
 
 vec3 totalRayleigh(vec3 lambda, float n, float N, float pn){
@@ -92,7 +92,7 @@ float calcMoon(vec3 fragpos, vec3 moonVec){
 
 /*
 float fakeMie(vec3 fragpos){
-	return pow(dot(normalize(fragpos), sunVec) * 0.5 + 0.5, 3.14 * 10.0);
+	return pow(dot(normalize(fragpos), sunVec) * 0.5 + 0.5, pi * 10.0);
 }
 
 vec3 getFakeRayLeigh(vec3 fragpos){
@@ -132,7 +132,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 
 	// constants for mie scattering
 	const float mieCoefficient = 0.005;
-	const float mieDirectionalG = 0.76;
+	const float mieDirectionalG = 0.75;
 	const float v = 4.0;
 
 	// Wavelength of the primary colors RGB in nanometers.
@@ -178,7 +178,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 Fexsun = vec3(exp(-(rayleighCoefficient * 0.00002853075 * rayleighOpticalLength + mieAtX * mieOpticalLength)));
 
 	vec3 rayleighXtoEye = rayleighAtX * RayleighPhase(cosViewSunAngle);
-	vec3 mieXtoEye = mieAtX *  hgPhase(cosViewSunAngle , mieDirectionalG);
+	vec3 mieXtoEye = mieAtX * hgPhase(cosViewSunAngle , mieDirectionalG);
 
 	vec3 totalLightAtX = rayleighAtX + mieAtX;
 	vec3 lightFromXtoEye = rayleighXtoEye + mieXtoEye;

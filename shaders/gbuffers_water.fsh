@@ -3,7 +3,7 @@ vec4 waterColor = vec4(1.0,1.0,1.0,0.11);
 
 #define PRALLAX_WATER //Makes waves on water look 3D
 	#define PW_DEPTH 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0]
-	#define PW_POINTS 6 //[4 6 8 16 32]
+	#define PW_POINTS 4 //[2 4 6 8 16 32]
 
 varying vec4 texcoord;
 varying vec4 lmcoord;
@@ -31,13 +31,11 @@ vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 	float waveZ = mix(2.0,0.25,iswater);
 	float waveM = mix(0.0,2.0,iswater);
 
-	const int steps = PW_POINTS;
-
 	vec3 parallaxPos = posxz;
 	float waterHeight = getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * 0.5;
 	
-	for(int i = 0; i < steps; i++){
-		parallaxPos.xz += waterHeight * viewVector.xy / dist * (1.0 / float(steps)) * 22.0 * PW_DEPTH;
+	for(int i = 0; i < PW_POINTS; i++){
+		parallaxPos.xz += waterHeight * viewVector.xy / dist * (1.0 / float(PW_POINTS)) * 22.0 * PW_DEPTH;
 		waterHeight = getWaterBump(parallaxPos.xz - parallaxPos.y, waveM, waveZ, iswater) * 0.5;
 	}
 	return parallaxPos;
