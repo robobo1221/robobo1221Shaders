@@ -333,7 +333,6 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.95 + 0.05; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
 		
-		
 		#ifdef NO_UNDERGROUND_FOG
 			float fogAdaption =  clamp(getEyeBrightnessSmooth, 0.0,1.0);
 		#else
@@ -351,9 +350,11 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 
 		float sunMoonScatter = pow(clamp(dot(normalize(fragposFog), lightVector),0.0,1.0),2.0) * transition_fading;
 
+		fogColor *= mix(1.0, 0.5, (1.0 - min(time[1].y + rainStrength + time[0].y, 1.0)));
 		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
 		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter / 4.0 * (1.0 - rainStrength) * (1.0 - time[1].y));
 		fogColor = mix(fogColor, lightCol, 0.05 * (1.0 - rainStrength) * (1.0 - time[1].y));
+		
 		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
 		fogColor = pow(fogColor, vec3(2.2));
 		fogColor = mix(mix(fogColor * 0.25, fogColor, rainStrength), fogColor, pow(cosMoonUpAngle, 5.0) * time[1].y);
@@ -404,7 +405,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 
 		volumetricLightSample /= vlWeight;
 
-		//volumetricLightSample = texture2D(gcolor, pos.xy , 0.0).a;
+		//volumetricLightSample = texture2D(gcolor, pos.xy).a;
 
 		float sunAngleCosine = pow(clamp(dot(uPos.rgb, lightVector), 0.0, 1.0), 2.0);
 
@@ -541,7 +542,7 @@ float getWaterScattering(float NdotL){
 
 			float err = distance(fragpos.xyz, spos.xyz);
 			
-			if(err < pow(sqrt(dot(vector,vector))*pow(sqrt(dot(vector,vector)),0.11),1.1)*1.1){
+			if(err < pow(sqrt(dot(vector,vector))*pow(sqrt(dot(vector,vector)),0.11),1.1) * 1.1){
 
 				sr++;
 				
@@ -683,7 +684,7 @@ void main()
 	color = renderGaux4(color);
 
 	#ifdef VOLUMETRIC_LIGHT
-		color = getVolumetricLight(color, refTexC.st);
+		color = getVolumetricLight(color, texcoord.st);
 	#endif
 	
 	//color *= mix(vec3(1.0), vec3(100.0), pow(dot(color, vec3(0.33333)), 2.2));

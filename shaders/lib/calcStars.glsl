@@ -26,7 +26,7 @@
 				float starNoise = texture2D(noisetex,fract(coord.xy/2.0)).x;
 				starNoise += texture2D(noisetex,fract(coord.xy)).x/2.0;
 				
-				float star = max(starNoise- 1.3,0.0);
+				float star = max(starNoise - 1.3,0.0);
 				
 				#ifdef DRAW_GALAXY
 				
