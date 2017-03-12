@@ -4,8 +4,6 @@
 #include "lib/colorRange.glsl"
 #include "lib/options.glsl"
 
-#define SHADOW_BIAS 0.85
-
 #define WATER_REFRACT
 	#define WATER_REFRACT_MULT 1.0 //[0.5 1.0 1.5 2.0]
 	#define WATER_REFRACT_DISPERSION //Makes the primary wavelength split up (RGB)
@@ -517,8 +515,11 @@ float getWaterScattering(float NdotL){
 	}
 	
 	vec4 raytrace(vec3 fragpos, vec3 rvector, float fresnel, vec3 fogColor) {
+		#define fragdepth texture2D(depthtex1, pos.st).r
+
 		bool land = false;
 		float border = 0.0;
+		vec3 pos = vec3(0.0);
 	
 		vec4 color = vec4(0.0);
 		vec3 start = fragpos;
@@ -531,32 +532,26 @@ float getWaterScattering(float NdotL){
 
 
 			for(int i=0;i<18;i++){
-			vec3 pos = nvec3(gbufferProjection * nvec4(fragpos)) * 0.5 + 0.5;
+			pos = nvec3(gbufferProjection * nvec4(fragpos)) * 0.5 + 0.5;
+
 			if(pos.x < 0 || pos.x > 1 || pos.y < 0 || pos.y > 1 || pos.z < 0 || pos.z > 1.0) break;
-			vec3 spos = vec3(pos.st, texture2D(depthtex1, pos.st).r);
-			spos = nvec3(gbufferProjectionInverse * nvec4(spos * 2.0 - 1.0));
-			float err = distance(fragpos.xyz,spos.xyz);
+
+			vec3 spos = vec3(pos.st, fragdepth);
+			     spos = nvec3(gbufferProjectionInverse * nvec4(spos * 2.0 - 1.0));
+
+			float err = distance(fragpos.xyz, spos.xyz);
+			
 			if(err < pow(sqrt(dot(vector,vector))*pow(sqrt(dot(vector,vector)),0.11),1.1)*1.1){
 
-					sr++;
-					if(sr >= maxf){
-						border = clamp(1.0 - pow(cdist(pos.st), 10.0), 0.0, 1.0);
-						color = texture2D(gcolor, pos.st) * MAX_COLOR_RANGE;
-						color.rgb = pow(color.rgb, vec3(2.2));
+				sr++;
+				
+				if(sr >= maxf){
+					color.a = 1.0;
+					break;
+				}
 
-						land = texture2D(gdepthtex, pos.st).x < comp;
-
-						#ifdef FOG
-							color.rgb = getFog(ambientlight, color.rgb, pos.st, float(land));
-						#endif
-
-						color.rgb *= fresnel;
-
-						break;
-					}
-					tvector -=vector;
-					vector *=ref;
-
+				tvector -=vector;
+				vector *=ref;
 
 	}
 			vector *= inc;
@@ -564,8 +559,20 @@ float getWaterScattering(float NdotL){
 			tvector += vector;
 			fragpos = start + tvector;
 		}
+
+		border = clamp(1.0 - pow(cdist(pos.st), 10.0), 0.0, 1.0);
+
+		color.rgb = texture2D(gcolor, pos.st).rgb * MAX_COLOR_RANGE;
+		color.rgb = pow(color.rgb, vec3(2.2));
+
+		land = fragdepth < comp;
+
+		#ifdef FOG
+			color.rgb = getFog(ambientlight, color.rgb, pos.st, float(land));
+		#endif
+
+		color.rgb *= fresnel;
 		
-		color.a = 1.0;
 		color.rgb = land ? color.rgb : fogColor;
 		color.a *= border;
 
