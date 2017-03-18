@@ -18,5 +18,5 @@
 
 #define POM
 	#define POM_MAP_RES 128 //[8 16 32 128 256 512 1024 2048 4096 9192]
-	#define POM_DEPTH 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0]
+	#define POM_DEPTH 3.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 	#define OCCLUSION_POINTS 32 //[8 16 32 64 128]

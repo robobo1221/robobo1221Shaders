@@ -11,7 +11,7 @@ vec3 getShadingForward(vec3 normal, vec3 color){
 
 	float skyLightMap = getSkyLightmap2();
 
-	float diffuse = mix(clamp(dot(normal, lightVector), 0.0, 1.0),0.0, isEyeInWater) * (1.0 - rainStrength) * transition_fading;
+	float diffuse = OrenNayar(fragpos.rgb, lightVector, normal, 0.0) * ((1.0 - rainStrength) * transition_fading);
 
 	vec3 lightCol = mix(sunlight, moonlight, time[1].y);
 	

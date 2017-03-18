@@ -145,6 +145,7 @@ float bayer16x16(vec2 p){
 
     return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
 }
+#undef g
 
 float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 
@@ -237,6 +238,24 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 	float emissiveLM = getEmissiveLightmap(aux, true);
 #endif
 
+float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
+    
+    r *= r;
+    
+    float NdotL = dot(n,l);
+    float NdotV = dot(n,v);
+    
+    float t = max(NdotL,NdotV);
+    float g = max(0.0, dot(v - n * NdotV, l - n * NdotL));
+    float c = g/t - g*t;
+    
+    float a = .285 / (r+.57) + .5;
+    float b = .45 * r / (r+.09);
+
+    return max(0., NdotL) * ( b * c + a);
+
+}
+
 #include "lib/noise.glsl"
 #include "lib/shadowPos.glsl"
 #include "lib/shadows.glsl"
@@ -248,35 +267,7 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 #include "lib/calcStars.glsl"
 
 float getSubSurfaceScattering(){
-	return clamp(pow(dot(normalize(fragpos.rgb), lightVector), 12.0),0.0,1.0) * transition_fading * 3.0;
-}
-
-float diffuseorennayar(vec3 pos, vec3 lvector, vec3 normal, float spec, float roughness) {
-
-    vec3 v = normalize(pos);
-	vec3 l = normalize(lvector);
-	vec3 n = normalize(normal);
-
-	float vdotn = dot(v,n);
-	float ldotn = dot(l,n);
-	float cos_theta_r = vdotn;
-	float cos_theta_i = ldotn;
-	float cos_phi_diff = dot(normalize(v-n*vdotn),normalize(l-n*ldotn));
-	float cos_alpha = min(cos_theta_i,cos_theta_r); // alpha=max(theta_i,theta_r);
-	float cos_beta = max(cos_theta_i,cos_theta_r); // beta=min(theta_i,theta_r)
-
-	float r2 = roughness*roughness;
-	float a = 1.0 - r2;
-	float b_term = 0.0;
-
-	if(cos_phi_diff>=0.0) {
-		float b = r2;
-		b_term = b*sqrt((1.0-cos_alpha*cos_alpha)*(1.0-cos_beta*cos_beta))/cos_beta*cos_phi_diff;
-		b_term = b*sin(cos_alpha)*tan(cos_beta)*cos_phi_diff;
-	}
-	else b_term = 0.0;
-
-	return clamp(cos_theta_i*(a+b_term),0.0,1.0);
+	return (clamp(pow(dot(normalize(fragpos.rgb), lightVector), 12.0),0.0,1.0) * transition_fading) * 3.0;
 }
 
 vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
@@ -285,8 +276,8 @@ vec3 getShading(vec3 color){
 
 	float skyLightMap = getSkyLightmap();
 
-	float diffuse = mix(diffuseorennayar(fragpos.rgb, lightVector, normal, 0.0, 0.0), 1.0, translucent) * (1.0 - rainStrength) * transition_fading;
-		diffuse = clamp((diffuse - 0.03) * 3.0,0.0,1.0) * mix(1.0, skyLightMap * 0.9 + 0.1, isEyeInWater * (1.0 - iswater));
+	float diffuse = mix(OrenNayar(fragpos.rgb, lightVector, normal, 0.0), 1.0, translucent * 0.5) * ((1.0 - rainStrength) * transition_fading);
+		  diffuse = diffuse * mix(1.0, skyLightMap * 0.9 + 0.1, isEyeInWater * (1.0 - iswater));
 
 	vec3 emissiveLightmap = emissiveLM * emissiveLightColor;
 		emissiveLightmap = getEmessiveGlow(color,emissiveLightmap, emissiveLightmap, emissive);
@@ -294,9 +285,9 @@ vec3 getShading(vec3 color){
 	vec3 lightCol = mix(sunlight, moonlight, time[1].y);
 
 	vec3 sunlightDirect = lightCol * sunlightAmount;
-	vec3 indirectLight = mix(ambientlight, lightCol, mix(mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * 0.2 * skyLightMap * shadowDarkness + minLight * (1.0 - skyLightMap);
+	vec3 indirectLight = mix(ambientlight, lightCol, mix(mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 
-	return mix(indirectLight, sunlightDirect * (1.0 + getSubSurfaceScattering() * translucent), shadows * diffuse) + emissiveLightmap;
+	return mix(indirectLight, sunlightDirect * (1.0 + (getSubSurfaceScattering() * translucent)), shadows * diffuse) + emissiveLightmap;
 }
 
 #ifdef VOLUMETRIC_LIGHT

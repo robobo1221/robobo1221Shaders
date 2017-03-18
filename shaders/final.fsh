@@ -224,25 +224,25 @@ float ld(float dist) {
 
 void main(){
 
-	vec3 color = texture2D(gcolor, newTexcoord.st).rgb * MAX_COLOR_RANGE;
+	vec3 color = pow(texture2D(gcolor, newTexcoord.st).rgb * MAX_COLOR_RANGE, vec3(2.2));
 
 	//color = getDof(color);
 
 	#ifdef BLOOM
-		color.rgb = pow(color.rgb, vec3(2.2));
-		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.02 * BLOOM_MULT / reinhardTonemap(vec3(1.0)), vec3(2.2)) * 3.0;
-		color.rgb = pow(color.rgb, vec3(0.4545));
+		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.03 * BLOOM_MULT / reinhardTonemap(vec3(1.0)), vec3(2.2)) * 3.0;
 	#endif
 	
 	color.r *= RED_MULT;
 	color.g *= GREEN_MULT;
 	color.b *= BLUE_MULT;
 	
-	color.rgb = tonemap(color.rgb);
+	color.rgb = pow(tonemap(pow(color.rgb, vec3(0.454545))), vec3(2.2));
 
 	#ifdef VIGNETTE
-		color = getVignette(color, newTexcoord);
+		color = pow(getVignette(pow(color, vec3(0.4545)), newTexcoord), vec3(2.2));
 	#endif
+
+	color = pow(color, vec3(0.454545));
 
 	gl_FragColor = vec4(color, 1.0);
 }
