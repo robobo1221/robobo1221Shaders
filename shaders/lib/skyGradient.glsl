@@ -1,4 +1,5 @@
 const float pi = 3.141592653589793238462643383279502884197169;
+#define c max(cosViewSunAngle, 0.0)
 
 float RayleighPhase(float cosViewSunAngle)
 {
@@ -9,8 +10,10 @@ float RayleighPhase(float cosViewSunAngle)
 			   16π
 	*/
 
-	return (3.0 / (16.0 * pi)) * (1.0 + pow(max(cosViewSunAngle, 0.0), 2.0));
+	return (3.0 / (16.0 * pi)) * (c*c + 1.0);
 }
+
+#undef c
 
 float hgPhase(float cosViewSunAngle, float g)
 {
@@ -23,7 +26,7 @@ float hgPhase(float cosViewSunAngle, float g)
 	*/
 
 
-	return (1.0 / (4.0 * pi)) * ((1.0 - pow(g, 2.0)) / pow(1.0 + pow(g, 2.0) - 2.0*g * cosViewSunAngle, 1.5));
+	return (1.0 / (4.0 * pi)) * ((1.0 - g*g) / (1.0 + g*g) - 2.0*g * cosViewSunAngle, 1.5);
 }
 
 vec3 totalMie(vec3 lambda, vec3 K, float T, float v)
@@ -33,8 +36,8 @@ vec3 totalMie(vec3 lambda, vec3 K, float T, float v)
 }
 
 vec3 totalRayleigh(vec3 lambda, float n, float N, float pn){
-	return (24.0 * pow(pi, 3.0) * pow(pow(n, 2.0) - 1.0, 2.0) * (6.0 + 3.0 * pn))
-	/ (N * pow(lambda, vec3(4.0)) * pow(pow(n, 2.0) + 2.0, 2.0) * (6.0 - 7.0 * pn));
+	return (24.0 * pow(pi, 3.0) * ((n*n - 1.0) * (n*n - 1.0)) * (6.0 + 3.0 * pn))
+	/ (N * pow(lambda, vec3(4.0)) * ((n*n + 2.0) * (n*n + 2.0)) * (6.0 - 7.0 * pn));
 }
 
 float SunIntensity(float zenithAngleCos, float sunIntensity, float cutoffAngle, float steepness)
@@ -75,7 +78,7 @@ float calcSun(vec3 fragpos, vec3 sunVec){
 	float cosViewSunAngle = dot(normalize(fragpos.rgb), sunVec);
 	float sundisk = smoothstep(sunAngularDiameterCos,sunAngularDiameterCos+0.0001,cosViewSunAngle);
 
-	return 10000.0 * sundisk * (1.0 - rainStrength);
+	return 7000.0 * sundisk * (1.0 - rainStrength);
 
 }
 
@@ -186,7 +189,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 scattering = sunE * (lightFromXtoEye / totalLightAtX);
 
 	vec3 sky = scattering * (1.0 - Fex);
-	sky *= mix(vec3(1.0),pow(scattering * Fex,vec3(0.5)),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
+	sky *= mix(vec3(1.0),sqrt(scattering * Fex),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
 
 	vec3 sun = K * calcSun(fragpos, sunVec);
 	vec3 moon = pow(moonlight, vec3(0.4545)) * calcMoon(fragpos, moonVec);

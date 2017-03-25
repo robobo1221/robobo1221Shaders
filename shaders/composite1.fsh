@@ -20,10 +20,10 @@
 #define RAIN_REFLECTION
 
 #define WATER_DEPTH_FOG
-	#define DEPTH_FOG_DENSITY 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+	#define DEPTH_FOG_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 	
 #define UNDERWATER_FOG
-	#define UNDERWATER_DENSITY 0.3 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+	#define UNDERWATER_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 #include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 
@@ -478,7 +478,7 @@ float getWaterScattering(float NdotL){
 		vec3 fogColor = (ambientlight * lightCol) * 0.0333;
 			 fogColor = (fogColor * (pow(aux2.b, skyLightAtten) + 0.25)) * 0.75;
 			 fogColor = mix(fogColor, (fogColor * lightCol) * 3.75, SSS * (1.0 - rainStrength) * shadows);
-			 fogColor = mix(fogColor, (fogColor * lightCol) * 10.0,(sunAngleCosine * shadows) * (transition_fading * (1.0 - pow(max(NdotL,0.0), 2.0))) * (1.0 - rainStrength));
+			 fogColor = mix(fogColor, (fogColor * lightCol) * 6.0,(sunAngleCosine * shadows) * (transition_fading * (1.0 - pow(max(NdotL,0.0), 2.0))) * (1.0 - rainStrength));
 			 fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), (pow((1.0 - depthFog), 0.75) * (1.0 - rainStrength)) * 20.0);
 			 
 		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.8);
@@ -497,10 +497,8 @@ float getWaterScattering(float NdotL){
 
 		vec3 fogColor = (ambientlight * lightCol) * 0.0333;
 		     fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), pow((1.0 - depthFog), 0.75) * 8.0 * (1.0 - rainStrength));
-			 
-		vec3 fogColor2 = vec3(0.1, 0.5, 0.8);
 
-		color *= pow(fogColor2, vec3(depth) * 0.8);
+		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.8);
 
 		return mix(color,fogColor, depthFog);
 	}

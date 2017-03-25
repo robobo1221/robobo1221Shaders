@@ -1,33 +1,35 @@
-const vec2 shadowOffset[17] = vec2[17](
-							vec2(0.5,-0.5),
-							vec2(-0.5,0.5),
-							vec2(-0.5,-0.5),
-							vec2(0.5,0.5),
-							vec2(1.0,0.5),
-							vec2(0.5,1.0),
-							vec2(-1.0,1.0),
-							vec2(1.0,-1.0),
-							vec2(1.0,1.0),
-							vec2(-1.0,-1.0),
-							vec2(-0.5,1.0),
-							vec2(1.0,-0.5),
-							vec2(-1.0,-0.5),
-							vec2(-0.5,-1.0),
-							vec2(0.5,-1.0),
-							vec2(-1.0,0.5),
-							vec2(0.0,0.0));
+#ifdef SHADOW_FILTER
+	const vec2 shadowOffset[17] = vec2[17](
+								vec2(0.5,-0.5),
+								vec2(-0.5,0.5),
+								vec2(-0.5,-0.5),
+								vec2(0.5,0.5),
+								vec2(1.0,0.5),
+								vec2(0.5,1.0),
+								vec2(-1.0,1.0),
+								vec2(1.0,-1.0),
+								vec2(1.0,1.0),
+								vec2(-1.0,-1.0),
+								vec2(-0.5,1.0),
+								vec2(1.0,-0.5),
+								vec2(-1.0,-0.5),
+								vec2(-0.5,-1.0),
+								vec2(0.5,-1.0),
+								vec2(-1.0,0.5),
+								vec2(0.0,0.0));
+#endif
 
 vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor, bool isClamped){
 
 	vec4 shadowPosition = biasedShadows(getShadowSpace(shadowDepth, texcoord.st));
-	float NdotL = pow(clamp(dot(normal, lightVector),0.0,1.0),1.0);
+	float NdotL = clamp(dot(normal, lightVector),0.0,1.0);
 	NdotL = mix(NdotL, 1.0, translucent);
 
 	float step = 0.5 / shadowMapResolution;
 
 	float distortFactor = getDistordFactor(shadowPosition);
 
-	float diffthresh = pow(distortFactor, 4.0)/(4096 * 0.75) * tan(acos(max(NdotL,0.0))) + pow(max(length(fragpos),0.0),0.25) / 2048 * 0.5;
+	float diffthresh = pow(distortFactor, 4.0)/(4096 * 0.75) * sqrt(1.0 - NdotL*NdotL)/NdotL + clamp(pow(dot(fragpos,fragpos),.125),0.0,1.0) / 4096;
 		diffthresh = mix(advDisFactor ? diffthresh : 0.0003 , 0.0003, translucent);
 
 	vec3 shading = vec3(0.0);

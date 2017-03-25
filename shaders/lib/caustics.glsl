@@ -8,7 +8,7 @@
 
 		caustics = pow(max((1.0 - caustics), 0.0), 10.0) * 0.75;
 
-		return vec3(1.0 + caustics * CAUSTIC_MULT);
+		return vec3(1.0 + (caustics * CAUSTIC_MULT));
 	}
 
 	#else
@@ -21,7 +21,7 @@
 
 		caustics = pow(max((1.0 - caustics), 0.0), 10.0) * 0.75;
 
-		return color + color * caustics * 0.5 * CAUSTIC_MULT * mix(iswater * land2, 1.0 - (iswater + istransparent), isEyeInWater) * (1.0 - time[1].y * 0.5);
+		return color + (color * caustics) * (0.5 * CAUSTIC_MULT) * (mix(iswater * land2, 1.0 - (iswater + istransparent), isEyeInWater) * (1.0 - time[1].y * 0.5));
 	}
 	#endif
 #endif

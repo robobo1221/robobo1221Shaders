@@ -292,7 +292,6 @@ vec3 getShading(vec3 color){
 
 #ifdef VOLUMETRIC_LIGHT
 
-#undef g
 	float getVolumetricRays() {
 
 		///////////////////////Setting up functions///////////////////////
