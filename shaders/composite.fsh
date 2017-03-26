@@ -278,16 +278,19 @@ vec3 getShading(vec3 color){
 
 	float diffuse = mix(OrenNayar(fragpos.rgb, lightVector, normal, 0.0), 1.0, translucent * 0.5) * ((1.0 - rainStrength) * transition_fading);
 		  diffuse = diffuse * mix(1.0, skyLightMap * 0.9 + 0.1, isEyeInWater * (1.0 - iswater));
+		  diffuse = clamp(diffuse*1.01-0.01, 0.0, 1.0);
 
 	vec3 emissiveLightmap = emissiveLM * emissiveLightColor;
 		emissiveLightmap = getEmessiveGlow(color,emissiveLightmap, emissiveLightmap, emissive);
 
-	vec3 lightCol = mix(sunlight, moonlight, time[1].y);
+	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));
 
-	vec3 sunlightDirect = lightCol * sunlightAmount;
-	vec3 indirectLight = mix(ambientlight, lightCol, mix(mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
+	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y);
 
-	return mix(indirectLight, sunlightDirect * (1.0 + (getSubSurfaceScattering() * translucent)), shadows * diffuse) + emissiveLightmap;
+	vec3 sunlightDirect = (lightCol * sunlightAmount);
+	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
+
+	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + emissiveLightmap;
 }
 
 #ifdef VOLUMETRIC_LIGHT
@@ -361,7 +364,7 @@ void main()
 	vec3 color = getDesaturation(pow(texture2D(gcolor, texcoord.st).rgb, vec3(2.2)), min(emissiveLM, 1.0));
 
 	vec3 sunMult = vec3(0.0);
-	float moonMult = 0.0;
+	vec3 moonMult = vec3(0.0);
 
 	vec3 skyGradient = pow(getAtmosphericScattering(pow(color, vec3(0.4545)), fragpos2.rgb, 1.0, ambientlight, sunMult, moonMult), vec3(2.2));
 

@@ -56,7 +56,12 @@ float getRainDrops(){
 	return noiseTexture;
 }
 
+float ld(float dist) {
+    return (2.0 * near) / (far + near - dist * (far - near));
+}
+
 vec2 customTexcoord(){
+	
 	vec2 texCoord = texcoord.st;
 
 	float noiseTexture = texture2D(noisetex, texcoord.st * 0.03 + frameTimeCounter * 0.001).x;
@@ -94,9 +99,6 @@ vec3 reinhardTonemap(vec3 color)
 	return color / (1.0 + color);
 }
 
-float ld(float dist) {
-    return (2.0 * near) / (far + near - dist * (far - near));
-}
 
 #ifdef BLOOM
 
@@ -130,9 +132,11 @@ float ld(float dist) {
 		return color * factor;
 	}
 #endif
+
 /*
+
 	//hexagon pattern
-	const vec2 hex_offsets[60] = vec2[60] (	vec2(  0.2165,  0.1250 ),
+	const vec2 hex_offsets[61] = vec2[61] (	vec2(  0.2165,  0.1250 ),
 											vec2(  0.0000,  0.2500 ),
 											vec2( -0.2165,  0.1250 ),
 											vec2( -0.2165, -0.1250 ),
@@ -191,7 +195,8 @@ float ld(float dist) {
 											vec2( -0.8668, -0.2513 ),
 											vec2( -0.2158, -0.8763 ),
 											vec2(  0.6510, -0.6250 ),
-											vec2(  0.8668,  0.2513 ));
+											vec2(  0.8668,  0.2513 ),
+											vec2(  0.0000,  0.0000));
 
 	vec3 getDof(vec3 color){
 
@@ -209,27 +214,28 @@ float ld(float dist) {
 				float nb = 0.0;
 				vec2 bcoord = vec2(0.0);
 
-				for ( int i = 0; i < 60; i++) {
+				for ( int i = 0; i < 61; i++) {
 					sample = texture2D(gcolor, newTexcoord.xy + hex_offsets[i]*pcoc*vec2(1.0,aspectRatio),abs(pcoc * 200.0));
 
 					sample.rgb *= MAX_COLOR_RANGE;
 
 					bcolor += pow(sample.rgb, vec3(DoFGamma));
 				}
-		color.rgb = pow(bcolor/60.0, vec3(1.0/DoFGamma));
+		color.rgb = pow(bcolor/61.0, vec3(1.0/DoFGamma));
 
 	return color;
 	}
 */
 
+
 void main(){
 
 	vec3 color = pow(texture2D(gcolor, newTexcoord.st).rgb * MAX_COLOR_RANGE, vec3(2.2));
 
-	//color = getDof(color);
+	//color = pow(getDof(color), vec3(2.2));
 
 	#ifdef BLOOM
-		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.03 * BLOOM_MULT / reinhardTonemap(vec3(1.0)), vec3(2.2)) * 3.0;
+		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.025 * BLOOM_MULT / reinhardTonemap(vec3(1.0)), vec3(2.2)) * 3.0;
 	#endif
 	
 	color.r *= RED_MULT;
@@ -239,10 +245,10 @@ void main(){
 	color.rgb = pow(tonemap(pow(color.rgb, vec3(0.454545))), vec3(2.2));
 
 	#ifdef VIGNETTE
-		color = pow(getVignette(pow(color, vec3(0.4545)), newTexcoord), vec3(2.2));
+		color = pow(getVignette(pow(color, vec3(0.4545)), texcoord.st), vec3(2.2));
 	#endif
 
-	color = pow(color, vec3(0.454545));
+	color = pow(color, vec3(0.4545));
 
 	gl_FragColor = vec4(color, 1.0);
 }

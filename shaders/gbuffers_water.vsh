@@ -1,5 +1,7 @@
 #version 120
 
+#define WAVING_WATER  //Makes water wave
+
 varying vec4 texcoord;
 varying vec4 lmcoord;
 varying vec4 color;
@@ -17,24 +19,38 @@ varying float dist;
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferModelView;
+
+uniform float frameTimeCounter;
 
 attribute vec4 mc_Entity;
 
 void main(){
 	mat = 1.0;
 	
-	vec4 position = gl_ModelViewMatrix * gl_Vertex;
+	gl_Position = gl_ModelViewMatrix * gl_Vertex;
 	
 	texcoord = gl_MultiTexCoord0;
 	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
-	
-	/* un-rotate */
-	vec4 viewpos = gbufferModelViewInverse * position;
+
+	vec4 viewpos = gbufferModelViewInverse * gl_Position;
 
 	vec3 worldpos = viewpos.xyz + cameraPosition;
 	wpos = worldpos;
 
-	gl_Position = ftransform();
+	#ifdef WAVING_WATER
+	//Checks if the bottom of a block is touching the block beneath the block it's checking. (Good explaination huh)
+	float fy = fract(worldpos.y + 0.001);
+	if (fy > 0.02) {
+
+		//Vertex Displacement
+		viewpos.y += (cos((worldpos.x + worldpos.z) + frameTimeCounter * 3.0) * 0.5 + 0.5) * (sin(frameTimeCounter) * 0.5 + 0.5) * 0.05;
+		viewpos.y += (sin((worldpos.x - worldpos.z) + frameTimeCounter * 4.0) * 0.5 + 0.5) * 0.05;
+	}
+	#endif
+
+	viewpos = gbufferModelView * viewpos;
+	gl_Position = gl_ProjectionMatrix * viewpos;
 	
 	color = gl_Color;
 	

@@ -24,5 +24,5 @@ vec3 getShadingForward(vec3 normal, vec3 color){
 	vec3 sunlightDirect = lightCol * sunlightAmount * 0.5;
 	vec3 indirectLight = mix(ambientlight, lightCol, mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y)) * 0.05 * skyLightMap * shadowDarkness + minLight * (1.0 - skyLightMap);
 
-	return mix(indirectLight, sunlightDirect, shadowsForward * diffuse) + emissiveLightmap;
+	return ((sunlightDirect * (shadowsForward * diffuse)) + indirectLight) + emissiveLightmap;
 }

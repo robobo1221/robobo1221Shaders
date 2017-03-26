@@ -78,7 +78,7 @@
 			float scatterMask = pow(1.0 - totalcloud, 100.0);
 			
 			cloudCol *= 1.0 + scatterMask * (1.0 - rainStrength * (1.0 - cosSunUpAngle)) * 6.0 * (1.0 + sss * 5.0 * (1.0 - cosSunUpAngle)) * sqrt(cosT);
-			cloudCol = mix(cloudCol, ambientlight * 0.25, (1.0 - scatterMask) * 0.3);
+			cloudCol = mix(cloudCol, ambientlight * 0.4, (1.0 - scatterMask) * 0.3);
 			cloudCol *= 0.75;
 
 			return mix(color, cloudCol ,clamp(totalcloud * 500.0, 0.0, 1.0) * sqrt(cosT));

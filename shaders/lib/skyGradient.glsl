@@ -126,12 +126,12 @@ vec3 getFakeRayLeigh(vec3 fragpos){
 }
 */
 
-vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 fogColor, out vec3 sunMax, out float moonMax){
+vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 fogColor, out vec3 sunMax, out vec3 moonMax){
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	float turbidity = 1.5;
-	float rayleighCoefficient = 2.0;
+	float rayleighCoefficient = 1.7;
 
 	// constants for mie scattering
 	const float mieCoefficient = 0.005;
@@ -197,7 +197,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	sunMax = sunE * pow(mix(Fexsun, Fex, clamp(pow(1.0-cosUpViewAngle,4.0),0.0,1.0)), vec3(0.4545))
 	* mix(0.000005, 0.00003, clamp(pow(1.0-cosSunUpAngle,3.0),0.0,1.0)) * (1.0 - rainStrength);
 
-	moonMax = pow(clamp(cosUpViewAngle,0.0,1.0), 0.8) * (1.0 - rainStrength);
+	moonMax += pow(clamp(cosUpViewAngle,0.0,1.0), 0.8) * (1.0 - rainStrength);
 
 	sky = max(ToneMap(sky, sunVec), 0.0) + (sun * sunMax + moon * moonMax) * sunMoonMult;
 

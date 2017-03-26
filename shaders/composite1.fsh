@@ -419,7 +419,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 		#endif
 
 		vec3 lightCol = mix(sunlight, moonlight * 0.75, time[1].y);
-			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.5, sunAngleCosine), lightCol, clamp(time[1].y * (1.0 - time[0].x * 0.5),0.0,1.0)), lightCol, 1.0 - getEyeBrightnessSmooth);
+			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.5, sunAngleCosine), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, 1.0 - getEyeBrightnessSmooth);
 			 lightCol *= 1.0 + sunAngleCosine * mix(4.0, 2.0, time[1].y);
 			 lightCol *= (1.0 + clamp(time[1].y * transition_fading * 0.5 + mix(0.0,1.0 - transition_fading, time[0].x),0.0,1.0)) * 0.5;
 			 lightCol = mix(lightCol, vec3(0.1, 0.5, 0.8) * lightCol, isEyeInWater);
@@ -431,7 +431,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 			 lightCol = lightCol * mix(1.0,VL_INTENSITY_MIDNIGHT, time[1].y);
 			
 		volumetricLightSample *= vlMult;
-		volumetricLightSample *= mix(0.1 * 0.2, 1.0, clamp(time[1].y + pow(time[0].x, 6.0) * 0.05,0.0,1.0));
+		volumetricLightSample *= mix(0.1 * 0.2, 1.0, clamp(time[1].y,0.0,1.0));
 
 		return pow(mix(pow(color, vec3(2.2)), pow(lightCol, vec3(2.2)), (volumetricLightSample * transition_fading) * (1.0 - rainStrength)), vec3(0.4545));
 	}
@@ -463,7 +463,7 @@ float getWaterScattering(float NdotL){
 
 	vec3 getWaterDepthFog(vec3 color, vec3 fragpos, vec3 fragpos2){
 
-		vec3 lightCol = mix(sunlight, vec3(1.0), time[1].y);
+		vec3 lightCol = mix(sunlight, pow(moonlight, vec3(0.4545)), time[1].y);
 
 		float depth = getWaterDepth(fragpos, fragpos2); // Depth of the water volume
 			  depth *= iswater;
@@ -506,7 +506,7 @@ float getWaterScattering(float NdotL){
 
 #ifdef REFLECTIONS
 
-	vec3 getSpec(vec3 rvector, vec3 sunMult, float moonMult){
+	vec3 getSpec(vec3 rvector, vec3 sunMult, vec3 moonMult){
 		vec3 spec = calcSun(rvector, sunVec) * sunMult;
 			spec += (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545));
 
@@ -579,7 +579,7 @@ float getWaterScattering(float NdotL){
 	}
 
 
-	vec3 getSkyReflection(vec3 reflectedVector, out vec3 sunMult, out float moonMult){
+	vec3 getSkyReflection(vec3 reflectedVector, out vec3 sunMult, out vec3 moonMult){
 		vec3 sky = pow(getAtmosphericScattering(vec3(0.0), reflectedVector, 0.0, ambientlight, sunMult, moonMult), vec3(2.2));
 
 		#ifdef STARS
@@ -616,7 +616,7 @@ float getWaterScattering(float NdotL){
 		float fresnel = pow(clamp(1.0 + normalDotEye, 0.0, 1.0),3.0) * 0.95 + 0.05;
 
 		vec3 sunMult = vec3(0.0);
-		float moonMult = 0.0;
+		vec3 moonMult = vec3(0.0);
 		
 		float reflectionMask = clamp(iswater + istransparent, 0.0 ,1.0);
 
@@ -686,6 +686,30 @@ void main()
 	#endif
 	
 	//color *= mix(vec3(1.0), vec3(100.0), pow(dot(color, vec3(0.33333)), 2.2));
+
+	/*
+		const vec2 Offsets[8] = vec2[8](
+								vec2(1.0, 0.0),
+								vec2(0.0, 1.0),
+								vec2(-1.0, 0.0),
+								vec2(0.0,-1.0),
+								vec2(0.5, 0.5),
+								vec2(-0.5, 0.5),
+								vec2(0.5, -0.5),
+								vec2(-0.5, -0.5));
+
+	float ofsetDepth = 0.0;
+	
+	for (int i = 0; i < 8; i++){
+		ofsetDepth += texture2D(gdepthtex, texcoord.st + vec2(Offsets[i].x / viewWidth, Offsets[i].y / viewHeight) * 50.0 * (1.0 - ld(pixeldepth))).x / 8.0;
+	}
+
+		float errorCheck = pow(pixeldepth, 1.0) - pow(ofsetDepth, 1.0);
+
+		float aoMask = clamp(1.0 - clamp(abs(errorCheck * 2.0 - 1.0),0.0,1.0) * 1.0 - 0.005 * (1.0 - clamp(ld(pixeldepth) * 10000.0,0.0,1.0)), 0.0, 1.0);
+
+		color *= 1.0 - clamp(vec3(errorCheck * 100.0 * (1.0 - min(aoMask * 10.0, 1.0))), 0.0, 1.0);
+	*/
 	
 	color = pow(color, vec3(0.4545));
 
