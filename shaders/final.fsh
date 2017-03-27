@@ -77,7 +77,7 @@ vec2 customTexcoord(){
 
 vec2 newTexcoord = customTexcoord();
 
-vec3 tonemap(vec3 color)
+vec3 tonemap(vec3 x)
 {
 	float a = BRIGHTNESS;
 	float b = GAMMA;
@@ -85,13 +85,13 @@ vec3 tonemap(vec3 color)
 	float d = LIFT;
 	float e = INVERSE_LIFT;
 	
-	color = mix(color, vec3(0.33333), 1.2 - c);
+	x = mix(x, vec3(0.33333), 1.2 - c);
 
-	color = pow(color, vec3(2.2)) * pow(1.5, 2.2) * a;
+	x = pow(x, vec3(2.2)) * pow(1.5, 2.2) * a;
 
-	vec3 x = max(vec3(0.0),color - INVERSE_LIFT) + LIFT;
-	vec3 outCol = pow((x * (6.2 * x + 0.4)) / (x * (6.2 * x + 1.56) + 0.2), vec3(b));
-	return outCol;
+	x = max(vec3(0.0),x - INVERSE_LIFT) + LIFT;
+	x = pow((x * (6.2 * x + 0.4)) / (x * (6.2 * x + 1.56) + 0.2), vec3(b));
+	return x;
 }
 
 vec3 reinhardTonemap(vec3 color)

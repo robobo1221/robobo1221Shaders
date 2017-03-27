@@ -366,20 +366,19 @@ void main()
 	vec3 sunMult = vec3(0.0);
 	vec3 moonMult = vec3(0.0);
 
-	vec3 skyGradient = pow(getAtmosphericScattering(pow(color, vec3(0.4545)), fragpos2.rgb, 1.0, ambientlight, sunMult, moonMult), vec3(2.2));
-
 	if (land > 0.9)
 		color = getShading(color) * color;
-	else
-		color = skyGradient;
+	else {
+		#ifdef STARS
+			color = getStars(vec3(0.0), fragpos2.rgb, land);
+		#endif
 		
-	#ifdef STARS
-		color = getStars(color, fragpos2.rgb, land);
-	#endif
+		color = pow(getAtmosphericScattering(pow(color, vec3(0.4545)), fragpos2.rgb, 1.0, ambientlight, sunMult, moonMult), vec3(2.2));
 		
-	#ifdef CLOUDS
-		color = getClouds(color, fragpos2.rgb, land, 3);
-	#endif
+		#ifdef CLOUDS
+			color = getClouds(color, fragpos2.rgb, land, 3);
+		#endif
+	}
 	
 	color = renderGaux2(color, normal2);
 

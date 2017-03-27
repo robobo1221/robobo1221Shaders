@@ -59,7 +59,7 @@
 					float cl = max(noise-1.0,0.0);
 					cl = max(cl,0.)*0.05 * (1.0 - rainStrength * 0.5);
 					density = pow(max(1.0 - cl * 2.0,0.),2.0) * 0.0303030;
-					density *= 2.0 * CLOUD_DENSITY;
+					density *= 1.5 * CLOUD_DENSITY;
 
 					totalcloud += density;
 					

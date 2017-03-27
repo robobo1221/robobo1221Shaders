@@ -205,9 +205,9 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 
 	sky += pow(fogColor * 0.5, vec3(0.4545)) * ((nightLightScattering + 0.5 * (1.0 - nightLightScattering)) * clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0));
 
-	color = mix(sky, pow(fogColor, vec3(0.4545)), rainStrength);
+	sky = mix(sky, pow(fogColor, vec3(0.4545)), rainStrength);
 	
 	//color = getFakeRayLeigh(fragpos) + (sun * sunMax + moon * moonMax) * sunMoonMult;
 
-	return color;
+	return mix(color, vec3(1.0), sky);
 }

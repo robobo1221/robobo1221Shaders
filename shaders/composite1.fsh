@@ -59,6 +59,7 @@ uniform sampler2D composite;
 uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferModelView;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferProjection;
 
@@ -397,7 +398,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 				float weight = pow(1.0 - abs(depth - depth2) * 10.0, 32.0);
 					weight = max(0.1e-8, weight);
 
-				volumetricLightSample += texture2DLod(gcolor, pos.xy + offset * 2.0, 2.0).a * weight;
+				volumetricLightSample += texture2DLod(gcolor, pos.xy + offset * 2.0, 1.5).a * weight;
 
 				vlWeight += weight;
 			}
@@ -712,7 +713,6 @@ void main()
 	*/
 	
 	color = pow(color, vec3(0.4545));
-
 
 /* DRAWBUFFERS:0 */
 
