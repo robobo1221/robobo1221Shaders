@@ -1,22 +1,18 @@
 #ifdef SHADOW_FILTER
-	const vec2 shadowOffset[17] = vec2[17](
-								vec2(0.5,-0.5),
-								vec2(-0.5,0.5),
-								vec2(-0.5,-0.5),
-								vec2(0.5,0.5),
-								vec2(1.0,0.5),
-								vec2(0.5,1.0),
-								vec2(-1.0,1.0),
-								vec2(1.0,-1.0),
-								vec2(1.0,1.0),
-								vec2(-1.0,-1.0),
-								vec2(-0.5,1.0),
-								vec2(1.0,-0.5),
-								vec2(-1.0,-0.5),
-								vec2(-0.5,-1.0),
-								vec2(0.5,-1.0),
-								vec2(-1.0,0.5),
-								vec2(0.0,0.0));
+vec2 shadowOffset[13] = vec2[13] (
+		vec2(0.5, 0.0),
+		vec2(0.0, 0.5),
+		vec2(-0.5, 0.0),
+		vec2(0.0, -0.5),
+		vec2(1.0, 0.0),
+		vec2(0.0, 1.0),
+		vec2(-1.0, 0.0),
+		vec2(0.0, -1.0),
+		vec2(0.5, 0.5),
+		vec2(0.5, -0.5),
+		vec2(-0.5, 0.5),
+		vec2(-0.5, -0.5),
+		vec2(0.0, 0.0));
 #endif
 
 vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor, bool isClamped){
@@ -25,7 +21,7 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	float NdotL = clamp(dot(normal, lightVector),0.0,1.0);
 	NdotL = mix(NdotL, 1.0, translucent);
 
-	float step = 0.5 / shadowMapResolution;
+	float step = 1.0 / shadowMapResolution;
 
 	float distortFactor = getDistordFactor(shadowPosition);
 
@@ -36,16 +32,22 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	vec3 shading2 = vec3(0.0);
 	vec3 colorShading = vec3(0.0);
 
+	float dither = bayer16x16(texcoord.st);
+
+	float noise = fract(sin(dot(texcoord.xy, vec2(18.9898f, 28.633f))) * 4378.5453f) * 4.0;
+		mat2 noiseM = mat2(cos(noise), -sin(noise),
+						   sin(noise), cos(noise));
+
 	if (max(abs(shadowPosition.x),abs(shadowPosition.y)) < 0.99) {
 
 	#ifdef SHADOW_FILTER
-	for (int i = 0; i < 17; i++) {
+	for (int i = 0; i < 13; i++) {
 
-		shading += shadow2D(shadowtex1, vec3(shadowPosition.xy + shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).x;
+		shading += shadow2D(shadowtex1, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).x;
 
 		#ifdef COLOURED_SHADOWS
-			shading2 += shadow2D(shadowtex0, vec3(shadowPosition.xy + shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).x;
-			colorShading += shadow2D(shadowcolor0, vec3(shadowPosition.xy + shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).rgb * 10.0;
+			shading2 += shadow2D(shadowtex0, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).x;
+			colorShading += shadow2D(shadowcolor0, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).rgb * 10.0;
 		#endif
 	}
 
@@ -61,14 +63,14 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	#endif
 
 	#ifdef SHADOW_FILTER
-		shading /= 17.0;
+		shading /= 13.0;
 	#endif
 
 	#ifdef COLOURED_SHADOWS
 
 		#ifdef SHADOW_FILTER
-			shading2 /= 17.0;
-			colorShading /= 17.0;
+			shading2 /= 13.0;
+			colorShading /= 13.0;
 		#endif
 
 		shading = mix(shading2, colorShading, max(shading - shading2, 0.0));
