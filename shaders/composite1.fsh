@@ -212,7 +212,8 @@ float refractmask(vec2 coord){
 		vec2 refractionMult = vec2(0.0); //.x = dispersionMult and ,y = the actual refractionMult
 
 		float normalDotEye = dot(normal, uPos.rgb);
-		refractionMult.x = pow(clamp(1.0 + normalDotEye, 0.0, 1.0), 2.0);
+		refractionMult.x = clamp(1.0 + normalDotEye, 0.0, 1.0);
+		refractionMult.x *= refractionMult.x;
 
 		#ifdef WATER_REFRACT_DISPERSION
 			float dispersion = 0.3 * refractionMult.x;

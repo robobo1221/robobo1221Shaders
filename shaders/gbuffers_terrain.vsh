@@ -25,9 +25,8 @@ varying vec4 vtexcoordam;
 varying vec4 vtexcoord;
 
 varying vec3 normal;
-varying vec3 tangent;
-varying vec3 binormal;
 varying vec3 viewVector;
+varying mat3 tbnMatrix;
 
 varying vec3 wpos;
 
@@ -40,6 +39,7 @@ uniform mat4 gbufferModelViewInverse;
 
 attribute vec4 mc_Entity;
 attribute vec4 mc_midTexCoord;
+attribute vec4 at_tangent;
 
 uniform float rainStrength;
 uniform float frameTimeCounter;
@@ -104,31 +104,11 @@ void main(){
 	
 	color = gl_Color;
 	
-	tangent = vec3(0.0);
-	binormal = vec3(0.0);
 	normal = normalize(gl_NormalMatrix * gl_Normal);
-	
-		if (gl_Normal.x > 0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( 0.0,  0.0, -1.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	} else if (gl_Normal.x < -0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( 0.0,  0.0,  1.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	} else if (gl_Normal.y > 0.5) {
-		//  0.0,  1.0,  0.0
-		tangent  = normalize(gl_NormalMatrix * vec3( 1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0,  0.0,  1.0));
-	} else if (gl_Normal.y < -0.5) {
-		//  0.0, -1.0,  0.0
-		tangent  = normalize(gl_NormalMatrix * vec3( 1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0,  0.0,  -1.0));
-	} else if (gl_Normal.z > 0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( 1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	} else if (gl_Normal.z < -0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( -1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	}
+	vec3 tangent = normalize(gl_NormalMatrix * at_tangent.xyz);
+    vec3 binormal = normalize(cross(tangent, normal));
+
+    tbnMatrix = transpose(mat3(tangent, binormal, normal));
 	
 	if (mc_Entity.x == ENTITY_CARROT || mc_Entity.x == ENTITY_COBWEB || mc_Entity.x == ENTITY_DANDELION || mc_Entity.x == ENTITY_DEAD_BUSH || mc_Entity.x == ENTITY_FIRE || mc_Entity.x == ENTITY_LEAVES || mc_Entity.x == ENTITY_LEAVES2
 	 || mc_Entity.x == ENTITY_LILYPAD || mc_Entity.x == ENTITY_NETHER_WART || mc_Entity.x == ENTITY_NEWFLOWERS || mc_Entity.x == ENTITY_POTATO || mc_Entity.x == ENTITY_ROSE || mc_Entity.x == ENTITY_TALLGRASS || mc_Entity.x == ENTITY_VINES
@@ -137,12 +117,7 @@ void main(){
 	if (mc_Entity.x == 50.0 || mc_Entity.x == 62.0 || mc_Entity.x == 91.0 || mc_Entity.x == 89.0 || mc_Entity.x == 124.0 || mc_Entity.x == 138.0  || mc_Entity.x == 169.0
 	|| mc_Entity.x == 10.0 || mc_Entity.x == 11.0  || mc_Entity.x == 51.0 || mc_Entity.x == 198.0) mat = 0.35;
 	 
-	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-						  tangent.y, binormal.y, normal.y,
-						  tangent.z, binormal.z, normal.z); 
-	 
 	viewVector = ( gl_ModelViewMatrix * gl_Vertex).xyz;
-	viewVector = normalize(tbnMatrix * viewVector);
 	
 	dist = sqrt(dot(gl_ModelViewMatrix * gl_Vertex,gl_ModelViewMatrix * gl_Vertex));
 }

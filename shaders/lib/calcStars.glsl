@@ -21,7 +21,7 @@
 			//Curve the fragposition so that the stars and the galaxy doesnt look weird
 			starCoord *= mix(1.0, cosT, 1.0 - cosT);
 			
-			vec2 coord = (starCoord.xz)/256.0 + 0.1;
+			vec2 coord = starCoord.xz/200.0 + 0.1;
 
 				float starNoise = texture2D(noisetex,fract(coord.xy/2.0)).x;
 				starNoise += texture2D(noisetex,fract(coord.xy)).x/2.0;
@@ -34,9 +34,9 @@
 					galaxyNoise += (texture2D(noisetex, fract(starCoord / 20000.0).xz).x * 1.5 - 0.5) * 0.5;
 					
 					float oldGalaxy = (texture2D(noisetex, fract(starCoord / 10000.0).xz).x * 1.5 - 1.5) * 0.25;
-						oldGalaxy += noise((starCoord / 5000.0 * 1024.0).xz) * 0.125;
-						oldGalaxy += noise((starCoord / 2500.0 * 1024.0).xz) * 0.125 * 0.5;
-						oldGalaxy += noise((starCoord / 1250.0 * 1024.0).xz) * 0.125 * 0.25;
+						oldGalaxy += texture2D(noisetex, fract(starCoord / 5000.0).xz).x * 0.125;
+						oldGalaxy += texture2D(noisetex, fract(starCoord / 2500.0).xz).x * 0.125 * 0.5;
+						oldGalaxy += texture2D(noisetex, fract(starCoord / 1250.0).xz).x * 0.125 * 0.25;
 					
 					galaxyNoise += oldGalaxy;
 					galaxyNoise = min(galaxyNoise, 1.0 - galaxyNoise);

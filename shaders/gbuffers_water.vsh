@@ -7,11 +7,10 @@ varying vec4 lmcoord;
 varying vec4 color;
 
 varying vec3 normal;
-varying vec3 tangent;
-varying vec3 binormal;
 
 varying vec3 wpos;
 varying vec3 viewVector;
+varying mat3 tbnMatrix;
 
 varying float mat;
 varying float dist;
@@ -24,6 +23,7 @@ uniform mat4 gbufferModelView;
 uniform float frameTimeCounter;
 
 attribute vec4 mc_Entity;
+attribute vec4 at_tangent;
 
 void main(){
 	mat = 1.0;
@@ -54,35 +54,11 @@ void main(){
 	
 	color = gl_Color;
 	
-	tangent = vec3(0.0);
-	binormal = vec3(0.0);
 	normal = normalize(gl_NormalMatrix * gl_Normal);
-	
-		if (gl_Normal.x > 0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( 0.0,  0.0, -1.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	} else if (gl_Normal.x < -0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( 0.0,  0.0,  1.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	} else if (gl_Normal.y > 0.5) {
-		//  0.0,  1.0,  0.0
-		tangent  = normalize(gl_NormalMatrix * vec3( 1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0,  0.0,  1.0));
-	} else if (gl_Normal.y < -0.5) {
-		//  0.0, -1.0,  0.0
-		tangent  = normalize(gl_NormalMatrix * vec3( 1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0,  0.0,  -1.0));
-	} else if (gl_Normal.z > 0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( 1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	} else if (gl_Normal.z < -0.5) {
-		tangent  = normalize(gl_NormalMatrix * vec3( -1.0,  0.0,  0.0));
-		binormal = normalize(gl_NormalMatrix * vec3( 0.0, -1.0,  0.0));
-	}
+	vec3 tangent = normalize(gl_NormalMatrix * at_tangent.xyz);
+    vec3 binormal = normalize(cross(tangent, normal));
 
-	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-	  tangent.y, binormal.y, normal.y,
-	  tangent.z, binormal.z, normal.z);
+    tbnMatrix = transpose(mat3(tangent, binormal, normal));
 	
 	viewVector = ( gl_ModelViewMatrix * gl_Vertex).xyz;
 	viewVector = (tbnMatrix * viewVector);

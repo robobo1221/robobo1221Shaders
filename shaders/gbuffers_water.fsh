@@ -10,11 +10,10 @@ varying vec4 lmcoord;
 varying vec4 color;
 
 varying vec3 normal;
-varying vec3 tangent;
-varying vec3 binormal;
 
 varying vec3 viewVector;
 varying vec3 wpos;
+varying mat3 tbnMatrix;
 
 varying float dist;
 varying float mat;
@@ -44,10 +43,6 @@ vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 
 void main(){
 	float iswater = float(mat > 0.1 && mat < 0.29);
-	
-	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-	  tangent.y, binormal.y, normal.y,
-	  tangent.z, binormal.z, normal.z);
 	
 	vec3 posxz = wpos.xyz;
 	

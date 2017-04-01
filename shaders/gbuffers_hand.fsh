@@ -15,11 +15,8 @@ varying vec4 vtexcoordam;
 varying vec4 vtexcoord;
 
 varying vec3 normal;
-varying vec3 tangent;
-varying vec3 binormal;
 varying vec3 viewVector;
-
-varying vec3 wpos;
+varying mat3 tbnMatrix;
 
 varying float mat;
 varying float dist;
@@ -54,9 +51,13 @@ void main(){
 
 	vec2 adjustedTexCoord = texcoord.st;
 
+	vec3 viewVector = normalize(tbnMatrix * viewVector);
+
 	#ifdef POM
 	if (dist < MAX_OCCLUSION_DISTANCE) {
-		if ( viewVector.z < 0.0 && readNormal(vtexcoord.st).a < 0.99 && readNormal(vtexcoord.st).a > 0.01)
+		float heightMap = readNormal(vtexcoord.st).a;
+
+		if ( viewVector.z < 0.0 && heightMap < 0.99 && heightMap > 0.01)
 	{
 		vec3 interval = viewVector.xyz * intervalMult;
 		vec3 coord = vec3(vtexcoord.st, 1.0);
@@ -77,8 +78,6 @@ void main(){
 
 
 	#include "lib/lmCoord.glsl"
-
-	vec2 posxz = wpos.xz - wpos.y;
 	
 	#ifdef SPECULAR_MAPPING
 		vec3 specularity = texture2DGradARB(specular, adjustedTexCoord, dcdx, dcdy).rgb;
@@ -93,10 +92,6 @@ void main(){
 	float bumpmult = 0.75;
 
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
-
-	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-	  tangent.y, binormal.y, normal.y,
-	  tangent.z, binormal.z, normal.z);
 						  
 	vec4 normalTangentSpace = vec4(normalize(bump * tbnMatrix) * 0.5 + 0.5, 1.0);
 

@@ -29,7 +29,7 @@
 
 			vec3 cloudCol = mix(mix(sunlight, moonlight * 2.0, time[1].y), vec3(1.0) * (1.0 - time[1].y * 0.96), rainStrength) * (1.0 - (time[1].x + time[0].x) * 0.5);
 				 cloudCol *= mix(1.0, 0.5, rainStrength * time[1].y);
-				 cloudCol *= 0.175  * 0.5;
+				 cloudCol *= 0.175;
 
 			float density = 	0.0f;
 			float totalcloud = 	0.0f;
@@ -77,9 +77,9 @@
 			
 			float scatterMask = pow(1.0 - totalcloud, 100.0);
 			
-			cloudCol *= 1.0 + scatterMask * (1.0 - rainStrength * (1.0 - cosSunUpAngle)) * 6.0 * (1.0 + sss * 5.0 * (1.0 - cosSunUpAngle)) * sqrt(cosT);
+			cloudCol *= 1.0 + scatterMask * (1.0 - rainStrength * (1.0 - cosSunUpAngle)) * 8.0 * (1.0 + sss * 5.0 * (1.0 - cosSunUpAngle)) * sqrt(cosT);
 			cloudCol = mix(cloudCol, ambientlight * 0.4, (1.0 - scatterMask) * 0.3);
-			cloudCol *= 0.75;
+			cloudCol *= 0.75 * 0.5;
 
 			return mix(color, cloudCol ,clamp(totalcloud * 500.0, 0.0, 1.0) * sqrt(cosT));
 		} else {

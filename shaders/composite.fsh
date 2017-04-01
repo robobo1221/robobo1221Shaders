@@ -211,6 +211,8 @@ vec4 getWorldSpace(vec4 fragpos){
 	return gbufferModelViewInverse * fragpos;
 }
 
+vec3 worldPosition = getWorldSpace(fragpos).rgb;
+
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
 	emissiveMap += (emissivetColor * ((20.0)) ) * pow(sqrt(dot(color.rgb,color.rgb)), 1.0) * emissive;
@@ -313,7 +315,7 @@ vec3 getShading(vec3 color){
 
 			float weight = 128.0 / rSD.y;
 
-			vec2 diffthresh = vec2(0.00005, -0.001);	// Fixes light leakage from walls
+			float diffthresh = 0.00005;	// Fixes light leakage from walls
 			
 			vec4 worldposition = vec4(0.0);
 
@@ -332,13 +334,13 @@ vec3 getShading(vec3 color){
 
 				//Projecting shadowmaps on a linear depth plane
 				#if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
-					float shadow0 = shadow2D(shadowtex0, vec3(worldposition.rg, worldposition.b + diffthresh.x )).z;
-					float shadow1 = shadow2D(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh.x )).z;
-					float caustics = length(shadow2D(shadowcolor0, vec3(worldposition.rg, worldposition.b + diffthresh.x )).rgb * 10.0);
+					float shadow0 = shadow2D(shadowtex0, vec3(worldposition.rg, worldposition.b + diffthresh )).z;
+					float shadow1 = shadow2D(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh )).z;
+					float caustics = length(shadow2D(shadowcolor0, vec3(worldposition.rg, worldposition.b + diffthresh )).rgb * 10.0);
 
 				rSD.x += mix(shadow0, shadow1, caustics);
 				#else
-					rSD.x += shadow2D(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh.x )).z;
+					rSD.x += shadow2D(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh )).z;
 				#endif
 				
 				minDist = minDist + rSD.y;
@@ -369,11 +371,12 @@ void main()
 	if (land > 0.9)
 		color = getShading(color) * color;
 	else {
-		#ifdef STARS
-			color = getStars(vec3(0.0), fragpos2.rgb, land);
-		#endif
 		
-		color = pow(getAtmosphericScattering(pow(color, vec3(0.4545)), fragpos2.rgb, 1.0, ambientlight, sunMult, moonMult), vec3(2.2));
+		color = pow(getAtmosphericScattering(vec3(0.0), fragpos2.rgb, 1.0, ambientlight, sunMult, moonMult), vec3(2.2));
+
+		#ifdef STARS
+			color = getStars(color, fragpos2.rgb, land);
+		#endif
 		
 		#ifdef CLOUDS
 			color = getClouds(color, fragpos2.rgb, land, 3);

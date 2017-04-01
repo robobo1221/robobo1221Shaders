@@ -18,7 +18,7 @@ vec3 getShadingForward(vec3 normal, vec3 color){
 	vec3 emissiveLightmap = forwardEmissive * emissiveLightColor;
 	
 	#ifdef DYNAMIC_HANDLIGHT
-		emissiveLightmap = getEmessiveGlow(color, handItemLightFactor2 * emissiveLightColor, emissiveLightmap, hand * 15.0);
+		emissiveLightmap = getEmessiveGlow(color, handLightMult * emissiveLightColor, emissiveLightmap, hand * 0.25);
 	#endif
 
 	vec3 sunlightDirect = (lightCol * sunlightAmount) * 0.5;

@@ -15,9 +15,8 @@ varying vec4 vtexcoordam;
 varying vec4 vtexcoord;
 
 varying vec3 normal;
-varying vec3 tangent;
-varying vec3 binormal;
 varying vec3 viewVector;
+varying mat3 tbnMatrix;
 
 varying vec3 wpos;
 
@@ -41,7 +40,6 @@ uniform float frameTimeCounter;
 #endif
 
 const float mincoord = 1.0/4096.0;
-const float maxcoord = 1.0-mincoord;
 
 vec2 dcdx = dFdx(vtexcoord.st*vtexcoordam.pq);
 vec2 dcdy = dFdy(vtexcoord.st*vtexcoordam.pq);
@@ -56,17 +54,23 @@ vec4 readNormal(vec2 coord)
 	return texture2DGradARB(normals,fract(coord)*vtexcoordam.pq+vtexcoordam.st,dcdx,dcdy);
 }
 
+#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
+
 void main(){
 
 	vec2 adjustedTexCoord = texcoord.st;
 
+	vec3 viewVector = normalize(tbnMatrix * viewVector);
+
 	#ifdef POM
 	if (dist < MAX_OCCLUSION_DISTANCE) {
-		if ( viewVector.z < 0.0 && readNormal(vtexcoord.st).a < 0.99 && readNormal(vtexcoord.st).a > 0.01)
+		float heightMap = readNormal(vtexcoord.st).a;
+
+		if ( viewVector.z < 0.0 && heightMap < 0.99 && heightMap > 0.01)
 	{
 		vec3 interval = viewVector.xyz * intervalMult;
 		vec3 coord = vec3(vtexcoord.st, 1.0);
-		for (int loopCount = 0; (loopCount < MAX_OCCLUSION_POINTS) && (readNormal(coord.st).a < coord.p); ++loopCount) {
+		for (int loopCount = 0; (loopCount < int(MAX_OCCLUSION_POINTS * 0.5)) && (readNormal(coord.st).a < coord.p); ++loopCount) {
 			coord = coord+interval;
 		}
 		if (coord.t < mincoord) {
@@ -107,10 +111,6 @@ void main(){
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 	
 	bump += getTerrainHeight(posxz) * 0.05 * rainpuddles * atten;
-
-	mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
-	  tangent.y, binormal.y, normal.y,
-	  tangent.z, binormal.z, normal.z);
 						  
 	vec4 normalTangentSpace = vec4(normalize(bump * tbnMatrix) * 0.5 + 0.5, 1.0);
 
