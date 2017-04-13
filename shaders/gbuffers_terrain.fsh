@@ -70,7 +70,7 @@ void main(){
 	{
 		vec3 interval = viewVector.xyz * intervalMult;
 		vec3 coord = vec3(vtexcoord.st, 1.0);
-		for (int loopCount = 0; (loopCount < int(MAX_OCCLUSION_POINTS * 0.5)) && (readNormal(coord.st).a < coord.p); ++loopCount) {
+		for (int loopCount = 0; (loopCount < int(MAX_OCCLUSION_POINTS)) && (readNormal(coord.st).a < coord.p); ++loopCount) {
 			coord = coord+interval;
 		}
 		if (coord.t < mincoord) {
@@ -110,7 +110,7 @@ void main(){
 
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 	
-	bump += getTerrainHeight(posxz) * 0.05 * rainpuddles * atten;
+	bump += getTerrainHeight(posxz) * 0.05 * rainpuddles;
 						  
 	vec4 normalTangentSpace = vec4(normalize(bump * tbnMatrix) * 0.5 + 0.5, 1.0);
 

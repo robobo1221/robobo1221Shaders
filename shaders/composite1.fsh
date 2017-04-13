@@ -614,8 +614,10 @@ float getWaterScattering(float NdotL){
 			float puddles = 1.0;
 		#endif
 
-		float normalDotEye = dot(normal, uPos);
-		float fresnel = pow(clamp(1.0 + normalDotEye, 0.0, 1.0),3.0) * 0.95 + 0.05;
+		float F0 				= 0.05;
+		vec3 halfVector = normalize(reflectedVector + normalize(-fragpos.rgb));
+		float LdotH			= clamp(dot(reflectedVector, halfVector),0.0,1.0);
+		float fresnel 	= F0 + (1.0 - F0) * pow(1.0 - LdotH, 5.0);
 
 		vec3 sunMult = vec3(0.0);
 		vec3 moonMult = vec3(0.0);

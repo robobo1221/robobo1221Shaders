@@ -56,7 +56,7 @@ void main(){
 	vec3 bump;
 		bump = getWaveHeight(posxz.xz - posxz.y,iswater);
 	
-	const float bumpmult = 0.13;
+	const float bumpmult = 0.2;
 	
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 						  
