@@ -60,6 +60,13 @@ float ld(float dist) {
     return (2.0 * near) / (far + near - dist * (far - near));
 }
 
+vec2 clampScreen(vec2 coord) {
+
+	vec2 pixel = 1.0 / vec2(viewWidth, viewHeight);
+
+    return clamp(coord, pixel, 1.0 - pixel);
+}
+
 vec2 customTexcoord(){
 	
 	vec2 texCoord = texcoord.st;
@@ -75,7 +82,7 @@ vec2 customTexcoord(){
 	#endif
 }
 
-vec2 newTexcoord = customTexcoord();
+vec2 newTexcoord = clampScreen(customTexcoord());
 
 vec3 tonemap(vec3 x)
 {

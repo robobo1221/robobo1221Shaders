@@ -1,5 +1,5 @@
 
-#define CLOUDS
+//#define CLOUDS
 	#define CLOUD_COVERAGE 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0]
 	#define CLOUD_DENSITY 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0]
 
