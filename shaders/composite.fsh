@@ -213,6 +213,7 @@ vec4 getWorldSpace(vec4 fragpos){
 }
 
 vec3 worldPosition = getWorldSpace(fragpos).rgb;
+vec3 worldPosition2 = getWorldSpace(fragpos2).rgb;
 
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
@@ -489,7 +490,7 @@ vec4 getVolumetricClouds(vec3 color){
 
 		float volumetricDistance = length((wpos.xyz - cameraPosition.xyz));
 
-		if (length(worldPosition) < volumetricDistance){
+		if (sqrt(dot(worldPosition2, worldPosition2)) < volumetricDistance){
 			result.a = 0.0;
 		}
 
