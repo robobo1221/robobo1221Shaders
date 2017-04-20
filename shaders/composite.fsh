@@ -467,7 +467,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 vec4 getVolumetricClouds(vec3 color){
 
-	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
+	vec4 clouds = vec4(0.0);
 
 	float farPlane = far; 		//Start from where the ray should march.
 	float nearPlane = 1.0;	//End to where the ray should march.
