@@ -454,7 +454,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 		vec3 sunLightColor = mix(sunlight * sunlight, moonlight, (1.0 - sunUpCos)) * 16.0;
 			sunLightColor *= sunLightAbsorption;
-			sunLightColor *= 1.0 + sunViewCos * 100.0 * sunLightAbsorption * (1.0 - (1.0 - sunUpCos) * 0.5);
+			sunLightColor *= 1.0 + sunViewCos * 5.0 * sunLightAbsorption * (1.0 - (1.0 - sunUpCos) * 0.5);
 			sunLightColor = mix(sunLightColor, ambientlight, rainStrength);
 
 		vec3 cloudColor = mix(sunLightColor, ambientlight * (0.25 + (rainStrength * 0.5)), pow(1.0 - absorption / 2.8, 4.0f));
