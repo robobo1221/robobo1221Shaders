@@ -460,16 +460,6 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 
 #endif
 
-vec3 getVolumetricClouds(vec3 color, vec2 uv){
-
-	float lod = 1.75;
-	vec4 sample = texture2DLod(gaux2, uv, lod);
-
-	return pow(mix(pow(color, vec3(2.2)), pow(sample.rgb, vec3(2.2)), sample.a), vec3(0.4545));
-
-	//return vec3(sampleError);
-}
-
 vec3 renderGaux4(vec3 color){
 	vec4 albedo = pow(texture2D(gaux4, texcoord.st), vec4(2.2));
 
@@ -684,6 +674,12 @@ float getWaterScattering(float NdotL){
 
 	}
 #endif
+
+vec3 getVolumetricClouds(vec3 color, vec2 uv){
+	vec4 sample = texture2DLod(gaux2, uv, 1.75);
+
+	return pow(mix(pow(color, vec3(2.2)), pow(sample.rgb, vec3(2.2)), sample.a), vec3(0.4545));
+}
 
 void main()
 {

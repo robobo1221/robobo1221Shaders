@@ -399,7 +399,7 @@ float getVolumetricCloudNoise(vec3 p){
 
 	p = fract(p * 0.01) * 100.0;
 
-	float noise = noise3D(vec3(p.x - wind * 0.01, p.y, p.z - wind * 0.01));
+	float noise = noise3D(vec3(p.x - wind * 0.01, p.y, p.z - wind * 0.015));
 		  noise += noise3D(p * 3.5) / 3.5;
 		  noise += abs(noise3D(p * 6.125) * 2.0 - 1.0) / 6.125;
 
@@ -425,8 +425,8 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 	//don't mind this stuff. It's still not done when it comes to coloring
 
-	const float height = 150.0;  	//Height of the clouds
-	float distRatio = 180.0;  	//Distance between top and bottom of the cloud in block * 10.
+	const float height = 170.0;  	//Height of the clouds
+	float distRatio = 140.0;  	//Distance between top and bottom of the cloud in block * 10.
 
 	float maxHeight = (distRatio * 0.5) + height;
 	float minHeight = height - (distRatio * 0.5);
@@ -450,11 +450,9 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 		float absorption = clamp((-(minHeight - wpos.y) / distRatio), 0.0f, 1.0f);
 
-		float sunLightAbsorption = pow(absorption, 8.0);
-			sunLightAbsorption *= (cloudAlpha / (0.01 + cloudAlpha));
-			sunLightAbsorption = clamp(sunLightAbsorption * 3.0, 0.0, 1.0);
+		float sunLightAbsorption = pow(absorption, 5.0);
 
-		vec3 sunLightColor = mix(sunlight * sunlight, moonlight, (1.0 - sunUpCos)) * 64.0;
+		vec3 sunLightColor = mix(sunlight * sunlight, moonlight, (1.0 - sunUpCos)) * 16.0;
 			sunLightColor *= sunLightAbsorption;
 			sunLightColor *= 1.0 + sunViewCos * 100.0 * sunLightAbsorption * (1.0 - (1.0 - sunUpCos) * 0.5);
 			sunLightColor = mix(sunLightColor, ambientlight, rainStrength);
@@ -486,7 +484,7 @@ vec4 getVolumetricClouds(vec3 color){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
 		vec4 result = getVolumetricCloudsColor(wpos.rgb);
-			 result.a = clamp(result.a * 100.0, 0.0, 1.0);
+			 result.a = clamp(result.a * 500.0, 0.0, 1.0);
 
 		float volumetricDistance = length((wpos.xyz - cameraPosition.xyz));
 
