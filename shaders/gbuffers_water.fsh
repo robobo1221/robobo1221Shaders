@@ -29,15 +29,11 @@ vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 
 	float waveZ = mix(2.0,0.25,iswater);
 	float waveM = 2.0 * iswater;
-
-	vec3 parallaxPos = posxz;
-	float waterHeight = getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * 0.5;
 	
 	for(int i = 0; i < PW_POINTS; i++){
-		parallaxPos.xz += (waterHeight * viewVector.xy) * (22.0 * PW_DEPTH) / dist / float(PW_POINTS);
-		waterHeight = getWaterBump(parallaxPos.xz - parallaxPos.y, waveM, waveZ, iswater) * 0.5;
+		posxz.xz += ((getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * 0.5) * viewVector.xy) * (22.0 * PW_DEPTH) / dist / float(PW_POINTS);
 	}
-	return parallaxPos;
+	return posxz;
 }
 #endif
 

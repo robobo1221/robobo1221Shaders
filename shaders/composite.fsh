@@ -29,7 +29,7 @@ const int 		RGBA8						= 0;
 
 const int 		gcolorFormat				= RGBA16;
 const int 		gaux1Format					= RGBA16;
-const int 		gaux2Format					= RGBA8;
+const int 		gaux2Format					= RGBA16;
 const int 		gaux3Format					= R11F_G11F_B10F;
 const int 		gaux4Format					= RGBA8;
 const int 		gnormalFormat				= RGBA16;
@@ -194,6 +194,7 @@ vec4 getFragpos(){
 }
 
 vec4 fragpos = getFragpos();
+vec4 uPos = normalize(fragpos);
 
 vec4 getFragpos2(){
 
@@ -269,7 +270,7 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 #include "lib/calcStars.glsl"
 
 float getSubSurfaceScattering(){
-	return (clamp(pow(dot(normalize(fragpos.rgb), lightVector), 12.0),0.0,1.0) * transition_fading) * 3.0;
+	return (clamp(pow(dot(uPos.xyz, lightVector), 12.0),0.0,1.0) * transition_fading) * 3.0;
 }
 
 vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
@@ -361,6 +362,147 @@ float getVolumetricRays(){
 
 #endif
 
+float mod289(float x){return x - floor(x * 0.003460) * 289.0;}
+vec4 mod289(vec4 x){return x - floor(x * 0.003460) * 289.0;}
+vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
+
+float noise3D(vec3 p){
+    vec3 a = floor(p);
+    vec3 d = p - a;
+    d = d * d * (3.0 - 2.0 * d);
+
+    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 k1 = perm(b.xyxy);
+    vec4 k2 = perm(k1.xyxy + b.zzww);
+
+    vec4 c = k2 + a.z;
+    vec4 k3 = perm(c);
+    vec4 k4 = perm(c + 1.0);
+
+    vec4 o1 = fract(k3 * 0.02439024390243902439024390243902);
+    vec4 o2 = fract(k4 * 0.02439024390243902439024390243902);
+
+    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+    return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
+float getVolumetricCloudNoise(vec3 p){
+
+	float wind = abs(frameTimeCounter - 0.5);
+
+	p.xz += wind;
+
+	p *= 0.02;
+
+	p = fract(p * 0.01) * 100.0;
+
+	float noise = noise3D(vec3(p.x - wind * 0.01, p.y, p.z - wind * 0.01));
+		  noise += noise3D(p * 3.5) / 3.5;
+		  noise += abs(noise3D(p * 6.125) * 2.0 - 1.0) / 6.125;
+
+		  noise = noise * (1.0 - rainStrength * 0.5);
+		  noise = pow(max(1.0 - noise * 1.5,0.),2.0) * 0.0303030;
+
+	return clamp(noise * 10.0, 0.0, 1.0);
+}
+
+vec4 getVolumetricCloudPosition(vec2 coord, float depth)
+{
+	vec4 position = gbufferProjectionInverse * vec4(vec3(coord, expDepth(depth)) * 2.0 - 1.0, 1.0);
+		 position /= position.w;
+
+	     position = gbufferModelViewInverse * position;
+
+	     position.rgb += cameraPosition;
+
+	return position;
+}
+
+vec4 getVolumetricCloudsColor(vec3 wpos){
+
+	//don't mind this stuff. It's still not done when it comes to coloring
+
+	const float height = 150.0;  	//Height of the clouds
+	float distRatio = 180.0;  	//Distance between top and bottom of the cloud in block * 10.
+
+	float maxHeight = (distRatio * 0.5) + height;
+	float minHeight = height - (distRatio * 0.5);
+
+	if (wpos.y < minHeight || wpos.y > maxHeight){
+		return vec4(0.0);
+	} else {
+
+		float sunViewCos = dot(lightVector, uPos.xyz) * 0.5 + 0.5;
+			//Inverse Square Root
+			sunViewCos = (0.5 / sqrt(1.0 - sunViewCos)) - 0.5;
+			//Reinhard to prevent over exposure
+			sunViewCos /= 1.0 + sunViewCos * 0.01; 
+
+		float sunUpCos = clamp(smoothstep(0.0175,0.05,dot(sunVec, upVec)), 0.0, 1.0);
+
+		float cloudAlpha = getVolumetricCloudNoise(wpos);
+		float cloudTreshHold = pow(1.0f - clamp(distance(wpos.y, height) / (distRatio / 2.0f), 0.0f, 1.0f), 12.0 * (1.0 - cloudAlpha));
+
+		cloudAlpha *= cloudTreshHold;
+
+		float absorption = clamp((-(minHeight - wpos.y) / distRatio), 0.0f, 1.0f);
+
+		float sunLightAbsorption = pow(absorption, 8.0);
+			sunLightAbsorption *= (cloudAlpha / (0.01 + cloudAlpha));
+			sunLightAbsorption = clamp(sunLightAbsorption * 3.0, 0.0, 1.0);
+
+		vec3 sunLightColor = mix(sunlight * sunlight, moonlight, (1.0 - sunUpCos)) * 64.0;
+			sunLightColor *= sunLightAbsorption;
+			sunLightColor *= 1.0 + sunViewCos * 100.0 * sunLightAbsorption * (1.0 - (1.0 - sunUpCos) * 0.5);
+			sunLightColor = mix(sunLightColor, ambientlight, rainStrength);
+
+		vec3 cloudColor = mix(sunLightColor, ambientlight * (0.25 + (rainStrength * 0.5)), pow(1.0 - absorption / 2.8, 4.0f));
+
+			cloudColor /= 1.0 + cloudColor;
+
+		return vec4(cloudColor, cloudAlpha);
+	}
+}
+
+vec4 getVolumetricClouds(vec3 color){
+
+	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
+
+	float farPlane = far; 		//Start from where the ray should march.
+	float nearPlane = 1.0;	//End to where the ray should march.
+
+    float increment = far / 10.0;
+
+	float dither = bayer16x16(texcoord.st);
+
+	farPlane += dither * increment;
+
+	float weight = farPlane / increment;
+
+	while (farPlane > nearPlane){
+
+		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
+		vec4 result = getVolumetricCloudsColor(wpos.rgb);
+			 result.a = clamp(result.a * 100.0, 0.0, 1.0);
+
+		float volumetricDistance = length((wpos.xyz - cameraPosition.xyz));
+
+		if (length(worldPosition) < volumetricDistance){
+			result.a = 0.0;
+		}
+
+		clouds.rgb = mix(clouds.rgb, result.rgb, result.a);
+		clouds.a += result.a;
+
+		farPlane -= increment;
+
+	}
+
+	return clouds;
+}
+
 
 void main()
 {
@@ -388,7 +530,8 @@ void main()
 	
 	color = pow(color, vec3(0.4545));
 
-/* DRAWBUFFERS:05 */
+/* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
-	gl_FragData[1] = vec4(shadowsForward, 1.0);
+	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
+	gl_FragData[2] = vec4(getVolumetricClouds(color));
 }
