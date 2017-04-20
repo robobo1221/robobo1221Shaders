@@ -363,7 +363,6 @@ float getVolumetricRays(){
 
 #endif
 
-float mod289(float x){return x - floor(x * 0.003460) * 289.0;}
 vec4 mod289(vec4 x){return x - floor(x * 0.003460) * 289.0;}
 vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
 
@@ -394,10 +393,9 @@ float getVolumetricCloudNoise(vec3 p){
 	float wind = abs(frameTimeCounter - 0.5);
 
 	p.xz += wind;
-
-	p *= 0.02;
-
-	p = fract(p * 0.01) * 100.0;
+	
+	p *= 0.0002;
+	p = fract(p) * 100.0;
 
 	float noise = noise3D(vec3(p.x - wind * 0.01, p.y, p.z - wind * 0.015));
 		  noise += noise3D(p * 3.5) / 3.5;
@@ -426,7 +424,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 	//don't mind this stuff. It's still not done when it comes to coloring
 
 	const float height = 170.0;  	//Height of the clouds
-	float distRatio = 140.0;  	//Distance between top and bottom of the cloud in block * 10.
+	const float distRatio = 140.0;  	//Distance between top and bottom of the cloud in block * 10.
 
 	float maxHeight = (distRatio * 0.5) + height;
 	float minHeight = height - (distRatio * 0.5);
@@ -444,7 +442,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		float sunUpCos = clamp(smoothstep(0.0175,0.05,dot(sunVec, upVec)), 0.0, 1.0);
 
 		float cloudAlpha = getVolumetricCloudNoise(wpos);
-		float cloudTreshHold = pow(1.0f - clamp(distance(wpos.y, height) / (distRatio / 2.0f), 0.0f, 1.0f), 12.0 * (1.0 - cloudAlpha));
+		float cloudTreshHold = pow(1.0f - clamp(distance(wpos.y, height) / (distRatio / 2.0f), 0.0f, 1.0f), 12.0);
 
 		cloudAlpha *= cloudTreshHold;
 
@@ -465,9 +463,9 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 	}
 }
 
-vec4 getVolumetricClouds(vec3 color){
+vec4 getVolumetricClouds(){
 
-	vec4 clouds = vec4(land < 0.9 ? pow(color, vec3(2.2)) : vec3(0.0), 0.0);
+	vec4 clouds = vec4(0.0);
 
 	float farPlane = far; 		//Start from where the ray should march.
 	float nearPlane = 1.0;	//End to where the ray should march.
@@ -484,7 +482,7 @@ vec4 getVolumetricClouds(vec3 color){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
 		vec4 result = getVolumetricCloudsColor(wpos.rgb);
-			 result.a = clamp(result.a * 500.0, 0.0, 1.0);
+			 result.a = clamp(result.a * 1000.0, 0.0, 1.0);
 
 		float volumetricDistance = length((wpos.xyz - cameraPosition.xyz));
 
@@ -532,5 +530,5 @@ void main()
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
 	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
-	gl_FragData[2] = vec4(getVolumetricClouds(color));
+	gl_FragData[2] = vec4(getVolumetricClouds());
 }
