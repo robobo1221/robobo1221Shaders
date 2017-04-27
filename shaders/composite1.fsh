@@ -117,6 +117,22 @@ vec3 normal = mix(texture2D(gnormal, texcoord.st, 2.0).rgb * 2.0 - 1.0, texture2
 
 float getEyeBrightnessSmooth = pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
 
+#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
+
+float bayer16x16(vec2 p){
+
+	p *= vec2(viewWidth,viewHeight);
+	
+    vec2 m0 = vec2(mod(floor(p/8.), 2.));
+    vec2 m1 = vec2(mod(floor(p/4.), 2.));
+    vec2 m2 = vec2(mod(floor(p/2.), 2.));
+    vec2 m3 = vec2(mod(floor(p)   , 2.));
+
+    return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
+}
+
+#undef g
+
 vec3 nvec3(vec4 pos) {
     return pos.xyz/pos.w;
 }
@@ -144,7 +160,10 @@ vec4 fragpos2 = getFragpos2(texcoord.st, pixeldepth2);
 
 vec4 getWorldSpace(vec4 fragpos){
 
-	return gbufferModelViewInverse * fragpos;
+	vec4 wpos = gbufferModelViewInverse * fragpos;
+		 wpos /= wpos.w;
+
+	return wpos;
 }
 
 vec3 worldPosition = getWorldSpace(fragpos).rgb;
@@ -163,20 +182,6 @@ float expDepth(float dist){
 
 float ld(float dist) {
     return (2.0 * near) / (far + near - dist * (far - near));
-}
-
-#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
-
-float bayer16x16(vec2 p){
-
-	p *= vec2(viewWidth,viewHeight);
-	
-    vec2 m0 = vec2(mod(floor(p/8.), 2.));
-    vec2 m1 = vec2(mod(floor(p/4.), 2.));
-    vec2 m2 = vec2(mod(floor(p/2.), 2.));
-    vec2 m3 = vec2(mod(floor(p)   , 2.));
-
-    return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
 }
 
 #include "lib/noise.glsl"
@@ -705,7 +710,7 @@ void main()
 		if (land > 0.9) color = getFog(ambientlight, color, texcoord.st, land);
 	#endif
 
-	color = getVolumetricClouds(color, refTexC.st);
+	//color = getVolumetricClouds(color, refTexC.st);
 
 	#ifdef UNDERWATER_FOG
 		if (isEyeInWater > 0.9) color = underwaterFog(color);

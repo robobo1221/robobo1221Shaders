@@ -12,12 +12,23 @@ vec4 getShadowSpace(float shadowdepth, vec2 texcoord){
 	if (isEyeInWater > 0.9)
 	fragpos.xy *= 0.817;
 
-	vec4 wpos = vec4(0.0);
-		wpos = gbufferModelViewInverse * fragpos;
+	vec4 wpos = getWorldSpace(fragpos);
 
-		wpos = shadowModelView * wpos;
-		wpos = shadowProjection * wpos;
-		wpos /= wpos.w;
+	//Pixel locked shadows.
+	/*
+	const float resourcePackRes = 16.0;
+
+	float offset = 0.01 / resourcePackRes;
+	
+	wpos.rgb += cameraPosition.rgb;
+	wpos.rgb += offset;													//fix z fighting.
+	wpos.rgb = floor(wpos.rgb * resourcePackRes) / resourcePackRes; 	//Lock it on the pixels of a block;
+	wpos.rgb -= offset;													//reverse back to lock the position back into place.
+	wpos.rgb -= cameraPosition.rgb;
+	*/
+
+	wpos = shadowModelView * wpos;
+	wpos = shadowProjection * wpos;
 
 	return wpos;
 

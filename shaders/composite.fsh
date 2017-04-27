@@ -151,18 +151,11 @@ float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 
 	float lightmap = aux.r;
 	
-	lightmap 		= 1.0f - lightmap;
-	lightmap 		*= 5.5f;
-	lightmap 		= 1.0 / pow((lightmap + 0.8f), 2.0);
-	lightmap 		= clamp(lightmap, 0.0f, 1.0f);
-	lightmap		= (lightmap / 1.0) / (1.0 - lightmap);
-	lightmap 		-= 0.03435f;
-	lightmap 		= max(0.0f, lightmap);
+	lightmap		= pow(lightmap, 2.0);
+	lightmap 		= 1.0 / (1.0 - lightmap) - 1.0;
+	lightmap 		= clamp(lightmap, 0.0, 100000.0);
 	
 	lightmap 		*= 0.08 * (1.0 + mix(dynamicExposure,1.0,time[1].y) / 0.08) * 0.23;
-	lightmap 		= clamp(lightmap, 0.0f, 1.0f);
-	lightmap 		= pow(lightmap , 4.0f) * 5.0 + lightmap;
-	lightmap 		= pow(lightmap, emissiveLightAtten) * emissiveLightMult;
 	
 	lightmap		= isForwardRendered ? lightmap * (1.0 - emissive) + emissive : lightmap; //Prevent glowstone and all emissive stuff to clip with the lightmap
 	lightmap		= isForwardRendered ? lightmap * (1.0 - handLightMult * hand) + handLightMult * hand : lightmap; //Also do this to the hand
@@ -209,7 +202,9 @@ vec4 fragpos2 = getFragpos2();
 
 vec4 getWorldSpace(vec4 fragpos){
 
-	return gbufferModelViewInverse * fragpos;
+	vec4 wpos = gbufferModelViewInverse * fragpos;
+
+	return wpos;
 }
 
 vec3 worldPosition = getWorldSpace(fragpos).rgb;
@@ -412,7 +407,7 @@ vec4 getVolumetricCloudPosition(vec2 coord, float depth)
 	vec4 position = gbufferProjectionInverse * vec4(vec3(coord, expDepth(depth)) * 2.0 - 1.0, 1.0);
 		 position /= position.w;
 
-	     position = gbufferModelViewInverse * position;
+	     position = getWorldSpace(position);
 
 	     position.rgb += cameraPosition;
 
@@ -467,16 +462,14 @@ vec4 getVolumetricClouds(){
 
 	vec4 clouds = vec4(0.0);
 
-	float farPlane = far; 		//Start from where the ray should march.
-	float nearPlane = 1.0;	//End to where the ray should march.
+	float nearPlane = 1.0;			//start to where the ray should march.
+	float farPlane = far; 		//End from where the ray should march.
 
     float increment = far / 10.0;
 
 	float dither = bayer16x16(texcoord.st);
 
 	farPlane += dither * increment;
-
-	float weight = farPlane / increment;
 
 	while (farPlane > nearPlane){
 
@@ -524,11 +517,11 @@ void main()
 	}
 	
 	color = renderGaux2(color, normal2);
-	
-	color = pow(color, vec3(0.4545));
 
+	color = pow(color, vec3(0.4545));
+	
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
 	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
-	gl_FragData[2] = vec4(getVolumetricClouds());
+	//gl_FragData[2] = vec4(getVolumetricClouds());
 }

@@ -27,6 +27,8 @@ varying vec3 worldpos;
 varying float iswater;
 varying float isTransparent;
 
+varying vec3 normal;
+
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
 uniform mat4 shadowProjection;
@@ -129,5 +131,5 @@ void main(){
 		gl_Position *= 1.0 - iswater;
 	#endif
 
-
+	normal = normalize(gl_NormalMatrix * gl_Normal) * 0.5 + 0.5;
 }
