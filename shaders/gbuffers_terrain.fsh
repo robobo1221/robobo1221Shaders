@@ -54,8 +54,6 @@ vec4 readNormal(vec2 coord)
 	return texture2DGradARB(normals,fract(coord)*vtexcoordam.pq+vtexcoordam.st,dcdx,dcdy);
 }
 
-#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
-
 void main(){
 
 	vec2 adjustedTexCoord = texcoord.st;

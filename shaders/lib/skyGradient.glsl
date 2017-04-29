@@ -1,4 +1,5 @@
 const float pi = 3.141592653589793238462643383279502884197169;
+
 #define c max(cosViewSunAngle, 0.0)
 
 float RayleighPhase(float cosViewSunAngle)
@@ -26,7 +27,7 @@ float hgPhase(float cosViewSunAngle, float g)
 	*/
 
 
-	return (1.0 / (4.0 * pi)) * ((1.0 - g*g) / (1.0 + g*g) - 2.0*g * cosViewSunAngle, 1.5);
+	return (1.0 / (4.0 * pi)) * ((1.0 - g*g) / pow((1.0 + g*g) - 2.0*g * cosViewSunAngle, 1.5));
 }
 
 vec3 totalMie(vec3 lambda, vec3 K, float T, float v)
@@ -135,7 +136,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 
 	// constants for mie scattering
 	const float mieCoefficient = 0.005;
-	const float mieDirectionalG = 0.75;
+	const float mieDirectionalG = 0.85;
 	const float v = 4.0;
 
 	// Wavelength of the primary colors RGB in nanometers.
@@ -204,7 +205,6 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	float nightLightScattering = pow(max(1.0 - max(cosUpViewAngle, 0.0 ),0.0), 2.0);
 
 	sky += pow(fogColor * 0.5, vec3(0.4545)) * ((nightLightScattering + 0.5 * (1.0 - nightLightScattering)) * clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0));
-
 	sky = mix(sky, pow(fogColor, vec3(0.4545)), rainStrength);
 	
 	//color = getFakeRayLeigh(fragpos) + (sun * sunMax + moon * moonMax) * sunMoonMult;
