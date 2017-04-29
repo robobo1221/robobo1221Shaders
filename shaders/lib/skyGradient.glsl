@@ -174,15 +174,20 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 mieAtX = totalMie(primaryWavelengths, K, turbidity, v) * mieCoefficient;
 
 	float zenithAngle = max(0.0, cosUpViewAngle);
+	float sunAngle = max(0.0, cosSunUpAngle);
 
 	float rayleighOpticalLength = rayleighZenithLength / zenithAngle;
 	float mieOpticalLength = mieZenithLength / zenithAngle;
 
+	float rayleighOpticalLengthSun = rayleighZenithLength / sunAngle;
+	float mieOpticalLengthSun = mieZenithLength / sunAngle;
+
 	vec3 Fex = exp(-(rayleighAtX * rayleighOpticalLength + mieAtX * mieOpticalLength));
-	vec3 Fexsun = vec3(exp(-(rayleighCoefficient * 0.00002853075 * rayleighOpticalLength + mieAtX * mieOpticalLength)));
+	vec3 Fex2 = vec3(exp(-(rayleighCoefficient * 0.00002853075 * rayleighOpticalLength + mieAtX * mieOpticalLength)));
+	vec3 FexMie = exp(-(mieAtX * mieOpticalLengthSun));
 
 	vec3 rayleighXtoEye = rayleighAtX * RayleighPhase(cosViewSunAngle);
-	vec3 mieXtoEye = mieAtX * hgPhase(cosViewSunAngle , mieDirectionalG);
+	vec3 mieXtoEye = mieAtX * hgPhase(cosViewSunAngle , mieDirectionalG) * FexMie;
 
 	vec3 totalLightAtX = rayleighAtX + mieAtX;
 	vec3 lightFromXtoEye = rayleighXtoEye + mieXtoEye;
@@ -195,7 +200,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 sun = K * calcSun(fragpos, sunVec);
 	vec3 moon = pow(moonlight, vec3(0.4545)) * calcMoon(fragpos, moonVec);
 
-	sunMax = sunE * pow(mix(Fexsun, Fex, clamp(pow(1.0-cosUpViewAngle,4.0),0.0,1.0)), vec3(0.4545))
+	sunMax = sunE * pow(mix(Fex2, Fex, clamp(pow(1.0-cosUpViewAngle,4.0),0.0,1.0)), vec3(0.4545))
 	* mix(0.000005, 0.00003, clamp(pow(1.0-cosSunUpAngle,3.0),0.0,1.0)) * (1.0 - rainStrength);
 
 	moonMax += pow(clamp(cosUpViewAngle,0.0,1.0), 0.8) * (1.0 - rainStrength);
