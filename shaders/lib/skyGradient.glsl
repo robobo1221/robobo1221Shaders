@@ -1,45 +1,29 @@
-const float pi = 3.141592653589793238462643383279502884197169;
+float turbidity = 1.5;
+float rayleighCoefficient = 1.7;
 
-#define c max(cosViewSunAngle, 0.0)
+// constants for mie scattering
+const float mieCoefficient = 0.005;
+const float mieDirectionalG = 0.85;
+const float v = 4.0;
 
-float RayleighPhase(float cosViewSunAngle)
-{
-	/*
-	Rayleigh phase function.
-			   3
-	p(θ) =	________   [1 + cos(θ)^2]
-			   16π
-	*/
+// Wavelength of the primary colors RGB in nanometers.
+const vec3 primaryWavelengths = vec3(650, 550, 450) * 1.0E-9;
 
-	return (3.0 / (16.0 * pi)) * (c*c + 1.0);
-}
+float n = 1.00029; // refractive index of air
+float N = 2.54743E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
+float pn = 0.03;	// depolarization factor for standard air
 
-#undef c
+// optical length at zenith for molecules
+float rayleighZenithLength = 8.4E3 ;
+float mieZenithLength = 1.25E3;
 
-float hgPhase(float cosViewSunAngle, float g)
-{
+const vec3 K = vec3(0.686, 0.678, 0.666);
 
-	/*
-	Henyey-Greenstein phase function.
-			   1		 		1 − g^2 
-	p(θ) =	________   ____________________________
-			   4π		[1 + g^2 − 2g cos(θ)]^(3/2)
-	*/
+float sunIntensity = 1000.0;
 
-
-	return (1.0 / (4.0 * pi)) * ((1.0 - g*g) / pow((1.0 + g*g) - 2.0*g * cosViewSunAngle, 1.5));
-}
-
-vec3 totalMie(vec3 lambda, vec3 K, float T, float v)
-{
-	float c = (0.2 * T ) * 10E-18;
-	return 0.4343 * c * pi * pow((2.0 * pi) / lambda, vec3(v - 2.0)) * K;
-}
-
-vec3 totalRayleigh(vec3 lambda, float n, float N, float pn){
-	return (24.0 * pow(pi, 3.0) * ((n*n - 1.0) * (n*n - 1.0)) * (6.0 + 3.0 * pn))
-	/ (N * pow(lambda, vec3(4.0)) * ((n*n + 2.0) * (n*n + 2.0)) * (6.0 - 7.0 * pn));
-}
+// earth shadow hack
+float cutoffAngle = pi * 0.5128205128205128;
+float steepness = 1.5;
 
 float SunIntensity(float zenithAngleCos, float sunIntensity, float cutoffAngle, float steepness)
 {
@@ -120,45 +104,14 @@ vec3 getFakeRayLeigh(vec3 fragpos){
 	color *= 1.0 + pow(dot(uVec, sunVec) * 0.5 + 0.5, 2.0);
 	color += sunlight * fakeMie(fragpos) * clamp(dot(sunVec, upVec) * 0.95 + 0.05, 0.0, 1.0);
 	
-	color = color / (0.5 + color);
+	color = color / (1.0 + color);
 	
-	return clamp(color, 0.0, 1.0);
+	return clamp(color * 0.1, 0.0, 1.0);
 	
 }
 */
 
 vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 fogColor, out vec3 sunMax, out vec3 moonMax){
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	float turbidity = 1.5;
-	float rayleighCoefficient = 1.7;
-
-	// constants for mie scattering
-	const float mieCoefficient = 0.005;
-	const float mieDirectionalG = 0.85;
-	const float v = 4.0;
-
-	// Wavelength of the primary colors RGB in nanometers.
-	const vec3 primaryWavelengths = vec3(650, 550, 450) * 1.0E-9;
-	
-	float n = 1.00029; // refractive index of air
-	float N = 2.54743E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
-	float pn = 0.03;	// depolarization factor for standard air
-
-	// optical length at zenith for molecules
-	float rayleighZenithLength = 8.4E3 ;
-	float mieZenithLength = 1.25E3;
-	
-	const vec3 K = vec3(0.686, 0.678, 0.666);
-
-	float sunIntensity = 1000.0;
-
-	// earth shadow hack
-	float cutoffAngle = pi * 0.5128205128205128;
-	float steepness = 1.5;
-
-	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Cos Angles
 	float cosViewSunAngle = dot(normalize(fragpos.rgb), sunVec);
@@ -174,7 +127,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 mieAtX = totalMie(primaryWavelengths, K, turbidity, v) * mieCoefficient;
 
 	float zenithAngle = max(0.0, cosUpViewAngle);
-	float sunAngle = max(0.0, cosSunUpAngle);
+	float sunAngle = max(0.0, cosSunUpAngle * 0.95 + 0.05);
 
 	float rayleighOpticalLength = rayleighZenithLength / zenithAngle;
 	float mieOpticalLength = mieZenithLength / zenithAngle;
@@ -184,10 +137,10 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 
 	vec3 Fex = exp(-(rayleighAtX * rayleighOpticalLength + mieAtX * mieOpticalLength));
 	vec3 Fex2 = vec3(exp(-(rayleighCoefficient * 0.00002853075 * rayleighOpticalLength + mieAtX * mieOpticalLength)));
-	vec3 FexMie = exp(-(mieAtX * mieOpticalLengthSun));
+	vec3 FexSun = exp(-(rayleighAtX * rayleighOpticalLengthSun + mieAtX * mieOpticalLengthSun)) * 2.0;
 
 	vec3 rayleighXtoEye = rayleighAtX * RayleighPhase(cosViewSunAngle);
-	vec3 mieXtoEye = mieAtX * hgPhase(cosViewSunAngle , mieDirectionalG) * FexMie;
+	vec3 mieXtoEye = mieAtX * hgPhase(cosViewSunAngle , mieDirectionalG) * FexSun;
 
 	vec3 totalLightAtX = rayleighAtX + mieAtX;
 	vec3 lightFromXtoEye = rayleighXtoEye + mieXtoEye;

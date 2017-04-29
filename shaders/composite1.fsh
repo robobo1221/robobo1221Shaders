@@ -82,6 +82,8 @@ uniform int worldTime;
 uniform float far;
 uniform float near;
 
+const float pi = 3.141592653589793238462643383279502884197169;
+
 float comp = 1.0-near/far/far;
 
 float timefract = worldTime;
@@ -186,6 +188,7 @@ float ld(float dist) {
 
 #include "lib/noise.glsl"
 #include "lib/waterBump.glsl"
+#include "lib/phases.glsl"
 #include "lib/skyGradient.glsl"
 #include "lib/calcClouds.glsl"
 #include "lib/calcStars.glsl"

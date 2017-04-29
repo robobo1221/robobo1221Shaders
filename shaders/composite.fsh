@@ -86,6 +86,8 @@ uniform float near;
 uniform int isEyeInWater;
 uniform int worldTime;
 
+const float pi = 3.141592653589793238462643383279502884197169;
+
 float comp = 1.0-near/far/far;
 
 float timefract = worldTime;
@@ -261,6 +263,7 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 #include "lib/nightDesat.glsl"
 #include "lib/shadingForward.glsl"
 #include "lib/gaux2Forward.glsl"
+#include "lib/phases.glsl"
 #include "lib/skyGradient.glsl"
 #include "lib/calcClouds.glsl"
 #include "lib/calcStars.glsl"
