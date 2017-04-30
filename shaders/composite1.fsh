@@ -352,7 +352,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 		vec3 fragposFog = vec3(pos.st, texture2D(gdepthtex, pos.st).r);
 		fragposFog = nvec3(gbufferProjectionInverse * nvec4(fragposFog * 2.0 - 1.0));
 		
-		float cosSunUpAngle = dot(sunVec, upVec) * 0.95 + 0.05; //Has a lower offset making it scatter when sun is below the horizon.
+		float cosSunUpAngle = dot(sunVec, upVec) * 0.9 + 0.1; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
 		
 		#ifdef NO_UNDERGROUND_FOG
@@ -435,6 +435,9 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 		  //Reinhard to prevent over exposure
 		      sunAngleCosine /= 1.0 + sunAngleCosine * 0.5; 
 
+		float cosSunUpAngle = dot(sunVec, upVec) * 0.85 + 0.15; //Has a lower offset making it scatter when sun is below the horizon.
+		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
+
 		float vlMult = 1.0;
 			vlMult = vlMult + (1.0 - getEyeBrightnessSmooth) * 4.0;
 			vlMult *= 1.0 + isEyeInWater;
@@ -457,7 +460,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 			 lightCol = lightCol * mix(1.0,VL_INTENSITY_MIDNIGHT, time[1].y);
 			
 		volumetricLightSample *= vlMult;
-		volumetricLightSample *= mix(0.1 * 0.2, 1.0, clamp(time[1].y,0.0,1.0));
+		volumetricLightSample *= mix(0.1 * 0.2, 1.0 * cosMoonUpAngle, clamp(time[1].y,0.0,1.0));
 
 		return pow(mix(pow(color, vec3(2.2)), pow(lightCol, vec3(2.2)), (volumetricLightSample * transition_fading) * (1.0 - rainStrength)), vec3(0.4545));
 	}

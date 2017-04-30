@@ -1,30 +1,3 @@
-float turbidity = 1.5;
-float rayleighCoefficient = 1.7;
-
-// constants for mie scattering
-const float mieCoefficient = 0.005;
-const float mieDirectionalG = 0.85;
-const float v = 4.0;
-
-// Wavelength of the primary colors RGB in nanometers.
-const vec3 primaryWavelengths = vec3(650, 550, 450) * 1.0E-9;
-
-float n = 1.00029; // refractive index of air
-float N = 2.54743E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
-float pn = 0.03;	// depolarization factor for standard air
-
-// optical length at zenith for molecules
-float rayleighZenithLength = 8.4E3 ;
-float mieZenithLength = 1.25E3;
-
-const vec3 K = vec3(0.686, 0.678, 0.666);
-
-float sunIntensity = 1000.0;
-
-// earth shadow hack
-float cutoffAngle = pi * 0.5128205128205128;
-float steepness = 1.5;
-
 float SunIntensity(float zenithAngleCos, float sunIntensity, float cutoffAngle, float steepness)
 {
 	return sunIntensity * max(0.0, 1.0 - exp(-((cutoffAngle - acos(zenithAngleCos))/steepness)));
@@ -113,9 +86,36 @@ vec3 getFakeRayLeigh(vec3 fragpos){
 
 vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 fogColor, out vec3 sunMax, out vec3 moonMax){
 
+	float turbidity = 1.5;
+	float rayleighCoefficient = 1.7;
+
+	// constants for mie scattering
+	const float mieCoefficient = 0.005;
+	const float mieDirectionalG = 0.85;
+	const float v = 4.0;
+
+	// Wavelength of the primary colors RGB in nanometers.
+	const vec3 primaryWavelengths = vec3(650, 550, 450) * 1.0E-9;
+
+	float n = 1.00029; // refractive index of air
+	float N = 2.54743E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
+	float pn = 0.03;	// depolarization factor for standard air
+
+	// optical length at zenith for molecules
+	float rayleighZenithLength = 8.4E3 ;
+	float mieZenithLength = 1.25E3;
+
+	const vec3 K = vec3(0.686, 0.678, 0.666);
+
+	float sunIntensity = 1000.0;
+
+	// earth shadow hack
+	float cutoffAngle = pi * 0.5128205128205128;
+	float steepness = 1.5;
+
 	// Cos Angles
 	float cosViewSunAngle = dot(normalize(fragpos.rgb), sunVec);
-	float cosSunUpAngle = dot(sunVec, upVec) * 0.95 + 0.05; //Has a lower offset making it scatter when sun is below the horizon.
+	float cosSunUpAngle = dot(sunVec, upVec) * 0.9 + 0.1; //Has a lower offset making it scatter when sun is below the horizon.
 	float cosUpViewAngle = dot(upVec, normalize(fragpos.rgb));
 
 	float sunE = SunIntensity(cosSunUpAngle, sunIntensity, cutoffAngle, steepness);  // Get sun intensity based on how high in the sky it is
