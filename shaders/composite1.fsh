@@ -38,10 +38,6 @@ const float inc = 2.2;			//increasement factor at each step
 
 varying vec4 texcoord;
 
-varying vec3 sunlight;
-varying vec3 ambientColor;
-varying vec3 moonlight;
-
 varying vec3 lightVector;
 varying vec3 sunVec;
 varying vec3 moonVec;
@@ -100,7 +96,7 @@ mat2 time = mat2(vec2(
 
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
 
-vec3 ambientlight = mix(ambientColor, vec3(0.2) * (1.0 - time[1].y * 0.97), rainStrength);
+#include "lib/lightColor.glsl"
 
 float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
