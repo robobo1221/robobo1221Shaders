@@ -125,7 +125,7 @@ float expDepth(float dist){
 }
 
 float getDepth(float depth) {
-    return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+    return (near * far) / (near * depth + (far * (1.0 - depth)));
 }
 
 #define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
@@ -337,7 +337,7 @@ vec3 getShading(vec3 color){
 					rSD.x += shadow2D(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh )).z;
 				#endif
 				
-				minDist = minDist + rSD.y;
+				minDist += rSD.y;
 		}
 
 			rSD.x /= weight;

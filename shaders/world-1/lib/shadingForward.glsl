@@ -13,5 +13,5 @@ vec3 getShadingForward(vec3 normal, vec3 color){
 		emissiveLightmap = getEmessiveGlow(color, handLightMult * emissiveLightColor, emissiveLightmap, hand);
 	#endif
 
-	return 0.01 * ambientlight + emissiveLightmap;
+	return MIN_LIGHT * ambientlight + emissiveLightmap;
 }
