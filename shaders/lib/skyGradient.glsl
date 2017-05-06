@@ -56,8 +56,8 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	float turbidity = 1.5;
-	float rayleighCoefficient = 1.7;
+	const float turbidity = 1.5;
+	const float rayleighCoefficient = 1.7;
 
 	// constants for mie scattering
 	const float mieCoefficient = 0.005;
@@ -67,21 +67,21 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	// Wavelength of the primary colors RGB in nanometers.
 	const vec3 primaryWavelengths = vec3(650, 550, 450) * 1.0E-9;
 
-	float n = 1.00029; // refractive index of air
-	float N = 2.54743E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
-	float pn = 0.03;	// depolarization factor for standard air
+	const float n = 1.00029; // refractive index of air
+	const float N = 2.54743E25; // number of molecules per unit volume for air at 288.15K and 1013mb (sea level -45 celsius)
+	const float pn = 0.03;	// depolarization factor for standard air
 
 	// optical length at zenith for molecules
-	float rayleighZenithLength = 8.4E3 ;
-	float mieZenithLength = 1.25E3;
+	const float rayleighZenithLength = 8.4E3 ;
+	const float mieZenithLength = 1.25E3;
 
 	const vec3 K = vec3(0.686, 0.678, 0.666);
 
-	float sunIntensity = 1000.0;
+	const float sunIntensity = 1000.0;
 
 	// earth shadow hack
 	float cutoffAngle = pi * 0.5128205128205128;
-	float steepness = 1.5;
+	const float steepness = 1.5;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -121,7 +121,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 scattering = sunE * (lightFromXtoEye / totalLightAtX);
 
 	vec3 sky = scattering * (1.0 - Fex);
-	sky *= mix(vec3(1.0),sqrt(scattering * Fex),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
+		 sky *= mix(vec3(1.0),sqrt(scattering * Fex),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
 
 	vec3 sun = K * calcSun(fragpos, sunVec);
 	vec3 moon = pow(moonlight, vec3(0.4545)) * calcMoon(fragpos, moonVec);
