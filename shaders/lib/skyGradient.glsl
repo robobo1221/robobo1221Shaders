@@ -17,14 +17,13 @@ vec3 Uncharted2Tonemap(vec3 x)
    return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
 
-vec3 ToneMap(vec3 color, vec3 sunPos) {
+vec3 ToneMap(vec3 color) {
     vec3 toneMappedColor;
 
     toneMappedColor = color * 0.04;
     toneMappedColor = Uncharted2Tonemap(toneMappedColor);
 
-    float sunfade = 1.0-clamp(1.0-exp(-(sunPos.z/500.0)),0.0,1.0);
-    toneMappedColor = pow(toneMappedColor,vec3(1.0/(1.2+(1.2*sunfade))));
+    toneMappedColor = pow(toneMappedColor,vec3(1.0/2.2));
 
     return toneMappedColor;
 }
@@ -132,7 +131,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 
 	moonMax += pow(clamp(cosUpViewAngle,0.0,1.0), 0.8) * (1.0 - rainStrength);
 
-	sky = max(ToneMap(sky, sunVec), 0.0) + (sun * sunMax + moon * moonMax) * sunMoonMult;
+	sky = max(ToneMap(sky), 0.0) + (sun * sunMax + moon * moonMax) * sunMoonMult;
 
 	float nightLightScattering = pow(max(1.0 - max(cosUpViewAngle, 0.0 ),0.0), 2.0);
 

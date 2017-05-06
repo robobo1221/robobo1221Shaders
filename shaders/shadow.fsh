@@ -10,7 +10,21 @@ varying float isTransparent;
 uniform sampler2D tex;
 uniform sampler2D noisetex;
 
+uniform mat4 gbufferModelViewInverse;
+
+uniform vec3 sunPosition;
+
 uniform float frameTimeCounter;
+
+vec3 sunVec = normalize(sunPosition);
+
+vec3 nvec3(vec4 pos) {
+    return pos.xyz/pos.w;
+}
+
+vec4 nvec4(vec3 pos) {
+    return vec4(pos.xyz, 1.0);
+}
 
 #include "lib/noise.glsl"
 #include "lib/waterBump.glsl"

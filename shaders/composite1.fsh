@@ -15,7 +15,7 @@
 	#define NO_UNDERGROUND_FOG
 
 #define REFLECTIONS 														//All the reflections. including water, rain and specular.
-	#define REFLECTION_STRENGTH 0.75 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
+	#define REFLECTION_STRENGTH 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 #define WATER_REFLECTION
 #define RAIN_REFLECTION
 
@@ -363,7 +363,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 
 		float fog = 1.0 - exp(-pow(sqrt(dot(fragposFog,fragposFog))
 		* mix(
-		mix(1.0 / 1200.0 * FOG_DENSITY_DAY, 1.0 / 120.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
+		mix(1.0 / 1200.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
 		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength) * fogAdaption,2.0));
 		
 		fog = clamp(fog, 0.0, 1.0);
@@ -460,7 +460,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 			 lightCol = lightCol * mix(1.0,VL_INTENSITY_MIDNIGHT, time[1].y);
 			
 		volumetricLightSample *= vlMult;
-		volumetricLightSample *= mix(0.1 * 0.2, 1.0 * cosMoonUpAngle, clamp(time[1].y,0.0,1.0));
+		volumetricLightSample *= mix(0.02, 0.5 * cosMoonUpAngle, clamp(time[1].y,0.0,1.0));
 
 		return pow(mix(pow(color, vec3(2.2)), pow(lightCol, vec3(2.2)), (volumetricLightSample * transition_fading) * (1.0 - rainStrength)), vec3(0.4545));
 	}
@@ -510,7 +510,7 @@ float getWaterScattering(float NdotL){
 			 fogColor = mix(fogColor, (fogColor * lightCol) * 6.0,(sunAngleCosine * shadows) * (transition_fading * (1.0 - pow(max(NdotL,0.0), 2.0))) * (1.0 - rainStrength));
 			 fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), (pow((1.0 - depthFog), 0.75) * (1.0 - rainStrength)) * 20.0);
 			 
-		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.8);
+		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.5);
 
 		return mix(color, fogColor, depthFog);
 	}
@@ -527,7 +527,7 @@ float getWaterScattering(float NdotL){
 		vec3 fogColor = (ambientlight * lightCol) * 0.0333;
 		     fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), pow((1.0 - depthFog), 0.75) * 8.0 * (1.0 - rainStrength));
 
-		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.8);
+		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.5);
 
 		return mix(color,fogColor, depthFog);
 	}
@@ -598,8 +598,6 @@ float getWaterScattering(float NdotL){
 		#ifdef FOG
 			color.rgb = getFog(ambientlight, color.rgb, pos.st, float(land));
 		#endif
-
-		color.rgb *= fresnel;
 		
 		color.rgb = land ? color.rgb : fogColor;
 		color.a *= border;
@@ -641,18 +639,19 @@ float getWaterScattering(float NdotL){
 			float puddles = 1.0;
 		#endif
 
-		float F0 				= 0.05;
+		const float F0 = 0.05;
+
 		vec3 halfVector = normalize(reflectedVector + normalize(-fragpos.rgb));
-		float LdotH			= clamp(dot(reflectedVector, halfVector),0.0,1.0);
-		float fresnel 	= F0 + (1.0 - F0) * pow(1.0 - LdotH, 5.0);
+		float LdotH	= clamp(dot(reflectedVector, halfVector),0.0,1.0);
+		float fresnel = F0 + (1.0 - F0) * pow(1.0 - LdotH, 5.0);
 
 		vec3 sunMult = vec3(0.0);
 		vec3 moonMult = vec3(0.0);
 		
 		float reflectionMask = clamp(iswater + istransparent, 0.0 ,1.0);
 
-		vec3 sky = getSkyReflection(reflectedVector, sunMult, moonMult) * fresnel;
-		sky += pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2)) * shadows;
+		vec3 sky = getSkyReflection(reflectedVector, sunMult, moonMult);
+		sky += pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2)) * shadows / fresnel;
 
 		vec4 reflection = raytrace(fragpos.rgb, reflectedVector, fresnel, sky);
 		reflection.rgb = mix(sky * smoothstep(0.5,0.9,mix(aux.b, aux2.b, clamp(iswater + istransparent + hand, 0.0 ,1.0))), reflection.rgb, reflection.a);
@@ -662,7 +661,7 @@ float getWaterScattering(float NdotL){
 		reflection.rgb *= (1.0 - hand);
 		
 		#ifdef WATER_REFLECTION
-			color.rgb += reflection.rgb * reflectionMask * (1.0 - isEyeInWater) * REFLECTION_STRENGTH * (1.0 - specMap);
+			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * (1.0 - isEyeInWater) * REFLECTION_STRENGTH * (1.0 - specMap));
 		#endif
 		
 		reflection.rgb = reflection.rgb * wetness * 0.75 * iswet;
@@ -723,32 +722,6 @@ void main()
 	#ifdef VOLUMETRIC_LIGHT
 		color = getVolumetricLight(color, texcoord.st);
 	#endif
-	
-	//color *= mix(vec3(1.0), vec3(100.0), pow(dot(color, vec3(0.33333)), 2.2));
-
-	/*
-		const vec2 Offsets[8] = vec2[8](
-								vec2(1.0, 0.0),
-								vec2(0.0, 1.0),
-								vec2(-1.0, 0.0),
-								vec2(0.0,-1.0),
-								vec2(0.5, 0.5),
-								vec2(-0.5, 0.5),
-								vec2(0.5, -0.5),
-								vec2(-0.5, -0.5));
-
-	float ofsetDepth = 0.0;
-	
-	for (int i = 0; i < 8; i++){
-		ofsetDepth += texture2D(gdepthtex, texcoord.st + vec2(Offsets[i].x / viewWidth, Offsets[i].y / viewHeight) * 50.0 * (1.0 - ld(pixeldepth))).x / 8.0;
-	}
-
-		float errorCheck = pow(pixeldepth, 1.0) - pow(ofsetDepth, 1.0);
-
-		float aoMask = clamp(1.0 - clamp(abs(errorCheck * 2.0 - 1.0),0.0,1.0) * 1.0 - 0.005 * (1.0 - clamp(ld(pixeldepth) * 10000.0,0.0,1.0)), 0.0, 1.0);
-
-		color *= 1.0 - clamp(vec3(errorCheck * 100.0 * (1.0 - min(aoMask * 10.0, 1.0))), 0.0, 1.0);
-	*/
 	
 	color = pow(color, vec3(0.4545));
 

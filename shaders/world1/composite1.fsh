@@ -15,7 +15,7 @@
 	#define NO_UNDERGROUND_FOG
 
 #define REFLECTIONS 														//All the reflections. including water, rain and specular.
-	#define REFLECTION_STRENGTH 0.75 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
+	#define REFLECTION_STRENGTH 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 #define WATER_REFLECTION
 #define RAIN_REFLECTION
 
