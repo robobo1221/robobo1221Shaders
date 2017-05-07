@@ -146,7 +146,7 @@ vec4 getFragpos(vec2 pos, float depth){
 }
 
 vec4 fragpos = getFragpos(texcoord.st, pixeldepth);
-vec4 uPos = normalize(fragpos);
+vec3 uPos = normalize(fragpos.rgb);
 
 vec4 getFragpos2(vec2 pos, float depth){
 
@@ -711,7 +711,7 @@ void main()
 		if (land > 0.9) color = getFog(ambientlight, color, texcoord.st, land);
 	#endif
 
-	//color = getVolumetricClouds(color, refTexC.st);
+	color = getVolumetricClouds(color, refTexC.st);
 
 	#ifdef UNDERWATER_FOG
 		if (isEyeInWater > 0.9) color = underwaterFog(color);

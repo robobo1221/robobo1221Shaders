@@ -21,7 +21,7 @@ const float		sunPathRotation				= -40.0; //[-50.0 -40.0 -30.0 -20.0 -10.0 0.0 10
 
 const float 	ambientOcclusionLevel 		= 0.5; //[0.0 0.25 0.5 0.75 1.0]
 
-const float		eyeBrightnessHalflife		= 7.0; //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0]
+const float		eyeBrightnessHalflife		= 16.0; //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 16.0 18.0 20.0 24.0 28.0 32.0 ]
 
 const int 		R11F_G11F_B10F				= 0;
 const int 		RGBA16						= 0;
@@ -183,7 +183,7 @@ vec4 getFragpos(){
 }
 
 vec4 fragpos = getFragpos();
-vec4 uPos = normalize(fragpos);
+vec3 uPos = normalize(fragpos.rgb);
 
 vec4 getFragpos2(){
 
@@ -263,7 +263,10 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 #include "lib/calcStars.glsl"
 
 float getSubSurfaceScattering(){
-	return (clamp(pow(dot(uPos.xyz, lightVector), 12.0),0.0,1.0) * transition_fading) * 3.0;
+	float cosV = clamp(dot(uPos.xyz, lightVector), 0.0, 1.0);
+		  cosV = 1.0 / sqrt(1.0 - cosV) - 1.0;
+
+	return cosV;
 }
 
 vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
@@ -455,9 +458,9 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 	}
 }
 
-vec4 getVolumetricClouds(){
+vec4 getVolumetricClouds(vec3 color){
 
-	vec4 clouds = vec4(0.0);
+	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
 	float nearPlane = 1.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
@@ -520,5 +523,5 @@ void main()
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
 	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
-	//gl_FragData[2] = vec4(getVolumetricClouds());
+	gl_FragData[2] = vec4(getVolumetricClouds(color));
 }
