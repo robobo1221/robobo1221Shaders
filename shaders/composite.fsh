@@ -147,7 +147,7 @@ float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 
 	float lightmap = aux.r;
 	
-	lightmap		= pow(lightmap, 2.0);
+	lightmap		= pow(lightmap, 2.0 * EMISSIVE_LIGHT_ATTEN);
 	lightmap 		= 1.0 / (1.0 - lightmap) - 1.0;
 	lightmap 		= clamp(lightmap, 0.0, 100000.0);
 	
@@ -156,7 +156,7 @@ float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 	lightmap		= isForwardRendered ? lightmap * (1.0 - emissive) + emissive : lightmap; //Prevent glowstone and all emissive stuff to clip with the lightmap
 	lightmap		= isForwardRendered ? lightmap * (1.0 - handLightMult * hand) + handLightMult * hand : lightmap; //Also do this to the hand
 
-	return lightmap;
+	return lightmap * EMISSIVE_LIGHT_MULT;
 }
 
 float getSkyLightmap(){

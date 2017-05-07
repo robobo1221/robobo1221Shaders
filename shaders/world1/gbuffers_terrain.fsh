@@ -33,12 +33,6 @@ uniform vec3 upPosition;
 uniform float wetness;
 uniform float frameTimeCounter;
 
-#include "lib/terrainBump.glsl"
-
-#ifdef RAIN_PUDDLES
-	#include "lib/rainPuddles.glsl"
-#endif
-
 const float mincoord = 1.0/4096.0;
 
 vec2 dcdx = dFdx(vtexcoord.st*vtexcoordam.pq);
@@ -88,14 +82,9 @@ void main(){
 
 	vec2 posxz = wpos.xz - wpos.y;
 	
-	#ifdef RAIN_PUDDLES
-		float rainpuddles = getRainPuddles(wpos) * smoothstep(0.8,0.9,lightmaps.y) * clamp(dot(normalize(upPosition), normal),0.0,1.0);
-	#else
-		float rainpuddles = 1.0;
-	#endif
 
 	vec4 albedo = texture2D(texture, adjustedTexCoord.st) * color;
-	vec3 bump = (texture2D(normals, adjustedTexCoord.st).rgb * 2.0 - 1.0);
+	vec3 bump = texture2D(normals, adjustedTexCoord.st).rgb * 2.0 - 1.0;
 	
 	#ifdef SPECULAR_MAPPING
 		vec3 specularity = texture2DGradARB(specular, adjustedTexCoord, dcdx, dcdy).rgb;
@@ -104,11 +93,9 @@ void main(){
 	#endif
 	float atten = 1.0-(specularity.g);
 	
-	float bumpmult = 0.75 * atten * (1.0 - clamp(rainpuddles * 1.25, 0.0, 1.0));
+	float bumpmult = 0.75 * atten;
 
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
-	
-	bump += getTerrainHeight(posxz) * 0.05 * rainpuddles;
 						  
 	vec4 normalTangentSpace = vec4(normalize(bump * tbnMatrix) * 0.5 + 0.5, 1.0);
 
