@@ -265,8 +265,9 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 float getSubSurfaceScattering(){
 	float cosV = clamp(dot(uPos.xyz, lightVector), 0.0, 1.0);
 		  cosV = 1.0 / sqrt(1.0 - cosV) - 1.0;
+		  cosV /= cosV * 0.01 + 1.0;
 
-	return cosV;
+	return clamp(cosV, 0.0, 90.0);
 }
 
 vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
@@ -419,7 +420,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 	//don't mind this stuff. It's still not done when it comes to coloring
 
 	const float height = 170.0;  	//Height of the clouds
-	const float distRatio = 140.0;  	//Distance between top and bottom of the cloud in block * 10.
+	const float distRatio = 100.0;  	//Distance between top and bottom of the cloud in block * 10.
 
 	float maxHeight = (distRatio * 0.5) + height;
 	float minHeight = height - (distRatio * 0.5);
@@ -434,7 +435,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 			//Reinhard to prevent over exposure
 			sunViewCos /= 1.0 + sunViewCos * 0.01; 
 
-		float sunUpCos = clamp(smoothstep(0.0175,0.05,dot(sunVec, upVec)), 0.0, 1.0);
+		float sunUpCos = clamp(smoothstep(0.0175,0.05,dot(sunVec, upVec) * 0.95 + 0.05), 0.0, 1.0);
 
 		float cloudAlpha = getVolumetricCloudNoise(wpos);
 		float cloudTreshHold = pow(1.0f - clamp(distance(wpos.y, height) / (distRatio / 2.0f), 0.0f, 1.0f), 12.0);
@@ -475,7 +476,7 @@ vec4 getVolumetricClouds(vec3 color){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
 		vec4 result = getVolumetricCloudsColor(wpos.rgb);
-			 result.a = clamp(result.a * 1000.0, 0.0, 1.0);
+			 result.a = clamp(result.a * 4000.0, 0.0, 1.0);
 
 		float volumetricDistance = length((wpos.xyz - cameraPosition.xyz));
 
