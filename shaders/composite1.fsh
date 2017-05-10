@@ -717,11 +717,11 @@ void main()
 		color = getVolumetricClouds(color, refTexC.st);
 	#endif
 
+	color = renderGaux4(color);
+
 	#ifdef UNDERWATER_FOG
 		if (isEyeInWater > 0.9) color = underwaterFog(color);
 	#endif
-
-	color = renderGaux4(color);
 
 	#ifdef VOLUMETRIC_LIGHT
 		color = getVolumetricLight(color, texcoord.st);
