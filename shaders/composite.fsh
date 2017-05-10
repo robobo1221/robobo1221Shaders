@@ -359,6 +359,8 @@ float getVolumetricRays(){
 
 #endif
 
+#ifdef VOLUMETRIC_CLOUDS
+
 vec4 mod289(vec4 x){return x - floor(x * 0.003460) * 289.0;}
 vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
 
@@ -390,12 +392,12 @@ float getVolumetricCloudNoise(vec3 p){
 
 	p.xz += wind;
 	
-	p *= 0.0002;
-	p = fract(p) * 100.0;
+	p *= 0.02;
 
 	float noise = noise3D(vec3(p.x - wind * 0.01, p.y, p.z - wind * 0.015));
 		  noise += noise3D(p * 3.5) / 3.5;
 		  noise += abs(noise3D(p * 6.125) * 2.0 - 1.0) / 6.125;
+		  noise += abs(noise3D(p * 6.125 * 2.0) * 2.0 - 1.0) / 6.125 / 2.0;
 
 		  noise = noise * (1.0 - rainStrength * 0.5);
 		  noise = pow(max(1.0 - noise * 1.5,0.),2.0) * 0.0303030;
@@ -476,16 +478,16 @@ vec4 getVolumetricClouds(vec3 color){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
 		vec4 result = getVolumetricCloudsColor(wpos.rgb);
-			 result.a = clamp(result.a * 4000.0, 0.0, 1.0);
+			 result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
-		float volumetricDistance = length((wpos.xyz - cameraPosition.xyz));
+		float volumetricDistance = length(wpos.xyz - cameraPosition.xyz);
 
-		if (sqrt(dot(worldPosition2, worldPosition2)) < volumetricDistance){
+		if (length(worldPosition2) < volumetricDistance ){
 			result.a = 0.0;
 		}
 
-		clouds.rgb = mix(clouds.rgb, result.rgb, result.a);
-		clouds.a += result.a;
+		clouds.rgb = mix(clouds.rgb, result.rgb, min(result.a * VOLUMETRIC_CLOUDS_DENSITY, 1.0));
+		clouds.a += result.a * VOLUMETRIC_CLOUDS_DENSITY;
 
 		farPlane -= increment;
 
@@ -494,6 +496,7 @@ vec4 getVolumetricClouds(vec3 color){
 	return clouds;
 }
 
+#endif
 
 void main()
 {
@@ -524,5 +527,8 @@ void main()
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
 	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
-	gl_FragData[2] = vec4(getVolumetricClouds(color));
+
+	#ifdef VOLUMETRIC_CLOUDS
+		gl_FragData[2] = vec4(getVolumetricClouds(color));
+	#endif
 }
