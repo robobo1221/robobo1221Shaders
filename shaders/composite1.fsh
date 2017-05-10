@@ -656,7 +656,7 @@ float getWaterScattering(float NdotL){
 		vec4 reflection = raytrace(fragpos.rgb, reflectedVector, fresnel, sky);
 		reflection.rgb = mix(sky * smoothstep(0.5,0.9,mix(aux.b, aux2.b, clamp(iswater + istransparent + hand, 0.0 ,1.0))), reflection.rgb, reflection.a);
 		
-		color.rgb += reflection.rgb * specMap * 0.5;
+		color.rgb = mix(color.rgb, reflection.rgb, fresnel * specMap * 0.5);
 		
 		reflection.rgb *= (1.0 - hand);
 		
@@ -664,15 +664,12 @@ float getWaterScattering(float NdotL){
 			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * (1.0 - isEyeInWater) * REFLECTION_STRENGTH * (1.0 - specMap));
 		#endif
 		
-		reflection.rgb = reflection.rgb * wetness * 0.75 * iswet;
-		
 		#if defined RAIN_REFLECTION && defined RAIN_PUDDLES
 			color.rgb *= mix(1.0,clamp(max(1.0 - puddles * 2.0,0.0) + 0.4,0.0,1.0), iswet * pow(fresnel, 0.3) * (1.0 - specMap) * wetness * (1.0 - hand));
-			reflection.rgb = reflection.rgb * min(pow(puddles, 3.0),1.0);
 		#endif
 
 		#ifdef RAIN_REFLECTION
-			color += reflection.rgb * (1.0 - reflectionMask);
+			color = mix(color, reflection.rgb, (1.0 - reflectionMask) * (wetness * 0.75) * (iswet * min(pow(puddles, 3.0),1.0)) * fresnel);
 		#endif
 
 		return color;
