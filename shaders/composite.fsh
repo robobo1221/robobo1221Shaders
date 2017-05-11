@@ -463,7 +463,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 vec4 getVolumetricClouds(vec3 color){
 
-	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
+	vec4 clouds = vec4(color, 0.0);
 
 	float nearPlane = 1.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
@@ -519,6 +519,8 @@ void main()
 			color = getClouds(color, fragpos2.rgb, land, 3);
 		#endif
 	}
+
+	vec4 VolumetricClouds = getVolumetricClouds(color);
 	
 	color = renderGaux2(color, normal2);
 
@@ -529,6 +531,6 @@ void main()
 	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
 
 	#ifdef VOLUMETRIC_CLOUDS
-		gl_FragData[2] = vec4(getVolumetricClouds(color));
+		gl_FragData[2] = vec4(renderGaux2(VolumetricClouds.rgb, normal2), VolumetricClouds.a);
 	#endif
 }
