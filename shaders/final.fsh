@@ -9,6 +9,9 @@
 	
 #define SCREEN_REFRACTION //Refracts the sceen underwater and when rain is hitting the camera.
 	#define SCREEN_REFRACTION_MULT 1.0 //[0.5 1.0 1.5 2.0]
+
+//#define LENS_FLARE
+	#define LENS_FLARE_MULT 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 	
 #define BRIGHTNESS 1.0 //[0.0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 #define GAMMA 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
@@ -250,6 +253,8 @@ vec3 toClipSpace(vec3 p)
 	return clipSpace.rgb;
 }
 
+#ifdef LENS_FLARE
+
 vec3 getflare(vec2 uv, vec2 lPos, vec3 col, float d, float r, float h, bool ring){
 
 	vec2 lVec = mix(lPos, vec2(0.5) / vec2(1.0,aspectRatio), d);
@@ -268,7 +273,9 @@ vec3 getLensFlare(vec2 uv){
 
 	const float lensFlareMult = 2.0f;
 
-	vec3 lVecVP = mix(normalize(sunPosition), normalize(-sunPosition), 1.0 - float((worldTime < 12700 || worldTime > 23250)));
+	float nightTime = 1.0 - float(worldTime < 12700 || worldTime > 23250);
+
+	vec3 lVecVP = mix(normalize(sunPosition), normalize(-sunPosition), nightTime);
 	float positionTreshHold = 1.0 - clamp(lVecVP.z/abs(lVecVP.z),0.0,1.0);
 
 	vec2 screenCorrection = vec2(1.0,aspectRatio);
@@ -288,30 +295,33 @@ vec3 getLensFlare(vec2 uv){
 
 	///////////////////////////////////LensFlares////////////////////////////////////////
 
-	//lens += getflare(uv, lPos, vec3(1.0, 0.5, 0.2), 2.0, 50.0, 20.0, false);
+	if (nightTime < 0.9) {
 
-	vec3 halfShapeColorA = vec3(1.0, 0.5, 0.0);
+		vec3 halfShapeColorA = vec3(1.0, 0.5, 0.0);
 
-	vec3 a0 = getflare(uv, lPos, halfShapeColorA, 1.9, 5.5, 0.7, false);
-	vec3 a1 = getflare(uv, lPos, halfShapeColorA, 1.75, 5.5, 1.0, false);
-	lens += max(a0 - a1, 0.0);
+		vec3 a0 = getflare(uv, lPos, halfShapeColorA, 1.9, 5.5, 0.7, false);
+		vec3 a1 = getflare(uv, lPos, halfShapeColorA, 1.75, 5.5, 1.0, false);
+		lens += max(a0 - a1, 0.0);
 
-	lens += getflare(uv, lPos, vec3(1.0, 0.0, 1.0) * 0.2, 1.6, 5.0, 1.0, false);
-	lens += getflare(uv, lPos, vec3(0.1, 0.0, 1.0), 1.5, 50.0, 2.0, false);
-	lens += getflare(uv, lPos, vec3(1.0, 0.25, 0.0) * 0.5, 1.45, 100.0, 2.0, false);
-	lens += getflare(uv, lPos, vec3(0.0, 0.25, 1.0) * 0.5, 1.4, 200.0, 2.0, false);
+		lens += getflare(uv, lPos, vec3(1.0, 0.0, 1.0) * 0.2, 1.6, 5.0, 1.0, false);
+		lens += getflare(uv, lPos, vec3(0.1, 0.0, 1.0), 1.5, 50.0, 2.0, false);
+		lens += getflare(uv, lPos, vec3(1.0, 0.25, 0.0) * 0.5, 1.45, 100.0, 2.0, false);
+		lens += getflare(uv, lPos, vec3(0.0, 0.25, 1.0) * 0.5, 1.4, 200.0, 2.0, false);
 
-	vec3 ring = getflare(uv, lPos, vec3(1.0, 0.0, 0.0), 0.0, 2.5, 1.0, true);
-		 ring += getflare(uv, lPos, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * sqrt(0.75), 1.0, true);
-		 ring += getflare(uv, lPos, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * sqrt(0.5), 1.0, true);
-	lens += ring * 4.0;
+		vec3 ring = getflare(uv, lPos, vec3(1.0, 0.0, 0.0), 0.0, 2.5, 1.0, true);
+			ring += getflare(uv, lPos, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * sqrt(0.75), 1.0, true);
+			ring += getflare(uv, lPos, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * sqrt(0.5), 1.0, true);
+		lens += ring * 4.0;
+	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	lens *= (positionTreshHold * fading) * (lensFlareMask * lensFlareMult);
+	lens *= (positionTreshHold * fading) * (lensFlareMask * lensFlareMult) * LENS_FLARE_MULT;
 
 	return lens / (lens + 1.0);
 }
+
+#endif
 
 void main(){
 
@@ -326,8 +336,6 @@ void main(){
 	color.r *= RED_MULT;
 	color.g *= GREEN_MULT;
 	color.b *= BLUE_MULT;
-
-	
 	
 	color.rgb = pow(tonemap(pow(color.rgb, vec3(0.454545))), vec3(2.2));
 
@@ -337,7 +345,9 @@ void main(){
 
 	color = pow(color, vec3(0.4545));
 
-	color += getLensFlare(newTexcoord);
+	#ifdef LENS_FLARE
+		color += getLensFlare(newTexcoord);
+	#endif
 
 	gl_FragColor = vec4(color, 1.0);
 }

@@ -9,6 +9,9 @@
 	
 #define SCREEN_REFRACTION //Refracts the sceen underwater and when rain is hitting the camera.
 	#define SCREEN_REFRACTION_MULT 1.0 //[0.5 1.0 1.5 2.0]
+
+//#define LENS_FLARE
+	#define LENS_FLARE_MULT 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 	
 #define BRIGHTNESS 1.0 //[0.0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 #define GAMMA 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
