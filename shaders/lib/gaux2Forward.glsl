@@ -1,6 +1,6 @@
-vec3 renderGaux2(vec3 color, vec3 normal){
+vec3 renderGaux2(vec3 color, vec3 normal, out vec4 albedo){
 
-	vec4 albedo = texture2D(gaux2, texcoord.st);
+	albedo = texture2D(gaux2, texcoord.st);
 	#ifdef DYNAMIC_HANDLIGHT
 		albedo.rgb = getDesaturation(albedo.rgb, mix(forwardEmissive, min(handLightMult * 10.0, 1.0), hand));
 	#else

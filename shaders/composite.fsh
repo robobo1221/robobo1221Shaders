@@ -417,7 +417,7 @@ vec4 getVolumetricCloudPosition(vec2 coord, float depth)
 	return position;
 }
 
-vec4 getVolumetricCloudsColor(vec3 wpos, out float isInCloud){
+vec4 getVolumetricCloudsColor(vec3 wpos){
 
 	//don't mind this stuff. It's still not done when it comes to coloring
 
@@ -426,8 +426,6 @@ vec4 getVolumetricCloudsColor(vec3 wpos, out float isInCloud){
 
 	float maxHeight = (distRatio * 0.5) + height;
 	float minHeight = height - (distRatio * 0.5);
-
-	isInCloud = float(cameraPosition.y > minHeight && cameraPosition.y < maxHeight);
 
 	if (wpos.y < minHeight || wpos.y > maxHeight){
 		return vec4(0.0);
@@ -463,9 +461,9 @@ vec4 getVolumetricCloudsColor(vec3 wpos, out float isInCloud){
 	}
 }
 
-vec4 getVolumetricClouds(vec3 color, out float isInCloud){
+vec4 getVolumetricClouds(vec3 color, vec4 albedo){
 
-	vec4 clouds = vec4(color, 0.0);
+	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
 	float nearPlane = 1.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
@@ -479,13 +477,17 @@ vec4 getVolumetricClouds(vec3 color, out float isInCloud){
 	while (farPlane > nearPlane){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
-		vec4 result = getVolumetricCloudsColor(wpos.rgb, isInCloud);
+		vec4 result = getVolumetricCloudsColor(wpos.rgb);
 			 result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
 		float volumetricDistance = length(wpos.xyz - cameraPosition.xyz);
 
 		if (length(worldPosition2) < volumetricDistance ){
 			result.a = 0.0;
+		}
+
+		if (length(worldPosition) < volumetricDistance ){
+			 result.rgb = mix(result.rgb, result.rgb * albedo.rgb, pow(albedo.a, mix(0.25, 1.0, iswater)));
 		}
 
 		clouds.rgb = mix(clouds.rgb, result.rgb, min(result.a * VOLUMETRIC_CLOUDS_DENSITY, 1.0));
@@ -521,15 +523,13 @@ void main()
 			color = getClouds(color, fragpos2.rgb, land, 3);
 		#endif
 	}
-
-	float isInCloud = 0.0;
-
-	vec4 VolumetricClouds = getVolumetricClouds(color, isInCloud);
-		 if (isInCloud < 0.9) VolumetricClouds.rgb = renderGaux2(VolumetricClouds.rgb, normal2);
 	
-	color = renderGaux2(color, normal2);
+	vec4 gaux2Albedo = vec4(0.0);
+	color = renderGaux2(color, normal2, gaux2Albedo);
 
 	color = pow(color, vec3(0.4545));
+
+	vec4 VolumetricClouds = getVolumetricClouds(color, gaux2Albedo);
 	
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
