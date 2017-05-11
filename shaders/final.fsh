@@ -25,23 +25,30 @@ const bool gcolorMipmapEnabled = true;
 varying vec4 texcoord;
 
 uniform sampler2D gcolor;
-uniform sampler2D gdepthtex;
+uniform sampler2D depthtex1;
 uniform sampler2D composite;
 uniform sampler2D noisetex;
 
-uniform float frameTimeCounter;
+uniform vec3 sunPosition;
 
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float aspectRatio;
 
+uniform mat4 gbufferProjection;
+
 uniform float rainStrength;
+uniform float frameTimeCounter;
+
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform float far;
 uniform float near;
 
 uniform int isEyeInWater;
+uniform int worldTime;
+
+float transition_fading = 1.0-(clamp((worldTime-12000.0)/300.0,0.0,1.0)-clamp((worldTime-13000.0)/300.0,0.0,1.0) + clamp((worldTime-22000.0)/200.0,0.0,1.0)-clamp((worldTime-23400.0)/200.0,0.0,1.0));
 
 float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
 
@@ -213,8 +220,8 @@ vec3 reinhardTonemap(vec3 color)
 
 		float DoFGamma = 4.4;
 				//Calculate pixel Circle of Confusion that will be used for bokeh depth of field
-				float z = ld(texture2D(gdepthtex, vec2(newTexcoord.st)).r)*far;
-				float focus = ld(texture2D(gdepthtex, vec2(0.5)).r)*far;
+				float z = ld(texture2D(depthtex1, vec2(newTexcoord.st)).r)*far;
+				float focus = ld(texture2D(depthtex1, vec2(0.5)).r)*far;
 				float pcoc = min(abs(aperture * (focal * (z - focus)) / (z * (focus - focal)))*sizemult,(1.0 / viewWidth)*10.0);
 				vec4 sample = vec4(0.0);
 				vec3 bcolor = vec3(0.0);
@@ -234,6 +241,64 @@ vec3 reinhardTonemap(vec3 color)
 	}
 */
 
+vec3 toClipSpace(vec3 p)
+{
+	vec4 clipSpace = gbufferProjection * vec4(p, 1.0);
+		 clipSpace /= clipSpace.w;
+		 clipSpace = 0.5 * clipSpace + 0.5;
+
+	return clipSpace.rgb;
+}
+
+vec3 getflare(vec2 uv, vec3 col, float d, float r, float h, bool ring){
+
+	vec2 screenCorrection = vec2(1.0,aspectRatio);
+
+	vec3 clipSpaceSunPosition = toClipSpace(sunPosition);
+	vec2 lPos = clipSpaceSunPosition.xy / clipSpaceSunPosition.z;
+
+	float lensFlareMask = 1.0 - float(texture2D(depthtex1, lPos).x < 1.0);
+
+	lPos /= screenCorrection;
+
+	vec3 lVecVP = vec3(0.0);
+
+	lVecVP = mix(normalize(sunPosition), normalize(-sunPosition), 1.0 - float((worldTime < 12700 || worldTime > 23250)));
+
+	float positionTreshHold = 1.0 - clamp(lVecVP.z/abs(lVecVP.z),0.0,1.0);
+
+	vec2 clipPosition = uv / screenCorrection;
+	vec2 center = vec2(0.5) / screenCorrection;
+
+	vec2 lVector = mix(lPos, center, d);
+
+	float fading = 1.0 - distance(center * screenCorrection, lPos * screenCorrection);
+		  fading = clamp((fading * 10.0) - 5.0, 0.0, 1.0);
+
+	float lens = clamp(1.0 - distance(clipPosition, lVector), 0.0, 1.0);
+		  lens = ring ? max(pow(lens, r) - pow(lens, r * 5.0), 0.0) : pow(lens, r);
+		  lens = clamp((lens * h * 2.0) - 1.0*h, 0.0, 1.0);
+
+		  //Cubic filtering
+		  lens = lens*lens * (3.0 - (2.0 * lens));
+
+		  lens *= (fading * positionTreshHold) * lensFlareMask;
+
+	return col * lens;
+}
+
+vec3 getLensFlare(){
+	vec3 lens = vec3(0.0);
+
+	vec3 ring = getflare(newTexcoord, vec3(1.0, 0.0, 0.0), 0.0, 2.5, 1.0, true);
+		 ring += getflare(newTexcoord, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * sqrt(0.75), 1.0, true);
+		 ring += getflare(newTexcoord, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * sqrt(0.5), 1.0, true);
+
+	lens += ring * 3.0;
+
+
+	return lens;
+}
 
 void main(){
 
@@ -248,6 +313,8 @@ void main(){
 	color.r *= RED_MULT;
 	color.g *= GREEN_MULT;
 	color.b *= BLUE_MULT;
+
+	color += getLensFlare();
 	
 	color.rgb = pow(tonemap(pow(color.rgb, vec3(0.454545))), vec3(2.2));
 

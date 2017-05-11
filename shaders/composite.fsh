@@ -417,7 +417,7 @@ vec4 getVolumetricCloudPosition(vec2 coord, float depth)
 	return position;
 }
 
-vec4 getVolumetricCloudsColor(vec3 wpos){
+vec4 getVolumetricCloudsColor(vec3 wpos, out float isInCloud){
 
 	//don't mind this stuff. It's still not done when it comes to coloring
 
@@ -426,6 +426,8 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 	float maxHeight = (distRatio * 0.5) + height;
 	float minHeight = height - (distRatio * 0.5);
+
+	isInCloud = float(cameraPosition.y > minHeight && cameraPosition.y < maxHeight);
 
 	if (wpos.y < minHeight || wpos.y > maxHeight){
 		return vec4(0.0);
@@ -461,7 +463,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 	}
 }
 
-vec4 getVolumetricClouds(vec3 color){
+vec4 getVolumetricClouds(vec3 color, out float isInCloud){
 
 	vec4 clouds = vec4(color, 0.0);
 
@@ -477,7 +479,7 @@ vec4 getVolumetricClouds(vec3 color){
 	while (farPlane > nearPlane){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
-		vec4 result = getVolumetricCloudsColor(wpos.rgb);
+		vec4 result = getVolumetricCloudsColor(wpos.rgb, isInCloud);
 			 result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
 		float volumetricDistance = length(wpos.xyz - cameraPosition.xyz);
@@ -520,7 +522,10 @@ void main()
 		#endif
 	}
 
-	vec4 VolumetricClouds = getVolumetricClouds(color);
+	float isInCloud = 0.0;
+
+	vec4 VolumetricClouds = getVolumetricClouds(color, isInCloud);
+		 if (isInCloud < 0.9) VolumetricClouds.rgb = renderGaux2(VolumetricClouds.rgb, normal2);
 	
 	color = renderGaux2(color, normal2);
 
@@ -531,6 +536,6 @@ void main()
 	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
 
 	#ifdef VOLUMETRIC_CLOUDS
-		gl_FragData[2] = vec4(renderGaux2(VolumetricClouds.rgb, normal2), VolumetricClouds.a);
+		gl_FragData[2] = vec4(VolumetricClouds);
 	#endif
 }
