@@ -92,11 +92,8 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	float cosUpViewAngle = dot(upVec, uPos);
 
 	float sunE = SunIntensity(cosSunUpAngle, sunIntensity, cutoffAngle, steepness);  // Get sun intensity based on how high in the sky it is
-	
-	vec3 totalRayleigh = totalRayleigh(primaryWavelengths, n, N, pn);
 
-	vec3 rayleighAtX = totalRayleigh * rayleighCoefficient;
-
+	vec3 rayleighAtX = totalRayleigh(primaryWavelengths, n, N, pn) * rayleighCoefficient;
 	vec3 mieAtX = totalMie(primaryWavelengths, K, turbidity, v) * mieCoefficient;
 
 	float zenithAngle = max(0.0, cosUpViewAngle);

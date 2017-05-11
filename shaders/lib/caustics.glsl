@@ -8,8 +8,10 @@
 			  caustics = caustics * 0.1 + 0.9;
 			  caustics = clamp(caustics, 0.0, 1.0);
 			  caustics = pow(caustics, 8.0) * 20.0;
+			  caustics *= CAUSTIC_MULT;
+			  caustics = (caustics * 0.25) + 0.75;
 
-		return vec3(1.0 + (caustics * CAUSTIC_MULT));
+		return vec3(caustics);
 	}
 
 	#else
@@ -22,8 +24,10 @@
 			  caustics = caustics * 0.1 + 0.9;
 			  caustics = clamp(caustics, 0.0, 1.0);
 			  caustics = pow(caustics, 8.0) * 20.0;
+			  caustics *= (0.5 * CAUSTIC_MULT) * (mix(iswater * land2, 1.0 - (iswater + istransparent), isEyeInWater) * (1.0 - time[1].y * 0.5));
+			  caustics = mix(caustics, 1.0, 0.75 + 0.25 * (1.0 - mix(iswater, land, isEyeInWater)));
 
-		return color + (color * caustics) * (0.5 * CAUSTIC_MULT) * (mix(iswater * land2, 1.0 - (iswater + istransparent), isEyeInWater) * (1.0 - time[1].y * 0.5));
+		return color * caustics;
 	}
 	#endif
 #endif
