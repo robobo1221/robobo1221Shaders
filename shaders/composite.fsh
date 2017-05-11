@@ -380,10 +380,10 @@ float noise3D(vec3 p){
     vec4 o1 = fract(k3 * 0.02439024390243902439024390243902);
     vec4 o2 = fract(k4 * 0.02439024390243902439024390243902);
 
-    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
-    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+    vec4 o3 = (o2 * d.z) + (o1 * (1.0 - d.z));
+    vec2 o4 = (o3.yw * d.x) + (o3.xz * (1.0 - d.x));
 
-    return o4.y * d.y + o4.x * (1.0 - d.y);
+    return (o4.y * d.y) + (o4.x * (1.0 - d.y));
 }
 
 float getVolumetricCloudNoise(vec3 p){
@@ -465,7 +465,7 @@ vec4 getVolumetricClouds(vec3 color, vec4 albedo){
 
 	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
-	float nearPlane = 1.0;			//start to where the ray should march.
+	float nearPlane = 2.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
 
     float increment = far / 10.0;
@@ -536,6 +536,6 @@ void main()
 	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
 
 	#ifdef VOLUMETRIC_CLOUDS
-		gl_FragData[2] = vec4(VolumetricClouds);
+		gl_FragData[2] = vec4(VolumetricClouds) / MAX_COLOR_RANGE;
 	#endif
 }

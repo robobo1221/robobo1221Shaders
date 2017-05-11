@@ -250,54 +250,67 @@ vec3 toClipSpace(vec3 p)
 	return clipSpace.rgb;
 }
 
-vec3 getflare(vec2 uv, vec3 col, float d, float r, float h, bool ring){
+vec3 getflare(vec2 uv, vec2 lPos, vec3 col, float d, float r, float h, bool ring){
 
-	vec2 screenCorrection = vec2(1.0,aspectRatio);
+	vec2 lVec = mix(lPos, vec2(0.5) / vec2(1.0,aspectRatio), d);
 
-	vec3 clipSpaceSunPosition = toClipSpace(sunPosition);
-	vec2 lPos = clipSpaceSunPosition.xy / clipSpaceSunPosition.z;
-
-	float lensFlareMask = 1.0 - float(texture2D(depthtex1, lPos).x < 1.0);
-
-	lPos /= screenCorrection;
-
-	vec3 lVecVP = vec3(0.0);
-
-	lVecVP = mix(normalize(sunPosition), normalize(-sunPosition), 1.0 - float((worldTime < 12700 || worldTime > 23250)));
-
-	float positionTreshHold = 1.0 - clamp(lVecVP.z/abs(lVecVP.z),0.0,1.0);
-
-	vec2 clipPosition = uv / screenCorrection;
-	vec2 center = vec2(0.5) / screenCorrection;
-
-	vec2 lVector = mix(lPos, center, d);
-
-	float fading = 1.0 - distance(center * screenCorrection, lPos * screenCorrection);
-		  fading = clamp((fading * 10.0) - 5.0, 0.0, 1.0);
-
-	float lens = clamp(1.0 - distance(clipPosition, lVector), 0.0, 1.0);
+	float lens = clamp(1.0 - distance(uv, lVec), 0.0, 1.0);
 		  lens = ring ? max(pow(lens, r) - pow(lens, r * 5.0), 0.0) : pow(lens, r);
 		  lens = clamp((lens * h * 2.0) - 1.0*h, 0.0, 1.0);
 
 		  //Cubic filtering
 		  lens = lens*lens * (3.0 - (2.0 * lens));
 
-		  lens *= (fading * positionTreshHold) * lensFlareMask;
-
 	return col * lens;
 }
 
-vec3 getLensFlare(){
+vec3 getLensFlare(vec2 uv){
+
+	const float lensFlareMult = 2.0f;
+
+	vec3 lVecVP = mix(normalize(sunPosition), normalize(-sunPosition), 1.0 - float((worldTime < 12700 || worldTime > 23250)));
+	float positionTreshHold = 1.0 - clamp(lVecVP.z/abs(lVecVP.z),0.0,1.0);
+
+	vec2 screenCorrection = vec2(1.0,aspectRatio);
+	uv /= screenCorrection;
+
+	vec3 clipSpaceSunPosition = toClipSpace(sunPosition);
+	vec2 lPos = clipSpaceSunPosition.xy / clipSpaceSunPosition.z;
+
+	float lensFlareMask = 1.0 - float(texture2D(depthtex1, lPos).x < 1.0);
+
+	float fading = 1.0 - distance(vec2(0.5), lPos);
+		  fading = clamp((fading * 10.0) - 5.0, 0.0, 1.0);
+
+	lPos /= screenCorrection;
+
 	vec3 lens = vec3(0.0);
 
-	vec3 ring = getflare(newTexcoord, vec3(1.0, 0.0, 0.0), 0.0, 2.5, 1.0, true);
-		 ring += getflare(newTexcoord, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * sqrt(0.75), 1.0, true);
-		 ring += getflare(newTexcoord, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * sqrt(0.5), 1.0, true);
+	///////////////////////////////////LensFlares////////////////////////////////////////
 
-	lens += ring * 3.0;
+	//lens += getflare(uv, lPos, vec3(1.0, 0.5, 0.2), 2.0, 50.0, 20.0, false);
 
+	vec3 halfShapeColorA = vec3(1.0, 0.5, 0.0);
 
-	return lens;
+	vec3 a0 = getflare(uv, lPos, halfShapeColorA, 1.9, 5.5, 0.7, false);
+	vec3 a1 = getflare(uv, lPos, halfShapeColorA, 1.75, 5.5, 1.0, false);
+	lens += max(a0 - a1, 0.0);
+
+	lens += getflare(uv, lPos, vec3(1.0, 0.0, 1.0) * 0.2, 1.6, 5.0, 1.0, false);
+	lens += getflare(uv, lPos, vec3(0.1, 0.0, 1.0), 1.5, 50.0, 2.0, false);
+	lens += getflare(uv, lPos, vec3(1.0, 0.25, 0.0) * 0.5, 1.45, 100.0, 2.0, false);
+	lens += getflare(uv, lPos, vec3(0.0, 0.25, 1.0) * 0.5, 1.4, 200.0, 2.0, false);
+
+	vec3 ring = getflare(uv, lPos, vec3(1.0, 0.0, 0.0), 0.0, 2.5, 1.0, true);
+		 ring += getflare(uv, lPos, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * sqrt(0.75), 1.0, true);
+		 ring += getflare(uv, lPos, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * sqrt(0.5), 1.0, true);
+	lens += ring * 4.0;
+
+	//////////////////////////////////////////////////////////////////////////////////////
+
+	lens *= (positionTreshHold * fading) * (lensFlareMask * lensFlareMult);
+
+	return lens / (lens + 1.0);
 }
 
 void main(){
@@ -314,7 +327,7 @@ void main(){
 	color.g *= GREEN_MULT;
 	color.b *= BLUE_MULT;
 
-	color += getLensFlare();
+	
 	
 	color.rgb = pow(tonemap(pow(color.rgb, vec3(0.454545))), vec3(2.2));
 
@@ -323,6 +336,8 @@ void main(){
 	#endif
 
 	color = pow(color, vec3(0.4545));
+
+	color += getLensFlare(newTexcoord);
 
 	gl_FragColor = vec4(color, 1.0);
 }

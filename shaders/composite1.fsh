@@ -680,7 +680,7 @@ float getWaterScattering(float NdotL){
 
 #ifdef VOLUMETRIC_CLOUDS
 	vec3 getVolumetricClouds(vec3 color, vec2 uv){
-		vec4 sample = texture2DLod(gaux2, uv, 1.75);
+		vec4 sample = texture2DLod(gaux2, uv, 1.75) * MAX_COLOR_RANGE;
 
 		return pow(mix(pow(color, vec3(2.2)), pow(sample.rgb, vec3(2.2)), clamp(sample.a * 1.001, 0.0, 1.0)), vec3(0.4545));
 	}
@@ -702,16 +702,16 @@ void main()
 		color = getWaterDepthFog(color, fragposRef.rgb, fragposRef2.rgb);
 	#endif
 
+	#ifdef VOLUMETRIC_CLOUDS
+		color = getVolumetricClouds(color, refTexC.st);
+	#endif
+
 	#ifdef REFLECTIONS
 		if (land > 0.9) color = getReflection(color);
 	#endif
 
 	#ifdef FOG
 		if (land > 0.9) color = getFog(ambientlight, color, texcoord.st, land);
-	#endif
-
-	#ifdef VOLUMETRIC_CLOUDS
-		color = getVolumetricClouds(color, refTexC.st);
 	#endif
 
 	color = renderGaux4(color);
