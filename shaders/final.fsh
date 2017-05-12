@@ -297,11 +297,17 @@ vec3 getLensFlare(vec2 uv){
 
 	if (nightTime < 0.9) {
 
-		vec3 halfShapeColorA = vec3(1.0, 0.5, 0.0);
+		vec3 shapeColorA = vec3(1.0, 0.5, 0.0);
+		vec3 shapeColorB = vec3(0.0, 0.25, 1.0);
 
-		vec3 a0 = getflare(uv, lPos, halfShapeColorA, 1.9, 5.5, 0.7, false);
-		vec3 a1 = getflare(uv, lPos, halfShapeColorA, 1.75, 5.5, 1.0, false);
+		vec3 a0 = getflare(uv, lPos, shapeColorA, 1.9, 5.5, 0.7, false);
+		vec3 a1 = getflare(uv, lPos, shapeColorA, 1.75, 5.5, 1.0, false);
 		lens += max(a0 - a1, 0.0);
+
+		vec3 b0 = getflare(uv, lPos, shapeColorB * 0.5, 1.5, 8.0, 20.0, false);
+		vec3 b1 = getflare(uv, lPos, shapeColorB * 0.5, 1.45, 7.0, 20.0, false);
+
+		lens += max(b0 - b1, 0.0);
 
 		lens += getflare(uv, lPos, vec3(1.0, 0.0, 1.0) * 0.2, 1.6, 5.0, 1.0, false);
 		lens += getflare(uv, lPos, vec3(0.1, 0.0, 1.0), 1.5, 50.0, 2.0, false);

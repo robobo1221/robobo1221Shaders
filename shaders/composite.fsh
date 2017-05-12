@@ -418,9 +418,6 @@ vec4 getVolumetricCloudPosition(vec2 coord, float depth)
 }
 
 vec4 getVolumetricCloudsColor(vec3 wpos){
-
-	//don't mind this stuff. It's still not done when it comes to coloring
-
 	const float height = 170.0;  	//Height of the clouds
 	const float distRatio = 100.0;  	//Distance between top and bottom of the cloud in block * 10.
 
@@ -461,7 +458,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 	}
 }
 
-vec4 getVolumetricClouds(vec3 color, vec4 albedo){
+vec4 getVolumetricClouds(vec3 color){
 
 	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
@@ -477,6 +474,14 @@ vec4 getVolumetricClouds(vec3 color, vec4 albedo){
 	while (farPlane > nearPlane){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
+
+		/*
+		vec4 shadowWPos = getShadowSpace(expDepth(farPlane),texcoord.st);
+			 shadowWPos = biasedShadows(shadowWPos);
+
+		float shadowSample = shadow2D(shadowtex0, shadowWPos.xyz).x;
+		*/
+
 		vec4 result = getVolumetricCloudsColor(wpos.rgb);
 			 result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
@@ -487,7 +492,7 @@ vec4 getVolumetricClouds(vec3 color, vec4 albedo){
 		}
 
 		if (length(worldPosition) < volumetricDistance ){
-			 result.rgb = mix(result.rgb, result.rgb * albedo.rgb, pow(albedo.a, mix(0.25, 1.0, iswater)));
+			 result.rgb = renderGaux2(result.rgb, normal2);
 		}
 
 		clouds.rgb = mix(clouds.rgb, result.rgb, min(result.a * VOLUMETRIC_CLOUDS_DENSITY, 1.0));
@@ -524,13 +529,12 @@ void main()
 		#endif
 	}
 	
-	vec4 gaux2Albedo = vec4(0.0);
-	color = renderGaux2(color, normal2, gaux2Albedo);
+	color = renderGaux2(color, normal2);
 
 	color = pow(color, vec3(0.4545));
 
 	#ifdef VOLUMETRIC_CLOUDS
-		vec4 VolumetricClouds = getVolumetricClouds(color, gaux2Albedo);
+		vec4 VolumetricClouds = getVolumetricClouds(color);
 	#endif
 	
 /* DRAWBUFFERS:015 */

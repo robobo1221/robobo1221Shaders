@@ -387,7 +387,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 		reflection.rgb *= (1.0 - hand);
 		
 		#ifdef WATER_REFLECTION
-			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * (1.0 - isEyeInWater) * REFLECTION_STRENGTH * (1.0 - specMap));
+			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * REFLECTION_STRENGTH * (1.0 - specMap));
 		#endif
 
 		return color;

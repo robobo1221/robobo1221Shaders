@@ -682,7 +682,7 @@ float getWaterScattering(float NdotL){
 	vec3 getVolumetricClouds(vec3 color, vec2 uv){
 		vec4 sample = texture2DLod(gaux2, uv, 1.75) * MAX_COLOR_RANGE;
 
-		return pow(mix(pow(color, vec3(2.2)), pow(sample.rgb, vec3(2.2)), clamp(sample.a * 1.001, 0.0, 1.0)), vec3(0.4545));
+		return mix(color, sample.rgb, clamp(sample.a * 1.001, 0.0, 1.0));
 	}
 #endif
 
