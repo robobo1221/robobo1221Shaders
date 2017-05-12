@@ -1,0 +1,15 @@
+// Place your settings in this file to overwrite the default settings
+{
+    "files.associations": {
+        "*.fsh": "glsl",
+        "*.vsh": "glsl",
+        "*.glsl": "glsl"
+    }
+,
+"git.confirmSync": false,
+"git.autofetch": false,
+"window.zoomLevel": 0,
+"workbench.iconTheme": "vs-seti",
+"workbench.colorTheme": "Visual Studio Dark",
+"files.autoSave": "off"
+}
