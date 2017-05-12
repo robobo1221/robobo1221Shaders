@@ -232,7 +232,7 @@ float refractmask(vec2 coord){
 		refractionMult.x *= refractionMult.x;
 
 		#ifdef WATER_REFRACT_DISPERSION
-			float dispersion = 0.3 * refractionMult.x;
+			float dispersion = 0.6 * refractionMult.x;
 		#else
 			float dispersion = 0.0;
 		#endif
