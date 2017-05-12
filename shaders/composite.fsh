@@ -529,7 +529,9 @@ void main()
 
 	color = pow(color, vec3(0.4545));
 
-	vec4 VolumetricClouds = getVolumetricClouds(color, gaux2Albedo);
+	#ifdef VOLUMETRIC_CLOUDS
+		vec4 VolumetricClouds = getVolumetricClouds(color, gaux2Albedo);
+	#endif
 	
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
