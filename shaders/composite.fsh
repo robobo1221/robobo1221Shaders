@@ -1,4 +1,5 @@
 #version 120
+//#extension GL_ARB_gpu_shader5 : enable
 
 #include "lib/colorRange.glsl"
 
@@ -19,7 +20,7 @@ const int 		noiseTextureResolution  	= 1024;
 const bool 		shadowHardwareFiltering 	= true;
 const float		sunPathRotation				= -40.0; //[-50.0 -40.0 -30.0 -20.0 -10.0 0.0 10.0 20.0 30.0 40.0 50.0]
 
-const float 	ambientOcclusionLevel 		= 0.5; //[0.0 0.25 0.5 0.75 1.0]
+const float 	ambientOcclusionLevel 		= 1.0; //[0.0 0.25 0.5 0.75 1.0]
 
 const float		eyeBrightnessHalflife		= 16.0; //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 16.0 18.0 20.0 24.0 28.0 32.0 ]
 
@@ -263,12 +264,79 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 #include "lib/calcStars.glsl"
 
 float getSubSurfaceScattering(){
-	float cosV = clamp(dot(uPos.xyz, lightVector), 0.0, 1.0);
-		  cosV = 1.0 / sqrt(1.0 - cosV) - 1.0;
+	float cosV = pow(clamp(dot(uPos.xyz, lightVector), 0.0, 1.0), 10.0) * 4.0;
 		  cosV /= cosV * 0.01 + 1.0;
 
 	return clamp(cosV, 0.0, 90.0);
 }
+
+/*
+
+vec4 toScreenSpace(vec2 pos){
+
+	vec4 fragpos = gbufferProjectionInverse * vec4(vec3(pos.st, texture2D(depthtex1, pos).x) * 2.0 - 1.0, 1.0);
+	if (isEyeInWater > 0.9)
+		fragpos.xy *= 0.817;
+
+	return (fragpos / fragpos.w);
+}
+
+#define steps 16
+#define radius 2.
+
+#define hammersley(i, N) vec2( float(i) / float(N), float( bitfieldReverse(i) ) * 2.3283064365386963e-10 )
+#define tau 6.2831853071795864769252867665590
+#define circlemap(p) (vec2(cos((p).y*tau), sin((p).y*tau)) * p.x)
+
+float jaao(vec2 p) {
+
+    const float r = radius;
+
+    int x = int(p.x*viewWidth)  % 4;
+    int y = int(p.y*viewHeight) % 4;
+    int index = (x<<2) + y;
+
+    vec3 p3 = toScreenSpace(p).rgb;
+    vec3 normal = normalize( cross(dFdx(p3), dFdy(p3)) );
+    vec2 clipRadius = r * vec2(viewHeight/viewWidth,1.) / length(p3);
+
+    vec3 v = normalize(-p3);
+
+    float nvisibility = 0.;
+    float vvisibility = 0.;
+
+    for (int i = 0; i < steps; i++) {
+        vec2 circlePoint = circlemap(
+            hammersley(i*15+index+1, 16*steps)
+        )*clipRadius;
+
+        vec3 o  = toScreenSpace(circlePoint    +p).rgb - p3;
+        vec3 o2 = toScreenSpace(circlePoint*.25+p).rgb - p3;
+        float l  = length(o );
+        float l2 = length(o2);
+        o /=l ;
+        o2/=l2;
+
+        nvisibility += clamp(1.-max(
+            dot(o , normal) - clamp((l -r)/r,0.,1.),
+            dot(o2, normal) - clamp((l2-r)/r,0.,1.)
+        ), 0., 1.);
+
+        vvisibility += clamp(1.-max(
+            dot(o , v) - clamp((l -r)/r,0.,1.),
+            dot(o2, v) - clamp((l2-r)/r,0.,1.)
+        ), 0., 1.);
+    }
+
+    return pow(min(vvisibility*2., nvisibility) / float(steps), 2.0);
+}
+
+#undef steps
+#undef radius
+#undef hammersley
+#undef tau
+#undef circlemap
+*/
 
 vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
 
@@ -428,19 +496,18 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		return vec4(0.0);
 	} else {
 
-		float sunViewCos = dot(sunVec, uPos.xyz) * 0.5 + 0.5;
+		float sunViewCos = pow(dot(sunVec, uPos.xyz) * 0.5 + 0.5, 10.0);
 			  sunViewCos = sunViewCos*sunViewCos * (3.0 - 2.0 * sunViewCos);
-			  //Inverse Square Root
-			  sunViewCos = (0.5 / sqrt(1.0 - sunViewCos)) - 0.5;
+			  sunViewCos *= 25.0;
 			  //Reinhard to prevent over exposure
 			  sunViewCos /= 1.0 + sunViewCos * 0.01; 
+			  sunViewCos = max(sunViewCos, 0.0);
 
-		float moonViewCos = dot(moonVec, uPos.xyz) * 0.5 + 0.5;
+		float moonViewCos = pow(dot(moonVec, uPos.xyz) * 0.5 + 0.5, 10.0);
 		      moonViewCos = moonViewCos*moonViewCos * (3.0 - 2.0 * moonViewCos);
-			  //Inverse Square Root
-			  moonViewCos = (0.5 / sqrt(1.0 - moonViewCos)) - 0.5;
+			  moonViewCos *= 25.0;
 			  //Reinhard to prevent over exposure
-			  moonViewCos /= 1.0 + moonViewCos * 0.01; 
+			  moonViewCos = max(moonViewCos, 0.0);
 
 		float sunUpCos = clamp(dot(sunVec, upVec) * 0.9 + 0.1, 0.0, 1.0);
 		float MoonUpCos = clamp(dot(moonVec, upVec) * 0.9 + 0.1, 0.0, 1.0);

@@ -422,10 +422,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 		//volumetricLightSample = texture2D(gcolor, pos.xy).a;
 
 		float sunAngleCosine = clamp(dot(uPos.rgb, lightVector), 0.0, 1.0);
-		 //Inverse Square Root
-		      sunAngleCosine = (0.5 / sqrt(-sunAngleCosine + 1.0)) - 0.5;
-		  //Reinhard to prevent over exposure
-		      sunAngleCosine /= 1.0 + sunAngleCosine * 0.5; 
+			  sunAngleCosine = sunAngleCosine * sunAngleCosine * (3.0 - 2.0 * sunAngleCosine);
 
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.85 + 0.15; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
