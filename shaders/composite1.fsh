@@ -197,17 +197,9 @@ vec3 shadows = vec3(aux2.a);
 
 float refractmask(vec2 coord){
 
-	float mask = texture2D(gdepth, coord.st).g;
+	float sample = texture2D(gdepth, coord.st).g;
 
-	if (iswater > 0.9){
-		mask = float(mask > 0.12 && mask < 0.28);
-	}
-
-	if (istransparent > 0.9){
-		mask = float(mask > 0.28 && mask < 0.32);
-	}
-
-	return mask;
+	return bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);
 
 }
 

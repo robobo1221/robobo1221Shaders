@@ -428,13 +428,22 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		return vec4(0.0);
 	} else {
 
-		float sunViewCos = dot(lightVector, uPos.xyz) * 0.5 + 0.5;
-			//Inverse Square Root
-			sunViewCos = (0.5 / sqrt(1.0 - sunViewCos)) - 0.5;
-			//Reinhard to prevent over exposure
-			sunViewCos /= 1.0 + sunViewCos * 0.01; 
+		float sunViewCos = dot(sunVec, uPos.xyz) * 0.5 + 0.5;
+			  sunViewCos = sunViewCos*sunViewCos * (3.0 - 2.0 * sunViewCos);
+			  //Inverse Square Root
+			  sunViewCos = (0.5 / sqrt(1.0 - sunViewCos)) - 0.5;
+			  //Reinhard to prevent over exposure
+			  sunViewCos /= 1.0 + sunViewCos * 0.01; 
 
-		float sunUpCos = clamp(smoothstep(0.0175,0.05,dot(sunVec, upVec) * 0.95 + 0.05), 0.0, 1.0);
+		float moonViewCos = dot(moonVec, uPos.xyz) * 0.5 + 0.5;
+		      moonViewCos = moonViewCos*moonViewCos * (3.0 - 2.0 * moonViewCos);
+			  //Inverse Square Root
+			  moonViewCos = (0.5 / sqrt(1.0 - moonViewCos)) - 0.5;
+			  //Reinhard to prevent over exposure
+			  moonViewCos /= 1.0 + moonViewCos * 0.01; 
+
+		float sunUpCos = clamp(dot(sunVec, upVec) * 0.9 + 0.1, 0.0, 1.0);
+		float MoonUpCos = clamp(dot(moonVec, upVec) * 0.9 + 0.1, 0.0, 1.0);
 
 		float cloudAlpha = getVolumetricCloudNoise(wpos);
 		float cloudTreshHold = pow(1.0f - clamp(distance(wpos.y, height) / (distRatio / 2.0f), 0.0f, 1.0f), 12.0);
@@ -445,12 +454,16 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 		float sunLightAbsorption = pow(absorption, 5.0);
 
-		vec3 sunLightColor = mix(sunlight * sunlight, moonlight, (1.0 - sunUpCos)) * 16.0;
-			sunLightColor *= sunLightAbsorption;
-			sunLightColor *= 1.0 + sunViewCos * 5.0 * sunLightAbsorption * (1.0 - (1.0 - sunUpCos) * 0.5);
-			sunLightColor = mix(sunLightColor, ambientlight, rainStrength);
+		vec3 dayTimeColor = sunlight * 16.0 * sunUpCos;
+			dayTimeColor += sunlight*sunlight * sunViewCos * 64.0 * sqrt(sunLightAbsorption) * sunUpCos;
 
-		vec3 cloudColor = mix(sunLightColor, ambientlight * (0.25 + (rainStrength * 0.5)), pow(1.0 - absorption / 2.8, 4.0f));
+		vec3 nightTimeColor = moonlight * 16.0 * MoonUpCos;
+			nightTimeColor += moonlight * moonViewCos * 4.0 * sqrt(sunLightAbsorption) * MoonUpCos;
+
+		vec3 totalCloudColor = (dayTimeColor + nightTimeColor) * sunLightAbsorption;
+			 totalCloudColor = mix(totalCloudColor, ambientlight, rainStrength);
+
+		vec3 cloudColor = mix(totalCloudColor, ambientlight * (0.25 + (rainStrength * 0.5)), pow(1.0 - absorption / 2.8, 4.0f));
 
 			cloudColor /= 1.0 + cloudColor;
 
