@@ -65,8 +65,8 @@
 			
 			float cosT = clamp(dot(fposition.rgb,upVec),0.0,1.0);
 
-			float sunUpCos = clamp(dot(sunVec, upVec) * 0.9 + 0.1, 0.0, 1.0);
-			float MoonUpCos = clamp(dot(moonVec, upVec) * 0.9 + 0.1, 0.0, 1.0);
+			float sunUpCos = clamp(dot(sunVec, upVec) * 0.95 + 0.15, 0.0, 1.0);
+			float MoonUpCos = clamp(dot(moonVec, upVec) * 0.95 + 0.15, 0.0, 1.0);
 
 			vec3 dayTimeColor = sunlight * sunUpCos;
 			vec3 nightTimeColor = moonlight * MoonUpCos;
@@ -89,7 +89,7 @@
 
 			totalcloud = cloudNoise(coord);
 
-			return mix(color, cloudCol ,totalcloud * sqrt(cosT));
+			return mix(color, cloudCol ,totalcloud * cosT);
 		} else {
 			return color;
 		}
