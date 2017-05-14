@@ -55,6 +55,7 @@ uniform mat4 gbufferProjection;
 uniform vec3 cameraPosition;
 
 uniform float frameTimeCounter;
+uniform float isEyeInWater;
 
 uniform float viewWidth;
 uniform float viewHeight;
@@ -300,6 +301,30 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 	}
 #endif
 
+#ifdef WATER_DEPTH_FOG
+
+	float getWaterDepth(vec3 fragpos, vec3 fragpos2){
+		return distance(fragpos, fragpos2);
+	}
+
+	vec3 getWaterDepthFog(vec3 color, vec3 fragpos, vec3 fragpos2){
+
+		float depth = getWaterDepth(fragpos, fragpos2); // Depth of the water volume
+		depth *= mix(iswater, 1.0, isEyeInWater);
+
+		float depthFog = 1.0 - clamp(exp2(-depth * DEPTH_FOG_DENSITY), 0.0, 1.0); // Beer's Law
+
+		vec3 fogColor = ambientlight * 0.0333;
+			 if (isEyeInWater < 0.9){
+				fogColor = (fogColor * (pow(aux2.b, skyLightAtten) + 0.25)) * 0.75;
+				}
+			 
+		color *= pow(ambientlight, vec3(depth) * 0.5);
+
+		return mix(color, fogColor, depthFog);
+	}
+#endif
+
 #ifdef REFLECTIONS
 	
 	vec4 raytrace(vec3 fragpos, vec3 rvector, vec3 fogColor) {
@@ -408,6 +433,10 @@ void main()
 		color = waterRefraction(color, worldPosition, texcoord.st);
 	#endif
 
+	#ifdef WATER_DEPTH_FOG
+		if (isEyeInWater < 0.9) color = getWaterDepthFog(color, fragposRef.rgb, fragposRef2.rgb);
+	#endif
+
 	vec3 fogColor = ambientlight * 0.001;
 
 	#ifdef REFLECTIONS
@@ -416,6 +445,10 @@ void main()
 
 	#ifdef FOG
 		color = getFog(fogColor, color, texcoord.st);
+	#endif
+
+	#if defined UNDERWATER_FOG && defined WATER_DEPTH_FOG
+		if (isEyeInWater > 0.9) color = getWaterDepthFog(color, fragposRef.rgb, vec3(0.0));
 	#endif
 	
 	color = pow(color, vec3(0.4545));
