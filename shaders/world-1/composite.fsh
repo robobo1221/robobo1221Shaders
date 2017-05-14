@@ -155,7 +155,7 @@ vec4 getFragpos(){
 }
 
 vec4 fragpos = getFragpos();
-vec4 uPos = normalize(fragpos);
+vec3 uPos = normalize(fragpos.rgb);
 
 vec4 getFragpos2(){
 

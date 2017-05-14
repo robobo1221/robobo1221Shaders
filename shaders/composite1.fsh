@@ -21,9 +21,7 @@
 
 #define WATER_DEPTH_FOG
 	#define DEPTH_FOG_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-	
-#define UNDERWATER_FOG
-	#define UNDERWATER_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+	#define UNDERWATER_FOG
 
 #include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 
@@ -421,8 +419,12 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 
 		//volumetricLightSample = texture2D(gcolor, pos.xy).a;
 
-		float sunAngleCosine = clamp(dot(uPos.rgb, lightVector), 0.0, 1.0);
-			  sunAngleCosine = sunAngleCosine * sunAngleCosine * (3.0 - 2.0 * sunAngleCosine);
+		float sunViewCos = dot(lightVector, uPos.xyz) * 0.5 + 0.5;
+			//Inverse Square Root
+			//Min it to prevent black dot bug on the sun
+			sunViewCos = min((0.5 / sqrt(1.0 - sunViewCos)) - 0.5, 100000.0);
+			//Reinhard to prevent over exposure
+			sunViewCos /= 1.0 + sunViewCos * 0.25; 
 
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.85 + 0.15; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
@@ -437,8 +439,8 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 		#endif
 
 		vec3 lightCol = mix(sunlight, moonlight * 0.75, time[1].y);
-			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.5, clamp(sunAngleCosine, 0.0, 1.0)), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, 1.0 - getEyeBrightnessSmooth);
-			 lightCol *= 1.0 + sunAngleCosine * mix(4.0, 2.0, time[1].y);
+			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.5, clamp(sunViewCos, 0.0, 1.0)), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, 1.0 - getEyeBrightnessSmooth);
+			 lightCol *= 1.0 + sunViewCos * mix(4.0, 2.0, time[1].y);
 			 lightCol *= (1.0 + clamp(time[1].y * transition_fading * 0.5 + mix(0.0,1.0 - transition_fading, time[0].x),0.0,1.0)) * 0.5;
 			 lightCol = mix(lightCol, vec3(0.1, 0.5, 0.8) * lightCol, isEyeInWater);
 			
@@ -463,29 +465,26 @@ vec3 renderGaux4(vec3 color){
 	return mix(color, albedo.rgb * sqrt(color), albedo.a);
 }
 
-#if defined WATER_DEPTH_FOG && defined UNDERWATER_FOG
+#ifdef WATER_DEPTH_FOG
+
 	float getWaterDepth(vec3 fragpos, vec3 fragpos2){
 		return distance(fragpos, fragpos2);
 	}
-#endif
 
-float getWaterScattering(float NdotL){
-	const float wrap = 0.1;
-	const float scatterWidth = 0.5;
-	
-	float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
-	return smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
-}
-
-#ifdef WATER_DEPTH_FOG
+	float getWaterScattering(float NdotL){
+		const float wrap = 0.1;
+		const float scatterWidth = 0.5;
+		
+		float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
+		return smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
+	}
 
 	vec3 getWaterDepthFog(vec3 color, vec3 fragpos, vec3 fragpos2){
 
 		vec3 lightCol = mix(sunlight, pow(moonlight, vec3(0.4545)), time[1].y);
 
 		float depth = getWaterDepth(fragpos, fragpos2); // Depth of the water volume
-			  depth *= iswater;
-			  depth *= (1.0 - isEyeInWater);
+		depth *= mix(iswater, 1.0, isEyeInWater);
 
 		float depthFog = 1.0 - clamp(exp2(-depth * DEPTH_FOG_DENSITY), 0.0, 1.0); // Beer's Law
 
@@ -494,31 +493,16 @@ float getWaterScattering(float NdotL){
 		float SSS = pow(getWaterScattering(NdotL), 2.0);
 
 		vec3 fogColor = (ambientlight * lightCol) * 0.0333;
-			 fogColor = (fogColor * (pow(aux2.b, skyLightAtten) + 0.25)) * 0.75;
-			 fogColor = mix(fogColor, (fogColor * lightCol) * 3.75, SSS * (1.0 - rainStrength) * shadows);
-			 fogColor = mix(fogColor, (fogColor * lightCol) * 6.0,(sunAngleCosine * shadows) * (transition_fading * (1.0 - pow(max(NdotL,0.0), 2.0))) * (1.0 - rainStrength));
-			 fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), (pow((1.0 - depthFog), 0.75) * (1.0 - rainStrength)) * 20.0);
+			 if (isEyeInWater < 0.9){
+				fogColor = (fogColor * (pow(aux2.b, skyLightAtten) + 0.25)) * 0.75;
+				fogColor = mix(fogColor, (fogColor * lightCol) * 3.75, SSS * (1.0 - rainStrength) * shadows);
+				fogColor = mix(fogColor, (fogColor * lightCol) * 6.0,(sunAngleCosine * shadows) * (transition_fading * (1.0 - pow(max(NdotL,0.0), 2.0))) * (1.0 - rainStrength));
+				}
+				fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), (pow((1.0 - depthFog), 0.75) * (1.0 - rainStrength)) * 20.0);
 			 
 		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.5);
 
 		return mix(color, fogColor, depthFog);
-	}
-#endif
-
-#ifdef UNDERWATER_FOG
-	vec3 underwaterFog(vec3 color){
-
-		float depth = getWaterDepth(fragpos.xyz * 0.25, vec3(0.0)) + 0.5; // Depth of the water volume
-		float depthFog = 1.0 - clamp(exp2(-depth * UNDERWATER_DENSITY), 0.0, 1.0); // Beer's Law
-
-		vec3 lightCol = mix(sunlight, vec3(1.0), time[1].y);
-
-		vec3 fogColor = (ambientlight * lightCol) * 0.0333;
-		     fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), pow((1.0 - depthFog), 0.75) * 8.0 * (1.0 - rainStrength));
-
-		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.5);
-
-		return mix(color,fogColor, depthFog);
 	}
 #endif
 
@@ -688,7 +672,7 @@ void main()
 	#endif
 
 	#ifdef WATER_DEPTH_FOG
-		color = getWaterDepthFog(color, fragposRef.rgb, fragposRef2.rgb);
+		if (isEyeInWater < 0.9) color = getWaterDepthFog(color, fragposRef.rgb, fragposRef2.rgb);
 	#endif
 
 	#ifdef REFLECTIONS
@@ -705,8 +689,8 @@ void main()
 
 	color = renderGaux4(color);
 
-	#ifdef UNDERWATER_FOG
-		if (isEyeInWater > 0.9) color = underwaterFog(color);
+	#if defined UNDERWATER_FOG && defined WATER_DEPTH_FOG
+		if (isEyeInWater > 0.9) color = getWaterDepthFog(color, fragposRef.rgb, vec3(0.0));
 	#endif
 
 	#ifdef VOLUMETRIC_LIGHT

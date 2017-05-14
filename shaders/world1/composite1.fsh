@@ -21,9 +21,7 @@
 
 #define WATER_DEPTH_FOG
 	#define DEPTH_FOG_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-	
-#define UNDERWATER_FOG
-	#define UNDERWATER_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+	#define UNDERWATER_FOG
 
 #include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 
@@ -100,8 +98,7 @@ vec4 getFragpos(vec2 pos, float depth){
 }
 
 vec4 fragpos = getFragpos(texcoord.st, pixeldepth);
-vec4 uPos = normalize(fragpos);
-
+vec3 uPos = normalize(fragpos.rgb);
 vec4 getFragpos2(vec2 pos, float depth){
 
 	vec4 fragpos = gbufferProjectionInverse * vec4(vec3(pos.st, depth) * 2.0 - 1.0, 1.0);
