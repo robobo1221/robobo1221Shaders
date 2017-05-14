@@ -541,6 +541,8 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 vec4 getVolumetricClouds(vec3 color){
 
+	float cloudDistance = 300.0 / far;
+
 	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
 	float nearPlane = 2.0;			//start to where the ray should march.
@@ -568,11 +570,11 @@ vec4 getVolumetricClouds(vec3 color){
 
 		float volumetricDistance = length(wpos.xyz - cameraPosition.xyz);
 
-		if (length(worldPosition2) < volumetricDistance ){
+		if (length(worldPosition2) < volumetricDistance && land > 0.9){
 			result.a = 0.0;
 		}
 
-		if (length(worldPosition) < volumetricDistance ){
+		if (length(worldPosition) < volumetricDistance){
 			 result.rgb = renderGaux2(result.rgb, normal2);
 		}
 
@@ -605,8 +607,8 @@ void main()
 			color = getStars(color, fragpos2.rgb, land);
 		#endif
 		
-		#ifdef CLOUDS
-			color = getClouds(color, fragpos2.rgb, land, 3);
+		#ifdef CLOUD_PLANE_2D
+			color = getClouds(color, fragpos2.rgb, land);
 		#endif
 	}
 	

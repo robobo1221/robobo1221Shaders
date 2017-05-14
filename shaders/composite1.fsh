@@ -157,7 +157,6 @@ vec4 fragpos2 = getFragpos2(texcoord.st, pixeldepth2);
 vec4 getWorldSpace(vec4 fragpos){
 
 	vec4 wpos = gbufferModelViewInverse * fragpos;
-		 wpos /= wpos.w;
 
 	return wpos;
 }
@@ -424,7 +423,7 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 			//Min it to prevent black dot bug on the sun
 			sunViewCos = min((0.5 / sqrt(1.0 - sunViewCos)) - 0.5, 100000.0);
 			//Reinhard to prevent over exposure
-			sunViewCos /= 1.0 + sunViewCos * 0.25; 
+			sunViewCos /= 1.0 + sunViewCos * 0.5; 
 
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.85 + 0.15; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
@@ -586,8 +585,8 @@ vec3 renderGaux4(vec3 color){
 			sky = getStars(sky, reflectedVector, 1.0 - land);
 		#endif
 
-		#ifdef CLOUDS
-			sky = getClouds(sky, reflectedVector, 1.0 - land, 1);
+		#ifdef CLOUD_PLANE_2D
+			sky = getClouds(sky, reflectedVector, 1.0 - land);
 		#endif
 
 		return sky;
@@ -595,7 +594,6 @@ vec3 renderGaux4(vec3 color){
 
 	vec3 getReflection(vec3 color){
 
-		vec3 uPos = normalize(fragpos.rgb);
 		vec3 reflectedVector = reflect(uPos, normal);
 		
 		#ifdef SPECULAR_MAPPING
