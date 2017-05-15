@@ -15,15 +15,14 @@
 	float cloudNoise(vec2 coord, vec2 wind){
 		float noise = 1.0;
 
-		coord -= wind;
+		coord -= wind * 0.8;
 
-		noise = texture2D(noisetex, vec2(0.0, (coord.y) * 2.0) * 0.7).x;
 		noise = texture2D(noisetex, vec2(coord.y * 3.0, coord.x * 0.5) * 0.7).x * 2.0;
 		noise /= noise + 1.0;
 		noise -= 0.3;
 		noise = max(noise, 0.0);
 
-		coord += wind;
+		coord += wind * 0.8;
 
 		float deg0 = 90.0 - noise * 7.0;
 		float rad0 = degreesToRadiance(deg0);

@@ -23,12 +23,18 @@
 #define GREEN_MULT 1.0 		//[0.0 0.25 0.5 0.75 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 #define BLUE_MULT 1.0 		//[0.0 0.25 0.5 0.75 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 
+//#define DOF
+	#define DOF_FOCAL_LENGTH 0.05 //[0.01 0.02 0.05 0.1 0.15 0.2 0.3]
+	#define DOF_APERTURE 0.002 //[0.001 0.002 0.004 0.008 0.016 0.032 0.064 0.128 0.256]
+	#define DOF_SIZE_MULT 50.0 //[10.0 20.0 30.0 40.0 50.0 60.0 70.0 80.0 90.0 100.0]
+
 const bool gcolorMipmapEnabled = true;
 
 varying vec4 texcoord;
 
 uniform sampler2D gcolor;
-uniform sampler2D gdepthtex;
+uniform sampler2D gdepth;
+uniform sampler2D depthtex1;
 uniform sampler2D composite;
 uniform sampler2D noisetex;
 
@@ -143,106 +149,99 @@ vec3 reinhardTonemap(vec3 color)
 	}
 #endif
 
-/*
+#ifdef DOF
 
-	//hexagon pattern
-	const vec2 hex_offsets[61] = vec2[61] (	vec2(  0.2165,  0.1250 ),
-											vec2(  0.0000,  0.2500 ),
-											vec2( -0.2165,  0.1250 ),
-											vec2( -0.2165, -0.1250 ),
-											vec2( -0.0000, -0.2500 ),
-											vec2(  0.2165, -0.1250 ),
-											vec2(  0.4330,  0.2500 ),
-											vec2(  0.0000,  0.5000 ),
-											vec2( -0.4330,  0.2500 ),
-											vec2( -0.4330, -0.2500 ),
-											vec2( -0.0000, -0.5000 ),
-											vec2(  0.4330, -0.2500 ),
-											vec2(  0.6495,  0.3750 ),
-											vec2(  0.0000,  0.7500 ),
-											vec2( -0.6495,  0.3750 ),
-											vec2( -0.6495, -0.3750 ),
-											vec2( -0.0000, -0.7500 ),
-											vec2(  0.6495, -0.3750 ),
-											vec2(  0.8660,  0.5000 ),
-											vec2(  0.0000,  1.0000 ),
-											vec2( -0.8660,  0.5000 ),
-											vec2( -0.8660, -0.5000 ),
-											vec2( -0.0000, -1.0000 ),
-											vec2(  0.8660, -0.5000 ),
-											vec2(  0.2163,  0.3754 ),
-											vec2( -0.2170,  0.3750 ),
-											vec2( -0.4333, -0.0004 ),
-											vec2( -0.2163, -0.3754 ),
-											vec2(  0.2170, -0.3750 ),
-											vec2(  0.4333,  0.0004 ),
-											vec2(  0.4328,  0.5004 ),
-											vec2( -0.2170,  0.6250 ),
-											vec2( -0.6498,  0.1246 ),
-											vec2( -0.4328, -0.5004 ),
-											vec2(  0.2170, -0.6250 ),
-											vec2(  0.6498, -0.1246 ),
-											vec2(  0.6493,  0.6254 ),
-											vec2( -0.2170,  0.8750 ),
-											vec2( -0.8663,  0.2496 ),
-											vec2( -0.6493, -0.6254 ),
-											vec2(  0.2170, -0.8750 ),
-											vec2(  0.8663, -0.2496 ),
-											vec2(  0.2160,  0.6259 ),
-											vec2( -0.4340,  0.5000 ),
-											vec2( -0.6500, -0.1259 ),
-											vec2( -0.2160, -0.6259 ),
-											vec2(  0.4340, -0.5000 ),
-											vec2(  0.6500,  0.1259 ),
-											vec2(  0.4325,  0.7509 ),
-											vec2( -0.4340,  0.7500 ),
-											vec2( -0.8665, -0.0009 ),
-											vec2( -0.4325, -0.7509 ),
-											vec2(  0.4340, -0.7500 ),
-											vec2(  0.8665,  0.0009 ),
-											vec2(  0.2158,  0.8763 ),
-											vec2( -0.6510,  0.6250 ),
-											vec2( -0.8668, -0.2513 ),
-											vec2( -0.2158, -0.8763 ),
-											vec2(  0.6510, -0.6250 ),
-											vec2(  0.8668,  0.2513 ),
-											vec2(  0.0000,  0.0000));
+	vec3 aux = texture2D(gdepth, newTexcoord.st).rgb;
+	float hand = float(aux.g > 0.85 && aux.g < 0.87);
+
+	const vec2 dofOffset[49] = vec2[49] (
+		vec2(0.25, 0.0),
+		vec2(0.0, 0.25),
+		vec2(-0.25, 0.0),
+		vec2(0.0, -0.25),
+		vec2(0.5, 0.0),
+		vec2(0.0, 0.5),
+		vec2(-0.5, 0.0),
+		vec2(0.0, -0.5),
+		vec2(0.75, 0.0),
+		vec2(0.0, 0.75),
+		vec2(-0.75, 0.0),
+		vec2(0.0, -0.75),
+		vec2(1.0, 0.0),
+		vec2(0.0, 1.0),
+		vec2(-1.0, 0.0),
+		vec2(0.0, -1.0),
+		vec2(0.25, 0.25),
+		vec2(0.5, 0.25),
+		vec2(0.75, 0.25),
+		vec2(0.25, 0.5),
+		vec2(0.5, 0.5),
+		vec2(0.75, 0.5),
+		vec2(0.25, 0.75),
+		vec2(0.5, 0.75),
+		vec2(0.25, -0.25),
+		vec2(0.5, -0.25),
+		vec2(0.75, -0.25),
+		vec2(0.25, -0.5),
+		vec2(0.5, -0.5),
+		vec2(0.75, -0.5),
+		vec2(0.25, -0.75),
+		vec2(0.5, -0.75),
+		vec2(-0.25, 0.25),
+		vec2(-0.5, 0.25),
+		vec2(-0.75, 0.25),
+		vec2(-0.25, 0.5),
+		vec2(-0.5, 0.5),
+		vec2(-0.75, 0.5),
+		vec2(-0.25, 0.75),
+		vec2(-0.5, 0.75),
+		vec2(-0.25, -0.25),
+		vec2(-0.5, -0.25),
+		vec2(-0.75, -0.25),
+		vec2(-0.25, -0.5),
+		vec2(-0.5, -0.5),
+		vec2(-0.75, -0.5),
+		vec2(-0.25, -0.75),
+		vec2(-0.5, -0.75),
+		vec2(0.0, 0.0));
 
 	vec3 getDof(vec3 color){
 
-	const float focal = 0.05;
-	float aperture = 0.002;
-	const float sizemult = 50.0;
+	float focal = float(DOF_FOCAL_LENGTH);
+	float aperture = float(DOF_APERTURE);
+	float sizemult = float(DOF_SIZE_MULT);
 
 		float DoFGamma = 4.4;
 				//Calculate pixel Circle of Confusion that will be used for bokeh depth of field
-				float z = ld(texture2D(gdepthtex, vec2(newTexcoord.st)).r)*far;
-				float focus = ld(texture2D(gdepthtex, vec2(0.5)).r)*far;
-				float pcoc = min(abs(aperture * (focal * (z - focus)) / (z * (focus - focal)))*sizemult,(1.0 / viewWidth)*10.0);
+				float z = ld(texture2D(depthtex1, vec2(newTexcoord.st)).r)*far;
+				float focus = ld(texture2D(depthtex1, vec2(0.5)).r)*far;
+				float pcoc = min(abs(aperture * (focal * (z - focus)) / (z * (focus - focal)))*sizemult,(1.0 / viewWidth)*5.0);
 				vec4 sample = vec4(0.0);
 				vec3 bcolor = vec3(0.0);
 				float nb = 0.0;
 				vec2 bcoord = vec2(0.0);
 
-				for ( int i = 0; i < 61; i++) {
-					sample = texture2D(gcolor, newTexcoord.xy + hex_offsets[i]*pcoc*vec2(1.0,aspectRatio),abs(pcoc * 200.0));
+				for ( int i = 0; i < 49; i++) {
+					sample = texture2D(gcolor, newTexcoord.xy + dofOffset[i]*pcoc*vec2(1.0,aspectRatio));
 
 					sample.rgb *= MAX_COLOR_RANGE;
 
 					bcolor += pow(sample.rgb, vec3(DoFGamma));
 				}
-		color.rgb = pow(bcolor/61.0, vec3(1.0/DoFGamma));
+		color.rgb = pow(bcolor/49.0, vec3(1.0/DoFGamma));
 
 	return color;
 	}
-*/
+#endif
 
 
 void main(){
 
 	vec3 color = pow(texture2D(gcolor, newTexcoord.st).rgb * MAX_COLOR_RANGE, vec3(2.2));
 
-	//color = pow(getDof(color), vec3(2.2));
+	#ifdef DOF
+		if (hand < 0.9) color = pow(getDof(color), vec3(2.2));
+	#endif
 
 	#ifdef BLOOM
 		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.025 * BLOOM_MULT / reinhardTonemap(vec3(1.0)), vec3(2.2)) * 3.0;
