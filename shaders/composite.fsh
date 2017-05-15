@@ -600,6 +600,8 @@ void main()
 	if (land > 0.9)
 		color = getShading(color) * color;
 	else {
+
+		//color = pow(color, vec3(2.2)); // Uncomment this line to get minecraft's default sky. And comment the line under to get minecraft's default sky.
 		
 		color = pow(getAtmosphericScattering(vec3(0.0), fragpos2.rgb, 1.0, ambientlight, sunMult, moonMult), vec3(2.2));
 
