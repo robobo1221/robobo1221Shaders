@@ -33,13 +33,13 @@
 		rCoord0.y *= 3.0;
 		rCoord0.x = 0.0;
 
-		noise += texture2D(noisetex, (rCoord0 + wind * 0.5) * 32.0).x * 0.025;
-		noise += texture2D(noisetex, rCoord0 * 32.0).x * 0.025;
+		noise += texture2D(noisetex, (rCoord0 + wind * 0.5) * 8.0).x * 0.025;
+		noise += texture2D(noisetex, rCoord0 * 16.0).x * 0.0125;
 
 		coord.x *= 2.0;
 		noise += (texture2D(noisetex, coord * 4.0).x) * 0.05;
 
-		float cl = max(pow(noise, 4.0) - 0.005, 0.0) * 15.0;
+		float cl = max(pow(noise, 4.0) - 0.005, 0.0) * 10.0;
 		cl *= (1.0 - rainStrength * 0.5);
 		cl /= cl + 1.0;
 
