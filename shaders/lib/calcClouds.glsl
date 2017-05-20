@@ -8,10 +8,6 @@
 		return pow(clamp(dot(lPos, uPos),0.0,1.0),size);
 	}
 
-	float degreesToRadiance(float x){
-		return x * (pi / 180.0); 
-	}
-
 	float cloudNoise(vec2 coord, vec2 wind){
 		float noise = 1.0;
 
@@ -24,8 +20,8 @@
 
 		coord += wind * 0.8;
 
-		float deg0 = 90.0 - noise * 7.0;
-		float rad0 = degreesToRadiance(deg0);
+		float deg0 = 90.0 - noise * 4.0;
+		float rad0 = radians(deg0);
 		mat2 rM0 = mat2(cos(rad0), -sin(rad0), sin(rad0), cos(rad0));
 
 		vec2 rCoord0 = coord;

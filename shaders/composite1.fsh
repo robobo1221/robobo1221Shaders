@@ -677,12 +677,12 @@ void main()
 		if (land > 0.9) color = getReflection(color);
 	#endif
 
-	#ifdef FOG
-		if (land > 0.9) color = getFog(ambientlight, color, texcoord.st, land);
-	#endif
-
 	#ifdef VOLUMETRIC_CLOUDS
 		color = getVolumetricClouds(color, refTexC.st);
+	#endif
+
+	#ifdef FOG
+		if (land > 0.9) color = getFog(ambientlight, color, texcoord.st, land);
 	#endif
 
 	color = renderGaux4(color);
