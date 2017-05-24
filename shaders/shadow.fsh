@@ -2,7 +2,6 @@
 
 varying vec4 texcoord;
 varying vec4 color;
-varying vec3 worldpos;
 
 varying float iswater;
 varying float isTransparent;
@@ -12,11 +11,7 @@ uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelViewInverse;
 
-uniform vec3 sunPosition;
-
 uniform float frameTimeCounter;
-
-vec3 sunVec = normalize(sunPosition);
 
 vec3 nvec3(vec4 pos) {
     return pos.xyz/pos.w;

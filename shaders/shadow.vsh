@@ -22,12 +22,9 @@
 
 varying vec4 texcoord;
 varying vec4 color;
-varying vec3 worldpos;
 
 varying float iswater;
 varying float isTransparent;
-
-varying vec3 normal;
 
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
@@ -106,7 +103,7 @@ void main(){
 	position = shadowProjectionInverse * position;
 	position = shadowModelViewInverse * position;
 	
-	worldpos = position.xyz + cameraPosition;
+	vec3 worldpos = position.xyz + cameraPosition;
 	
 	#include "lib/vertexDisplacement.glsl"
 	
@@ -130,6 +127,4 @@ void main(){
 	#if !defined PROJECTED_CAUSTICS || !defined WATER_CAUSTICS
 		gl_Position *= 1.0 - iswater;
 	#endif
-
-	normal = normalize(gl_NormalMatrix * gl_Normal) * 0.5 + 0.5;
 }

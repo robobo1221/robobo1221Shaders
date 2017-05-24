@@ -57,8 +57,6 @@ uniform float near;
 uniform int isEyeInWater;
 uniform int worldTime;
 
-float transition_fading = 1.0-(clamp((worldTime-12000.0)/300.0,0.0,1.0)-clamp((worldTime-13000.0)/300.0,0.0,1.0) + clamp((worldTime-22000.0)/200.0,0.0,1.0)-clamp((worldTime-23400.0)/200.0,0.0,1.0));
-
 float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
 
 float getRainDrops(){

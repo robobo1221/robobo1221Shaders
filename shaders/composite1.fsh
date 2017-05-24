@@ -96,11 +96,18 @@ float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((t
 
 #include "lib/lightColor.glsl"
 
+//Unpack textures.
+#ifdef SPECULAR_MAPPING
+vec3 specular = 		texture2D(gaux3, texcoord.st).rgb;
+#endif
+vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
+vec3 normals = 			texture2D(gnormal, texcoord.st, 2.0).rgb * 2.0 - 1.0;
+vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
+vec4 aux = 				texture2D(gaux1, texcoord.st);
+vec4 aux2 = 			texture2D(gdepth, texcoord.st);
+
 float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
-
-vec4 aux = texture2D(gaux1, texcoord.st);
-vec4 aux2 = texture2D(gdepth, texcoord.st);
 
 float emissive = float(aux.g > 0.34 && aux.g < 0.36);
 
@@ -109,7 +116,7 @@ float istransparent = float(aux2.g > 0.28 && aux2.g < 0.32);
 float hand = float(aux2.g > 0.85 && aux2.g < 0.87);
 float translucent = 0.0;
 
-vec3 normal = mix(texture2D(gnormal, texcoord.st, 2.0).rgb * 2.0 - 1.0, texture2D(composite, texcoord.st).rgb * 2.0 - 1.0, iswater + istransparent + hand);
+vec3 normal = mix(normals, compositeNormals, iswater + istransparent + hand);
 
 float getEyeBrightnessSmooth = pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
 
@@ -319,10 +326,6 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 float pixeldepthRef = texture2D(gdepthtex, refTexC.st).x;
 float pixeldepthRef2 = texture2D(depthtex1, refTexC.st).x;
 
-#ifdef SPECULAR_MAPPING
-	vec3 specular = texture2D(gaux3, refTexC.st).rgb;
-#endif
-
 float land = float(pixeldepthRef < comp);
 float land2 = float(pixeldepthRef2 < comp);
 
@@ -461,7 +464,7 @@ vec3 renderGaux4(vec3 color){
 	vec4 albedo = pow(texture2D(gaux4, texcoord.st), vec4(2.2));
 
 
-	return mix(color, albedo.rgb * sqrt(color), albedo.a);
+	return mix(color, albedo.rgb * sqrt(color), albedo.a * (0.75 * rainStrength));
 }
 
 #ifdef WATER_DEPTH_FOG
@@ -659,7 +662,7 @@ vec3 renderGaux4(vec3 color){
 
 void main()
 {
-	vec3 color = pow(texture2D(gcolor, texcoord.st).rgb * MAX_COLOR_RANGE, vec3(2.2));
+	color = pow(color * MAX_COLOR_RANGE, vec3(2.2));
 
 	#ifdef WATER_REFRACT
 		color = waterRefraction(color, worldPosition, texcoord.st);

@@ -12,6 +12,12 @@
 #include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 #include "lib/options.glsl"
 
+/*
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+Standard shader configuration.
+
 const float 	wetnessHalflife 			= 70.0; //[0.0 10.0 20.0 30.0 40.0 50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0]
 const float 	drynessHalflife 			= 70.0; //[0.0 10.0 20.0 30.0 40.0 50.0 60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0]
 
@@ -24,17 +30,20 @@ const float 	ambientOcclusionLevel 		= 1.0; //[0.0 0.25 0.5 0.75 1.0]
 
 const float		eyeBrightnessHalflife		= 16.0; //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 16.0 18.0 20.0 24.0 28.0 32.0 ]
 
-const int 		R11F_G11F_B10F				= 0;
-const int 		RGBA16						= 0;
-const int 		RGBA8						= 0;
+//----------------------------------------------------------------------------------------------------------------------------------------------------//
+
+Texture Formats
 
 const int 		gcolorFormat				= RGBA16;
-const int 		gaux1Format					= RGBA16;
+const int 		gaux1Format					= RGB10_A2;
 const int 		gaux2Format					= RGBA16;
-const int 		gaux3Format					= R11F_G11F_B10F;
-const int 		gaux4Format					= RGBA8;
-const int 		gnormalFormat				= RGBA16;
+const int 		gaux3Format					= RGB10_A2;
+const int 		gaux4Format					= RGB5_A1;
+const int 		gnormalFormat				= RGB10_A2;
 const int 		compositeFormat				= RGBA16;
+*/
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------//
 
 //-------------------------------------------------//
 
@@ -102,14 +111,15 @@ float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((t
 
 #include "lib/lightColor.glsl"
 
+//Unpack textures.
+vec3 color = 	texture2D(gcolor, texcoord.st).rgb;
+vec3 normal = 	texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
+vec3 normal2 = 	texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
+vec4 aux = 		texture2D(gaux1, texcoord.st);
+vec4 aux2 = 	texture2D(gdepth, texcoord.st);
+
 float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
-
-vec3 normal = texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
-vec3 normal2 = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
-
-vec4 aux = texture2D(gaux1, texcoord.st);
-vec4 aux2 = texture2D(gdepth, texcoord.st);
 
 float land = float(pixeldepth2 < comp);
 float translucent = float(aux.g > 0.09 && aux.g < 0.11);
@@ -161,12 +171,10 @@ float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 }
 
 float getSkyLightmap(){
-
 	return pow(aux.z, skyLightAtten);
 }
 
 float getSkyLightmap2(){
-
 	return pow(aux2.z, skyLightAtten);
 }
 
@@ -592,7 +600,7 @@ vec4 getVolumetricClouds(vec3 color){
 
 void main()
 {
-	vec3 color = getDesaturation(pow(texture2D(gcolor, texcoord.st).rgb, vec3(2.2)), min(emissiveLM, 1.0));
+	color = getDesaturation(pow(color, vec3(2.2)), min(emissiveLM, 1.0));
 
 	vec3 sunMult = vec3(0.0);
 	vec3 moonMult = vec3(0.0);
