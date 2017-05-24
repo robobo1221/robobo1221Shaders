@@ -460,6 +460,14 @@ vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
 
 #endif
 
+#ifdef VOLUMETRIC_CLOUDS
+	vec3 getVolumetricClouds(vec3 color, vec2 uv){
+		vec4 sample = texture2DLod(gaux2, uv, 1.75) * MAX_COLOR_RANGE;
+
+		return mix(color, sample.rgb, clamp(sample.a, 0.0, 1.0));
+	}
+#endif
+
 vec3 renderGaux4(vec3 color){
 	vec4 albedo = pow(texture2D(gaux4, texcoord.st), vec4(2.2));
 
@@ -575,6 +583,11 @@ vec3 renderGaux4(vec3 color){
 		#endif
 		
 		color.rgb = land ? color.rgb : fogColor;
+
+		#ifdef VOLUMETRIC_CLOUDS
+			color.rgb = getVolumetricClouds(color.rgb, pos.st);
+		#endif
+		
 		color.a *= border;
 
 		return color;
@@ -649,14 +662,6 @@ vec3 renderGaux4(vec3 color){
 		return color;
 
 
-	}
-#endif
-
-#ifdef VOLUMETRIC_CLOUDS
-	vec3 getVolumetricClouds(vec3 color, vec2 uv){
-		vec4 sample = texture2DLod(gaux2, uv, 1.75) * MAX_COLOR_RANGE;
-
-		return mix(color, sample.rgb, clamp(sample.a, 0.0, 1.0));
 	}
 #endif
 

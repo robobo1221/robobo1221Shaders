@@ -494,6 +494,7 @@ vec4 getVolumetricCloudPosition(vec2 coord, float depth)
 }
 
 vec4 getVolumetricCloudsColor(vec3 wpos){
+	
 	const float height = 170.0;  	//Height of the clouds
 	const float distRatio = 100.0;  	//Distance between top and bottom of the cloud in block * 10.
 
@@ -528,7 +529,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 		float absorption = clamp((-(minHeight - wpos.y) / distRatio), 0.0f, 1.0f);
 
-		float sunLightAbsorption = pow(absorption, 5.0);
+		float sunLightAbsorption = pow(absorption, 4.0);
 
 		vec3 dayTimeColor = sunlight * 16.0 * sunUpCos;
 			 dayTimeColor += sunlight*sunlight * sunViewCos * 64.0 * sqrt(sunLightAbsorption) * sunUpCos;
