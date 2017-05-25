@@ -6,6 +6,8 @@ varying vec4 color;
 varying float iswater;
 varying float isTransparent;
 
+varying vec3 worldpos;
+
 uniform sampler2D tex;
 uniform sampler2D noisetex;
 

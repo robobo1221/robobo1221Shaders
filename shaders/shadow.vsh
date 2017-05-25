@@ -26,6 +26,8 @@ varying vec4 color;
 varying float iswater;
 varying float isTransparent;
 
+varying vec3 worldpos;
+
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
 uniform mat4 shadowProjection;
@@ -103,7 +105,7 @@ void main(){
 	position = shadowProjectionInverse * position;
 	position = shadowModelViewInverse * position;
 	
-	vec3 worldpos = position.xyz + cameraPosition;
+	worldpos = position.xyz + cameraPosition;
 	
 	#include "lib/vertexDisplacement.glsl"
 	
