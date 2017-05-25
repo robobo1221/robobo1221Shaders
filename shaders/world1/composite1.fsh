@@ -393,6 +393,7 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 		#else
 			float specMap = 0.0;
 		#endif	
+		
 		float F0 				= 0.05;
 		vec3 halfVector = normalize(reflectedVector + normalize(-fragpos.rgb));
 		float LdotH			= clamp(dot(reflectedVector, halfVector),0.0,1.0);
