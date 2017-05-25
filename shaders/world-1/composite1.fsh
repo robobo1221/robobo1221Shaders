@@ -90,32 +90,27 @@ vec4 nvec4(vec3 pos) {
     return vec4(pos.xyz, 1.0);
 }
 
-vec4 getFragpos(vec2 pos, float depth){
+vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
 
-	vec4 fragpos = gbufferProjectionInverse * vec4(vec3(pos.st, depth) * 2.0 - 1.0, 1.0);
-	return (fragpos / fragpos.w);
+vec3 toScreenSpace(vec3 p) {
+        vec3 p3 = vec3(p) * 2. - 1.;
+        vec4 fragposition = iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
+        return fragposition.xyz / fragposition.w;
 }
 
-vec4 fragpos = getFragpos(texcoord.st, pixeldepth);
+vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
 vec3 uPos = normalize(fragpos.rgb);
 
-vec4 getFragpos2(vec2 pos, float depth){
-
-	vec4 fragpos = gbufferProjectionInverse * vec4(vec3(pos.st, depth) * 2.0 - 1.0, 1.0);
-	return (fragpos / fragpos.w);
-}
-
-vec4 fragpos2 = getFragpos2(texcoord.st, pixeldepth2);
+vec3 fragpos2 = toScreenSpace(vec3(texcoord.st, pixeldepth));
 
 vec4 getWorldSpace(vec4 fragpos){
 
 	vec4 wpos = gbufferModelViewInverse * fragpos;
-		 wpos /= wpos.w;
 
 	return wpos;
 }
 
-vec3 worldPosition = getWorldSpace(fragpos).rgb;
+vec3 worldPosition = getWorldSpace(vec4(fragpos, 0.0)).rgb;
 
 float cdist(vec2 coord) {
 	return max(abs(coord.x-0.5),abs(coord.y-0.5))*2.0;
@@ -276,16 +271,15 @@ float pixeldepthRef2 = texture2D(depthtex1, refTexC.st).x;
 float land = float(pixeldepthRef < comp);
 float land2 = float(pixeldepthRef2 < comp);
 
-vec4 fragposRef = getFragpos(refTexC.st, pixeldepthRef);
-vec4 fragposRef2 = getFragpos2(refTexC.st, pixeldepthRef2);
+vec3 fragposRef = toScreenSpace(vec3(texcoord.st, pixeldepthRef));
+vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 
 #ifdef FOG
 	vec3 getFog(vec3 fogColor, vec3 color, vec2 pos){
 
 		color = pow(color, vec3(2.2));
 
-		vec3 fragposFog = vec3(pos.st, texture2D(gdepthtex, pos.st).r);
-			 fragposFog = nvec3(gbufferProjectionInverse * nvec4(fragposFog * 2.0 - 1.0));
+		vec3 fragposFog = toScreenSpace(vec3(pos, texture2D(gdepthtex, pos).x));
 
 		float fog = 1.0 - exp(-pow(sqrt(dot(fragposFog,fragposFog)) * 0.01, 2.0));
 			  fog = clamp(fog, 0.0, 1.0);

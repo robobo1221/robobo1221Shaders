@@ -16,8 +16,8 @@
 
 	#else
 
-	vec3 waterCaustics(vec3 color, vec4 fpos){
-		vec3 wpos = getWorldSpace(fpos).rgb + cameraPosition;
+	vec3 waterCaustics(vec3 color, vec3 fpos){
+		vec3 wpos = getWorldSpace(vec4(fpos, 0.0)).rgb + cameraPosition;
 		vec2 posxz = wpos.xz - wpos.y;
 
 		float caustics = dot(getWaveHeight(posxz, 1.0).xyz * 2.0 - 1.0, vec3(1.88888));

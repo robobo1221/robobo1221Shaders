@@ -145,28 +145,18 @@ vec4 nvec4(vec3 pos) {
     return vec4(pos.xyz, 1.0);
 }
 
-vec4 getFragpos(){
+vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
 
-	vec4 fragpos = gbufferProjectionInverse * vec4(vec3(texcoord.st, pixeldepth) * 2.0 - 1.0, 1.0);
-	if (isEyeInWater > 0.9)
-		fragpos.xy *= 0.817;
-
-	return (fragpos / fragpos.w);
+vec3 toScreenSpace(vec3 p) {
+        vec3 p3 = vec3(p) * 2. - 1.;
+        vec4 fragposition = iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
+        return fragposition.xyz / fragposition.w;
 }
 
-vec4 fragpos = getFragpos();
-vec3 uPos = normalize(fragpos.rgb);
+vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
+vec3 uPos = normalize(fragpos);
 
-vec4 getFragpos2(){
-
-	vec4 fragpos = gbufferProjectionInverse * vec4(vec3(texcoord.st, pixeldepth2) * 2.0 - 1.0, 1.0);
-	if (isEyeInWater > 0.9)
-		fragpos.xy *= 0.817;
-
-	return (fragpos / fragpos.w);
-}
-
-vec4 fragpos2 = getFragpos2();
+vec3 fragpos2 = toScreenSpace(vec3(texcoord.st, pixeldepth2));
 
 vec4 getWorldSpace(vec4 fragpos){
 
@@ -175,8 +165,8 @@ vec4 getWorldSpace(vec4 fragpos){
 	return wpos;
 }
 
-vec3 worldPosition = getWorldSpace(fragpos).rgb;
-vec3 worldPosition2 = getWorldSpace(fragpos2).rgb;
+vec3 worldPosition = getWorldSpace(vec4(fragpos, 0.0)).rgb;
+vec3 worldPosition2 = getWorldSpace(vec4(fragpos2, 0.0)).rgb;
 
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
@@ -186,7 +176,7 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 }
 
 #ifdef DYNAMIC_HANDLIGHT
-	float getHandItemLightFactor(vec4 fragpos, vec3 normal){
+	float getHandItemLightFactor(vec3 fragpos, vec3 normal){
 		float handItemLightFactor = length(fragpos.xyz);
 			handItemLightFactor = 1.0 - handItemLightFactor / 25.0;
 			handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor);

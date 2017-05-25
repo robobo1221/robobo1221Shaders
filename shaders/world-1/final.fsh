@@ -95,10 +95,18 @@ vec3 reinhardTonemap(vec3 color)
 	return color / (1.0 + color);
 }
 
+vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
+
+vec3 toScreenSpace(vec3 p) {
+        vec3 p3 = vec3(p) * 2. - 1.;
+        vec4 fragposition = iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
+        return fragposition.xyz / fragposition.w;
+}
+
+
 float getFog(vec2 pos){
 
-		vec3 fragposFog = vec3(pos.st, texture2D(depthtex1, pos.st).r);
-			 fragposFog = nvec3(gbufferProjectionInverse * nvec4(fragposFog * 2.0 - 1.0));
+		vec3 fragposFog = toScreenSpace(vec3(pos, texture2D(depthtex1, pos).x));
 
 		float fog = 1.0 - exp(-pow(sqrt(dot(fragposFog,fragposFog)) * 0.015, 2.0));
 			  fog = clamp(fog, 0.0, 1.0);
