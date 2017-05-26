@@ -23,10 +23,13 @@
 varying vec4 texcoord;
 varying vec4 color;
 
+varying vec2 lmcoord;
+
 varying float iswater;
 varying float isTransparent;
 
 varying vec3 worldpos;
+varying vec3 normal;
 
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
@@ -98,7 +101,7 @@ vec4 BiasShadowProjection(vec4 position) {
 
 void main(){
 	texcoord = gl_MultiTexCoord0;
-	vec4 lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+	lmcoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	
 	vec4 position = ftransform();
 	
@@ -129,4 +132,6 @@ void main(){
 	#if !defined PROJECTED_CAUSTICS || !defined WATER_CAUSTICS
 		gl_Position *= 1.0 - iswater;
 	#endif
+
+	normal = normalize(gl_NormalMatrix * gl_Normal);
 }

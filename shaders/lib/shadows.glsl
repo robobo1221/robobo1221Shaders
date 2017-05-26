@@ -39,21 +39,21 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	#ifdef SHADOW_FILTER
 	for (int i = 0; i < 9; i++) {
 
-		shading += shadow2D(shadowtex1, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).x;
+		shading += shadowStep(shadowtex1, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh));
 
 		#ifdef COLOURED_SHADOWS
-			shading2 += shadow2D(shadowtex0, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).x;
-			colorShading += shadow2D(shadowcolor0, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh)).rgb * 10.0;
+			shading2 += shadowStep(shadowtex0, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh));
+			colorShading += texture2D(shadowcolor0, shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize).rgb * 10.0;
 		#endif
 	}
 
 	#else
 
-		shading += shadow2D(shadowtex1, vec3(shadowPosition.xy, shadowPosition.z - diffthresh)).x;
+		shading += shadowStep(shadowtex1, vec3(shadowPosition.xy, shadowPosition.z - diffthresh));
 
 		#ifdef COLOURED_SHADOWS
-			shading2 += shadow2D(shadowtex0, vec3(shadowPosition.xy, shadowPosition.z - diffthresh)).x;
-			colorShading += shadow2D(shadowcolor0, vec3(shadowPosition.xy, shadowPosition.z - diffthresh)).rgb * 10.0;
+			shading2 += shadowStep(shadowtex0, vec3(shadowPosition.xy, shadowPosition.z - diffthresh));
+			colorShading += texture2D(shadowcolor0, shadowPosition.xy).rgb * 10.0;
 		#endif
 
 	#endif

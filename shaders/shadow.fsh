@@ -3,10 +3,13 @@
 varying vec4 texcoord;
 varying vec4 color;
 
+varying vec2 lmcoord;
+
 varying float iswater;
 varying float isTransparent;
 
 varying vec3 worldpos;
+varying vec3 normal;
 
 uniform sampler2D tex;
 uniform sampler2D noisetex;
@@ -41,9 +44,8 @@ void main() {
 		fragcolor.rgb = bool(iswater) ? caustics : fragcolor.rgb;
 	#endif
 	
-	fragcolor.rgb = mix(vec3(0.0), mix(vec3(0.0),fragcolor.rgb, fragcolor.a), isTransparent) * 0.1;
-	
-/* DRAWBUFFERS:0 */	
+/* DRAWBUFFERS:01 */	
 
-	gl_FragData[0] = vec4(fragcolor);
+	gl_FragData[0] = vec4(fragcolor.rgb * 0.1, fragcolor.a);
+	gl_FragData[1] = vec4(normal * 0.5 + 0.5, lmcoord.y * 0.8 + 0.2);
 }
