@@ -59,12 +59,6 @@ float pixeldepth = 	texture2D(gdepthtex, texcoord.st).r;
 float pixeldepth2 = texture2D(depthtex1, texcoord.st).r;
 float aux = 		texture2D(gaux1, texcoord.st).b;
 
-float getSkyLightmap(){
-	return pow(aux, skyLightAtten);
-}
-
-float skyLightMap = getSkyLightmap();
-
 vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
 
 vec3 toScreenSpace(vec3 p) {
@@ -126,7 +120,7 @@ vec3 getGi(){
 
 	vec4 shadowPosition = getShadowSpace(pixeldepth2, texcoord.st);
 	
-	const int steps = 4;
+	const int steps = 6;
 
 	for (int i = 1; i < steps + 1; i++){
 		
@@ -150,29 +144,33 @@ vec3 getGi(){
 			vec3 lPos = normalize(halfVector);
 			float distFromX = length(halfVector);
 
-			float dotProduct = clamp(dot(vec3(lPos.xy, -lPos.z), normalize(shadowSpaceNormal.xyz)), 0.0, 1.0);
+			float nDotL = clamp(dot(vec3(lPos.xy, -lPos.z), normalize(shadowSpaceNormal.xyz)), 0.0, 1.0);
 			float sampleWeight = clamp(dot(lPos, normalSample.rgb), 0.0, 1.0);
 
 			float distanceWeight = 1.0 / (pow(distFromX * 6200.0, 2.0) + 5000.0);
 				  distanceWeight *= pow(length(offset), 2.0);
 				  
-			float skyLightMapShadow = 1.0 / (max(0.0, normalSample.a - skyLightMap) * 50.0 + 1.0);
+			float skyLightMapShadow = 1.0 / (max(0.0, normalSample.a - aux) * 50.0 + 1.0);
 
-			indirectLight += pow(texture2DLod(shadowcolor, biasedPosition.xy, .0).rgb, vec3(2.2)) * sampleWeight * dotProduct * distanceWeight * skyLightMap;
+			indirectLight += pow(texture2DLod(shadowcolor, biasedPosition.xy, .0).rgb, vec3(2.2)) * sampleWeight * nDotL * distanceWeight * skyLightMapShadow;
 
 			weight++;
 	}
 	indirectLight /= weight;
 	indirectLight *= 1000000000.0;
 
-	return indirectLight;
+	return clamp(indirectLight / (indirectLight + 1.0), 0.0, 1.0);
 }
 #endif
 
 void main(){
 #ifdef GLOBAL_ILLUMINATION
 
-	vec3 globalIllumination = getGi();
+	vec3 globalIllumination = vec3(0.0);
+
+	if (pixeldepth2 < 1.0){
+		globalIllumination = getGi();
+	}
 	
 	gl_FragData[0] = vec4(texture2D(gcolor, texcoord.st).rgb, globalIllumination.r);
 	gl_FragData[1] = vec4(texture2D(gdepth, texcoord.st).rgb, globalIllumination.g);

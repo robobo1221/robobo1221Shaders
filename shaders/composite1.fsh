@@ -372,7 +372,7 @@ vec3 getShading(vec3 color){
 		globalIllumination = getGlobalIllumination(texcoord.st) * lightCol;
 	#endif
 
-	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination * 150.0 + emissiveLightmap;
+	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination * 500.0 + emissiveLightmap;
 }
 
 #ifdef VOLUMETRIC_LIGHT
