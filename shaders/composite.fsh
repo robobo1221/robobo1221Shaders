@@ -113,12 +113,16 @@ vec3 getGi(){
 	
 	float rotateMult = dither * pi * 2.0;	//Make sure the offset rotates 360 degrees.
 	
-	mat2 rotationMatrix	= mat2(cos(rotateMult), -sin(rotateMult),
-						       sin(rotateMult), cos(rotateMult));
+	mat2 rotationMatrix	= rotate(rotateMult);
 
 	vec4 shadowSpaceNormal = normalize(shadowModelView * getWorldSpace(vec4(normal, 0.0)));
 
-	vec4 shadowPosition = getShadowSpace(pixeldepth2, texcoord.st);
+	vec3 shadowPosition = toShadowSpace(toScreenSpace(vec3(texcoord.st, pixeldepth)));
+
+	float fragposLength = length(fragpos);
+	float diffTresh = 0.0025 * pow(smoothstep(0.0, 255.0, fragposLength), 0.75) + 0.0001;
+
+	float giDistanceMask = clamp(1.0 - (fragposLength / far * 1.5), 0.0, 1.0);
 	
 	const int steps = 6;
 
@@ -127,39 +131,43 @@ vec3 getGi(){
 			vec2 offset = rotationMatrix * vec2(float(i) + dither) / 16.0 / float(steps);
 				 offset *= length(offset) * 4.0;
 
-			vec4 offsetPosition = vec4(shadowPosition.rg + offset, 0.0, 0.0);
-			vec2 biasedPosition = biasedShadows(offsetPosition).xy;
-
-			vec4 normalSample = texture2D(shadowcolor1, biasedPosition.xy);
-				 normalSample.rgb = normalSample.rgb * 2.0 - 1.0;
-				 normalSample.xy = -normalSample.xy;
+			vec2 offsetPosition = vec2(shadowPosition.rg + offset);
+			vec2 biasedPosition = biasedShadows(vec3(offsetPosition, 0.0)).xy;
 
 			float shadow = texture2D(shadowtex1, biasedPosition).x;
+			      shadow = -2.5 + 5.0 * (shadow + diffTresh);
 
-			shadow = -2.5 + 5.0 * (shadow + 0.0025 * pow(smoothstep(0.0, 255.0, length(fragpos)), 0.75) + 0.0001);
-			vec3 samplePos = vec3(offsetPosition.xy, shadow);
+			vec3 samplePos = vec3(offsetPosition, shadow);
 			
 			vec3 halfVector = samplePos.xyz - shadowPosition.xyz;
 			
 			vec3 lPos = normalize(halfVector);
 			float distFromX = length(halfVector);
 
-			float nDotL = clamp(dot(vec3(lPos.xy, -lPos.z), normalize(shadowSpaceNormal.xyz)), 0.0, 1.0);
-			float sampleWeight = clamp(dot(lPos, normalSample.rgb), 0.0, 1.0);
+			float nDotL = clamp(dot(vec3(lPos.xy, -lPos.z), shadowSpaceNormal.xyz), 0.0, 1.0);
 
-			float distanceWeight = 1.0 / (pow(distFromX * 6200.0, 2.0) + 5000.0);
-				  distanceWeight *= pow(length(offset), 2.0);
-				  
-			float skyLightMapShadow = 1.0 / (max(0.0, normalSample.a - aux) * 50.0 + 1.0);
+			if (nDotL > 0.0) {
 
-			indirectLight += pow(texture2DLod(shadowcolor, biasedPosition.xy, .0).rgb, vec3(2.2)) * sampleWeight * nDotL * distanceWeight * skyLightMapShadow;
+				vec4 normalSample = texture2D(shadowcolor1, biasedPosition);
+					 normalSample.rgb = normalSample.rgb * 2.0 - 1.0;
+					 normalSample.xy = -normalSample.xy;
+
+				float sampleWeight = clamp(dot(lPos, normalSample.rgb), 0.0, 1.0);
+
+				float distanceWeight = 1.0 / (pow(distFromX * 6200.0, 2.0) + 5000.0);
+					  distanceWeight *= pow(length(offset), 2.0);
+					
+				float skyLightWeight = 1.0 / (max(0.0, normalSample.a - aux) * 50.0 + 1.0);
+
+				indirectLight += pow(texture2DLod(shadowcolor, biasedPosition, 4.0).rgb, vec3(2.2)) * sampleWeight * nDotL * distanceWeight * skyLightWeight;
+			}
 
 			weight++;
 	}
 	indirectLight /= weight;
 	indirectLight *= 1000000000.0;
 
-	return clamp(indirectLight / (indirectLight + 1.0), 0.0, 1.0);
+	return clamp(indirectLight / (indirectLight + 1.0), 0.0, 1.0) * giDistanceMask;
 }
 #endif
 

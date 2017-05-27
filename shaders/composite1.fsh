@@ -335,15 +335,15 @@ float jaao(vec2 p) {
 */
 
 #ifdef GLOBAL_ILLUMINATION
-vec3 getGlobalIllumination(vec2 uv){
-	const float lod = 2.5;
-	
-	float sampleR = texture2D(gcolor, uv, lod).a;
-	float sampleG = texture2D(gdepth, uv, lod).a;
-	float sampleB = texture2D(composite, uv, lod).a;
-	
-	return getDesaturation(vec3(sampleR, sampleG, sampleB), min(emissiveLM, 1.0));
-}
+	vec3 getGlobalIllumination(vec2 uv){
+		const float lod = 2.5;
+		
+		float sampleR = texture2D(gcolor, uv, lod).a;
+		float sampleG = texture2D(gdepth, uv, lod).a;
+		float sampleB = texture2D(composite, uv, lod).a;
+		
+		return getDesaturation(vec3(sampleR, sampleG, sampleB), min(emissiveLM, 1.0));
+	}
 #endif
 
 vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
@@ -369,10 +369,10 @@ vec3 getShading(vec3 color){
 	vec3 globalIllumination = vec3(0.0);
 	
 	#ifdef GLOBAL_ILLUMINATION
-		globalIllumination = getGlobalIllumination(texcoord.st) * lightCol;
+		globalIllumination = getGlobalIllumination(texcoord.st) * lightCol * transition_fading * 500.0;
 	#endif
 
-	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination * 500.0 + emissiveLightmap;
+	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap;
 }
 
 #ifdef VOLUMETRIC_LIGHT
@@ -397,7 +397,7 @@ vec3 getShading(vec3 color){
 
 			float diffthresh = 0.0005;	// Fixes light leakage from walls
 			
-			vec4 worldposition = vec4(0.0);
+			vec3 worldposition = vec3(0.0);
 
 			for (minDist; minDist < maxDist; ) {
 
@@ -407,7 +407,7 @@ vec3 getShading(vec3 color){
 				}
 
 				//Getting worldpositon
-				worldposition = getShadowSpace(expDepth(minDist),texcoord.st);
+				worldposition = toShadowSpace(toScreenSpace(vec3(texcoord.st, expDepth(minDist))));
 
 				//Rescaling ShadowMaps
 				worldposition = biasedShadows(worldposition);

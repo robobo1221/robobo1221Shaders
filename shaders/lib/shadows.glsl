@@ -12,22 +12,22 @@ vec2 shadowOffset[8] = vec2[8] (
 
 vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor, bool isClamped){
 
-	vec4 shadowPosition = biasedShadows(getShadowSpace(shadowDepth, texcoord.st));
+	vec3 shadowPosition = toShadowSpace(toScreenSpace(vec3(texcoord.st, shadowDepth)));
+		 shadowPosition = biasedShadows(shadowPosition);
+
 	float NdotL = clamp(dot(normal, lightVector),0.0,1.0);
-	NdotL = mix(NdotL, 1.0, translucent);
+		  NdotL = mix(NdotL, 1.0, translucent);
 
 	float step = 1.0 / shadowMapResolution;
 
 	float distortFactor = getDistordFactor(shadowPosition);
 
 	float diffthresh = pow(distortFactor, 4.0)/ 4096.0 * sqrt(1.0 - NdotL*NdotL)/NdotL + clamp(pow(dot(fragpos,fragpos),.125),0.0,1.0) / 4096;
-		diffthresh = mix(advDisFactor ? diffthresh : 0.0003 , 0.0003, translucent);
+		  diffthresh = mix(advDisFactor ? diffthresh : 0.0003 , 0.0003, translucent);
 
 	vec3 shading = vec3(0.0);
 	vec3 shading2 = vec3(0.0);
 	vec3 colorShading = vec3(0.0);
-
-	float dither = bayer16x16(texcoord.st);
 
 	float noise = fract(sin(dot(texcoord.xy, vec2(18.9898f, 28.633f))) * 4378.5453f) * 4.0;
 		mat2 noiseM = mat2(cos(noise), -sin(noise),
