@@ -149,7 +149,7 @@ vec3 getGi(){
 			weight++;
 	}
 	indirectLight /= weight;
-	indirectLight *= 1000000000.0;
+	indirectLight *= 1250000000.0;
 
 	return clamp(indirectLight / (indirectLight + 1.0), 0.0, 1.0) * giDistanceMask;
 }
