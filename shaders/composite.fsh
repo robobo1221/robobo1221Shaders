@@ -7,16 +7,6 @@
 #include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 #include "lib/options.glsl"
 
-//-------------------------------------------------//
-
-/*
-Standard shader configuration.
-const bool 		shadowColor0Mipmap = true;
-
-*/
-
-//-------------------------------------------------//
-
 varying vec4 texcoord;
 
 uniform sampler2D gcolor;
@@ -40,7 +30,6 @@ uniform float far;
 
 uniform sampler2D gnormal;
 uniform sampler2D gaux1;
-uniform sampler2D gdepthtex;
 uniform sampler2D depthtex1;
 
 uniform sampler2D shadowcolor;
@@ -55,8 +44,7 @@ uniform float viewWidth;
 const float pi = 3.141592653589793238462643383279502884197169;
 
 vec3 normal = 		texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
-float pixeldepth = 	texture2D(gdepthtex, texcoord.st).r;
-float pixeldepth2 = texture2D(depthtex1, texcoord.st).r;
+float pixeldepth = texture2D(depthtex1, texcoord.st).r;
 float aux = 		texture2D(gaux1, texcoord.st).b;
 
 vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
@@ -98,10 +86,6 @@ float bayer16x16(vec2 p){
 }
 #undef g
 
-vec4 nvec4(vec3 pos) {
-    return vec4(pos.xyz, 1.0);
-}
-
 #include "lib/shadowPos.glsl"
 
 vec3 getGi(){
@@ -122,7 +106,7 @@ vec3 getGi(){
 	float fragposLength = length(fragpos);
 	float diffTresh = 0.0025 * pow(smoothstep(0.0, 255.0, fragposLength), 0.75) + 0.0001;
 
-	float giDistanceMask = clamp(1.0 - (fragposLength / far * 1.5), 0.0, 1.0);
+	float giDistanceMask = clamp(1.0 - (fragposLength / far), 0.0, 1.0);
 	
 	const int steps = 6;
 
@@ -159,7 +143,7 @@ vec3 getGi(){
 					
 				float skyLightWeight = 1.0 / (max(0.0, normalSample.a - aux) * 50.0 + 1.0);
 
-				indirectLight += pow(texture2DLod(shadowcolor, biasedPosition, 4.0).rgb, vec3(2.2)) * sampleWeight * nDotL * distanceWeight * skyLightWeight;
+				indirectLight += pow(texture2D(shadowcolor, biasedPosition).rgb, vec3(2.2)) * sampleWeight * nDotL * distanceWeight * skyLightWeight;
 			}
 
 			weight++;
@@ -176,7 +160,7 @@ void main(){
 
 	vec3 globalIllumination = vec3(0.0);
 
-	if (pixeldepth2 < 1.0){
+	if (pixeldepth < 1.0){
 		globalIllumination = getGi();
 	}
 	
