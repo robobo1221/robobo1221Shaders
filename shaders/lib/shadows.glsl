@@ -1,5 +1,5 @@
 #ifdef SHADOW_FILTER
-vec2 shadowOffset[9] = vec2[9] (
+vec2 shadowOffset[8] = vec2[8] (
 		vec2(1.0, 0.0),
 		vec2(0.0, 1.0),
 		vec2(-1.0, 0.0),
@@ -7,8 +7,7 @@ vec2 shadowOffset[9] = vec2[9] (
 		vec2(0.5, 0.0),
 		vec2(0.0, 0.5),
 		vec2(-0.5, 0.0),
-		vec2(0.0, -0.5),
-		vec2(0.0, 0.0));
+		vec2(0.0, -0.5));
 #endif
 
 vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor, bool isClamped){
@@ -37,7 +36,7 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	if (max(abs(shadowPosition.x),abs(shadowPosition.y)) < 0.99) {
 
 	#ifdef SHADOW_FILTER
-	for (int i = 0; i < 9; i++) {
+	for (int i = 0; i < 8; i++) {
 
 		shading += shadowStep(shadowtex1, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh));
 
@@ -59,14 +58,14 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	#endif
 
 	#ifdef SHADOW_FILTER
-		shading /= 9.0;
+		shading /= 8.0;
 	#endif
 
 	#ifdef COLOURED_SHADOWS
 
 		#ifdef SHADOW_FILTER
-			shading2 /= 9.0;
-			colorShading /= 9.0;
+			shading2 /= 8.0;
+			colorShading /= 8.0;
 		#endif
 
 		shading = mix(shading2, colorShading, max(shading - shading2, 0.0));
