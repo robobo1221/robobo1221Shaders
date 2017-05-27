@@ -336,13 +336,13 @@ float jaao(vec2 p) {
 
 #ifdef GLOBAL_ILLUMINATION
 vec3 getGlobalIllumination(vec2 uv){
-	const float lod = 1.75;
+	const float lod = 2.5;
 	
 	float sampleR = texture2D(gcolor, uv, lod).a;
 	float sampleG = texture2D(gdepth, uv, lod).a;
 	float sampleB = texture2D(composite, uv, lod).a;
 	
-	return vec3(sampleR, sampleG, sampleB);
+	return getDesaturation(vec3(sampleR, sampleG, sampleB), min(emissiveLM, 1.0));
 }
 #endif
 
@@ -395,7 +395,7 @@ vec3 getShading(vec3 color){
 
 			float weight = 128.0 / rSD.y;
 
-			float diffthresh = 0.00005;	// Fixes light leakage from walls
+			float diffthresh = 0.0005;	// Fixes light leakage from walls
 			
 			vec4 worldposition = vec4(0.0);
 
@@ -556,8 +556,6 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 vec4 getVolumetricClouds(vec3 color){
 
-	float cloudDistance = 300.0 / far;
-
 	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
 	float nearPlane = 2.0;			//start to where the ray should march.
@@ -585,7 +583,7 @@ vec4 getVolumetricClouds(vec3 color){
 
 		float volumetricDistance = length(wpos.xyz - cameraPosition.xyz);
 
-		if (length(worldPosition2) < volumetricDistance && land > 0.9){
+		if (length(worldPosition2) < volumetricDistance){
 			result.a = 0.0;
 		}
 

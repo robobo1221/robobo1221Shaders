@@ -122,7 +122,7 @@ vec3 getGi(){
 	
 	const int steps = 6;
 
-	for (int i = 1; i < steps + 1; i++){
+	for (int i = 1; i < steps; i++){
 		
 			vec2 offset = rotationMatrix * vec2(float(i) + dither) / 16.0 / float(steps);
 				 offset *= length(offset) * 4.0;

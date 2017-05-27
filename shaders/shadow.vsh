@@ -26,7 +26,6 @@ varying vec4 color;
 varying vec2 lmcoord;
 
 varying float iswater;
-varying float isTransparent;
 
 varying vec3 worldpos;
 varying vec3 normal;
@@ -118,13 +117,8 @@ void main(){
 	gl_Position = BiasShadowProjection(position);
 	
 	color = gl_Color;
-	
-	isTransparent = 0.0;
-	
-	if (mc_Entity.x == 97.0 || mc_Entity.x == 95.0 || mc_Entity.x == 79.0 || mc_Entity.x == 160.0 || mc_Entity.x == 90.0 || mc_Entity.x == 165.0 || mc_Entity.x == 8.0 || mc_Entity.x == 9.0)
-		isTransparent = 1.0;
 		
-		iswater = 0.0;
+	iswater = 0.0;
 	
 	if (mc_Entity.x == 8.0 || mc_Entity.x == 9.0)
 		iswater = 1.0;

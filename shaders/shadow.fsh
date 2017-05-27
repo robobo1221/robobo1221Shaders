@@ -6,7 +6,6 @@ varying vec4 color;
 varying vec2 lmcoord;
 
 varying float iswater;
-varying float isTransparent;
 
 varying vec3 worldpos;
 varying vec3 normal;
