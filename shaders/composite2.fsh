@@ -541,7 +541,7 @@ vec3 renderGaux4(vec3 color){
 			if(pos.x < 0 || pos.x > 1 || pos.y < 0 || pos.y > 1 || pos.z < 0 || pos.z > 1.0) break;
 
 			vec3 spos = vec3(pos.st, fragdepth);
-			     spos = nvec3(gbufferProjectionInverse * nvec4(spos * 2.0 - 1.0));
+			     spos = toScreenSpace(spos);
 
 			float err = distance(fragpos.xyz, spos.xyz);
 			

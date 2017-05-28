@@ -157,6 +157,8 @@ float bayer16x16(vec2 p){
 }
 #undef g
 
+float dither = bayer16x16(texcoord.st);
+
 float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 
 	float lightmap = aux.r;
@@ -173,16 +175,8 @@ float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 	return lightmap * EMISSIVE_LIGHT_MULT;
 }
 
-float getSkyLightmap(){
-	return pow(aux.z, skyLightAtten);
-}
-
-float getSkyLightmap2(){
-	return pow(aux2.z, skyLightAtten);
-}
-
-vec4 nvec4(vec3 pos) {
-    return vec4(pos.xyz, 1.0);
+float getSkyLightmap(float l){
+	return pow(l, skyLightAtten);
 }
 
 vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
@@ -291,7 +285,7 @@ vec3 shadows = getShadow(pixeldepth2, normal, 2.0, true, false);
 
 vec3 getShading(vec3 color){
 
-	float skyLightMap = getSkyLightmap();
+	float skyLightMap = getSkyLightmap(aux.z);
 
 	float diffuse = mix(OrenNayar(fragpos.rgb, lightVector, normal, 0.0), 1.0, translucent * 0.5) * ((1.0 - rainStrength) * transition_fading);
 		  diffuse = diffuse * mix(1.0, pow(skyLightMap, 0.25) * 0.9 + 0.1, isEyeInWater * (1.0 - iswater));
@@ -325,7 +319,7 @@ vec3 getShading(vec3 color){
 			vec3 rSD = vec3(0.0);
 				rSD.x = 0.0;
 				rSD.y = 4.0 / VL_QUALITY;
-				rSD.z = bayer16x16(texcoord.st);
+				rSD.z = dither;
 				
 			
 			rSD.z *= rSD.y;
@@ -503,8 +497,6 @@ vec4 getVolumetricClouds(vec3 color){
 	float farPlane = far; 		//End from where the ray should march.
 
     float increment = far / 10.0;
-
-	float dither = bayer16x16(texcoord.st);
 
 	farPlane += dither * increment;
 
