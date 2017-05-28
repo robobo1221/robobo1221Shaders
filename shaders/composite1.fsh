@@ -257,10 +257,10 @@ float shadowStep(sampler2D shadow, vec3 sPos) {
 	return clamp(1.0 - max(sPos.z - texture2D(shadow, sPos.xy).x, 0.0) * float(shadowMapResolution), 0.0, 1.0);
 }
 
+#include "lib/nightDesat.glsl"
 #include "lib/noise.glsl"
 #include "lib/shadowPos.glsl"
 #include "lib/shadows.glsl"
-#include "lib/nightDesat.glsl"
 #include "lib/shadingForward.glsl"
 #include "lib/gaux2Forward.glsl"
 #include "lib/phases.glsl"
@@ -274,65 +274,6 @@ float getSubSurfaceScattering(){
 
 	return clamp(cosV, 0.0, 90.0);
 }
-
-/*
-
-#define steps 16
-#define radius 2.
-
-#define hammersley(i, N) vec2( float(i) / float(N), float( bitfieldReverse(i) ) * 2.3283064365386963e-10 )
-#define tau 6.2831853071795864769252867665590
-#define circlemap(p) (vec2(cos((p).y*tau), sin((p).y*tau)) * p.x)
-
-float jaao(vec2 p) {
-
-    const float r = radius;
-
-    int x = int(p.x*viewWidth)  % 4;
-    int y = int(p.y*viewHeight) % 4;
-    int index = (x<<2) + y;
-
-    vec3 p3 = toScreenSpace(p).rgb;
-    vec3 normal = normalize( cross(dFdx(p3), dFdy(p3)) );
-    vec2 clipRadius = r * vec2(viewHeight/viewWidth,1.) / length(p3);
-
-    vec3 v = normalize(-p3);
-
-    float nvisibility = 0.;
-    float vvisibility = 0.;
-
-    for (int i = 0; i < steps; i++) {
-        vec2 circlePoint = circlemap(
-            hammersley(i*15+index+1, 16*steps)
-        )*clipRadius;
-
-        vec3 o  = toScreenSpace(circlePoint    +p).rgb - p3;
-        vec3 o2 = toScreenSpace(circlePoint*.25+p).rgb - p3;
-        float l  = length(o );
-        float l2 = length(o2);
-        o /=l ;
-        o2/=l2;
-
-        nvisibility += clamp(1.-max(
-            dot(o , normal) - clamp((l -r)/r,0.,1.),
-            dot(o2, normal) - clamp((l2-r)/r,0.,1.)
-        ), 0., 1.);
-
-        vvisibility += clamp(1.-max(
-            dot(o , v) - clamp((l -r)/r,0.,1.),
-            dot(o2, v) - clamp((l2-r)/r,0.,1.)
-        ), 0., 1.);
-    }
-
-    return pow(min(vvisibility*2., nvisibility) / float(steps), 2.0);
-}
-
-#undef steps
-#undef radius
-#undef hammersley
-#undef tau
-#undef circlemap
-*/
 
 #ifdef GLOBAL_ILLUMINATION
 	vec3 getGlobalIllumination(vec2 uv){

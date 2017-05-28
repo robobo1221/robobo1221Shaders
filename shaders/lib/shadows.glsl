@@ -68,6 +68,8 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 			colorShading /= 8.0;
 		#endif
 
+		colorShading = getDesaturation(colorShading, min(emissiveLM, 1.0));
+
 		shading = mix(shading2, colorShading, max(shading - shading2, 0.0));
 	#endif
 
