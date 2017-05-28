@@ -278,7 +278,7 @@ float getSubSurfaceScattering(){
 #ifdef GLOBAL_ILLUMINATION
 	vec3 getGlobalIllumination(vec2 uv){
 		const float lod = 2.5;
-		
+
 		float sampleR = texture2D(gcolor, uv, lod).a;
 		float sampleG = texture2D(gdepth, uv, lod).a;
 		float sampleB = texture2D(composite, uv, lod).a;
@@ -310,7 +310,7 @@ vec3 getShading(vec3 color){
 	vec3 globalIllumination = vec3(0.0);
 	
 	#ifdef GLOBAL_ILLUMINATION
-		globalIllumination = (getGlobalIllumination(texcoord.st) * 500.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
+		globalIllumination = (getGlobalIllumination(texcoord.st) * 5.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
 	#endif
 
 	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap;
