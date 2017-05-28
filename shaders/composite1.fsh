@@ -508,6 +508,8 @@ vec4 getVolumetricClouds(vec3 color){
 
 	farPlane += dither * increment;
 
+	vec3 fixedWorldPosition = mix(worldPosition2, worldPosition, iswater * (1.0 - isEyeInWater));
+
 	while (farPlane > nearPlane){
 
 		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
@@ -524,7 +526,7 @@ vec4 getVolumetricClouds(vec3 color){
 
 		float volumetricDistance = length(wpos.xyz - cameraPosition.xyz);
 
-		if (length(worldPosition2) < volumetricDistance){
+		if (length(fixedWorldPosition) < volumetricDistance){
 			result.a = 0.0;
 		}
 

@@ -6,6 +6,7 @@ varying vec4 color;
 varying vec2 lmcoord;
 
 varying float iswater;
+varying float translucentBlocks;
 
 varying vec3 worldpos;
 varying vec3 normal;
@@ -42,6 +43,8 @@ void main() {
 	
 		fragcolor.rgb = bool(iswater) ? caustics : fragcolor.rgb;
 	#endif
+
+	fragcolor.rgb = mix(fragcolor.rgb, vec3(0.0), smoothstep(0.99, 1.0, fragcolor.a) * translucentBlocks);
 	
 /* DRAWBUFFERS:01 */	
 

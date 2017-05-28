@@ -26,6 +26,7 @@ varying vec4 color;
 varying vec2 lmcoord;
 
 varying float iswater;
+varying float translucentBlocks;
 
 varying vec3 worldpos;
 varying vec3 normal;
@@ -99,6 +100,8 @@ vec4 BiasShadowProjection(vec4 position) {
 }
 
 void main(){
+	float bockID = mc_Entity.x;
+	
 	texcoord = gl_MultiTexCoord0;
 	lmcoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	
@@ -119,9 +122,10 @@ void main(){
 	color = gl_Color;
 		
 	iswater = 0.0;
+	translucentBlocks = 0.0;
 	
-	if (mc_Entity.x == 8.0 || mc_Entity.x == 9.0)
-		iswater = 1.0;
+	iswater = float(bockID == 8.0 || bockID == 9.0);
+	translucentBlocks = float(bockID == 95.0 || bockID == 165.0 || bockID == 160.0);
 		
 	#if !defined PROJECTED_CAUSTICS || !defined WATER_CAUSTICS
 		gl_Position *= 1.0 - iswater;
