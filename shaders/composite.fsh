@@ -141,7 +141,9 @@ vec3 getGi(){
 				float distanceWeight = 1.0 / (pow(distFromX * 6200.0, 2.0) + 5000.0);
 					  distanceWeight *= pow(length(offset), 2.0);
 					
-				float skyLightWeight = 1.0 / (max(0.0, normalSample.a - aux) * 50.0 + 1.0);
+				float skyLightWeight = normalSample.a - aux;
+					  skyLightWeight *= skyLightWeight;
+					  skyLightWeight = 1.0 / (max(0.0, skyLightWeight) * 50.0 + 1.0);
 
 				indirectLight += pow(texture2D(shadowcolor, biasedPosition).rgb, vec3(2.2)) * sampleWeight * nDotL * distanceWeight * skyLightWeight;
 			}
@@ -149,7 +151,7 @@ vec3 getGi(){
 			weight++;
 	}
 	indirectLight /= weight;
-	indirectLight *= 1250000000.0;
+	indirectLight *= 1000000000.0;
 
 	return clamp(indirectLight / (indirectLight + 1.0), 0.0, 1.0) * giDistanceMask;
 }

@@ -1,12 +1,20 @@
 vec3 renderGaux2(vec3 color, vec3 normal){
 
 	vec4 albedo = texture2D(gaux2, texcoord.st);
+
+	bool multMask = albedo.a > 0.0 + iswater && albedo.a < 1.0;
+
 	#ifdef DYNAMIC_HANDLIGHT
 		albedo.rgb = getDesaturation(albedo.rgb, mix(forwardEmissive, min(handLightMult * 10.0, 1.0), hand));
 	#else
 		albedo.rgb = getDesaturation(albedo.rgb, forwardEmissive);
 	#endif
-		albedo.rgb = pow(albedo.rgb, vec3(2.2));
+		albedo.rgb = pow(albedo.rgb, !multMask ? vec3(2.2) : vec3(1.0));
 
-	return mix(color, albedo.rgb * getShadingForward(normal, albedo.rgb) * mix(color, vec3(1.0), clamp(albedo.a, 0.0, 1.0)), pow(albedo.a, mix(0.25, 1.0, iswater)));
+	vec3 shading = vec3(0.0);
+
+	if (!multMask)
+		shading = getShadingForward(normal, albedo.rgb);
+
+	return mix(color, albedo.rgb * (multMask ? color : shading), float(albedo.a > 0.0 + iswater));
 }

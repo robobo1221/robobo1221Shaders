@@ -17,7 +17,7 @@ const float 	drynessHalflife 			= 70.0; //[0.0 10.0 20.0 30.0 40.0 50.0 60.0 70.
 const int 		noiseTextureResolution  	= 1024;
 
 const bool 		shadowHardwareFiltering 	= true;
-const float		sunPathRotation				= -40.0; //[-50.0 -40.0 -30.0 -20.0 -10.0 0.0 10.0 20.0 30.0 40.0 50.0]
+const float		sunPathRotation				= -40.0; //[-50.0 -40.0 -30.0 -20.0 -10.0 0.01 10.0 20.0 30.0 40.0 50.0]
 
 const float 	ambientOcclusionLevel 		= 1.0; //[0.0 0.25 0.5 0.75 1.0]
 
