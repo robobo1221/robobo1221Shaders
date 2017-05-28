@@ -503,9 +503,8 @@ vec3 renderGaux4(vec3 color){
 				fogColor = mix(fogColor, (fogColor * lightCol) * 3.75, SSS * (1.0 - rainStrength) * shadows);
 				fogColor = mix(fogColor, (fogColor * lightCol) * 6.0,(sunAngleCosine * shadows) * (transition_fading * (1.0 - pow(max(NdotL,0.0), 2.0))) * (1.0 - rainStrength));
 				}
-				fogColor = mix(fogColor, vec3(fogColor.r, fogColor.g * 1.1, fogColor.b * 1.05), (pow((1.0 - depthFog), 0.75) * (1.0 - rainStrength)) * 20.0);
 			 
-		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.5);
+		color *= pow(vec3(0.1, 0.5, 0.8), vec3(depth) * 0.25);
 
 		return mix(color, fogColor, depthFog);
 	}

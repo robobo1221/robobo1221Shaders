@@ -369,7 +369,7 @@ vec3 getShading(vec3 color){
 	vec3 globalIllumination = vec3(0.0);
 	
 	#ifdef GLOBAL_ILLUMINATION
-		globalIllumination = getGlobalIllumination(texcoord.st) * lightCol * transition_fading * 500.0;
+		globalIllumination = (getGlobalIllumination(texcoord.st) * 500.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
 	#endif
 
 	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap;
