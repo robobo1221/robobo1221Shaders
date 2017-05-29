@@ -31,7 +31,7 @@ vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 	float waveM = 2.0 * iswater;
 	
 	for(int i = 0; i < PW_POINTS; i++){
-		posxz.xz += ((getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * 0.5) * viewVector.xy) * (22.0 * PW_DEPTH) / dist / float(PW_POINTS);
+		posxz.xz += ((getWaterBump(posxz, waveM, waveZ, iswater) * 0.5) * viewVector.xy) * (22.0 * PW_DEPTH) / dist / float(PW_POINTS);
 	}
 	return posxz;
 }
@@ -50,7 +50,7 @@ void main(){
 	albedo = mix(albedo * color, waterColor, iswater);
 	
 	vec3 bump;
-		bump = getWaveHeight(posxz.xz - posxz.y,iswater);
+		bump = getWaveHeight(posxz,iswater);
 	
 	const float bumpmult = 0.2;
 	

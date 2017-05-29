@@ -215,7 +215,7 @@ float refractmask(vec2 coord){
 	void getRefractionCoord(vec3 wpos, vec2 texPosition, out vec3 refraction, out vec2 refractCoord0, out vec2 refractCoord1, out vec2 refractCoord2, out vec3 refractMask){
 		wpos.rgb += cameraPosition.rgb;
 
-		vec2 posxz = (wpos.xz - wpos.y);
+		vec3 posxz = wpos;
 		
 		vec2 refractionMult = vec2(0.0); //.x = dispersionMult and ,y = the actual refractionMult
 
@@ -259,10 +259,6 @@ float refractmask(vec2 coord){
 						   refractmask(refractCoord2));
 	}
 
-#endif
-
-vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
-
 	vec3 refraction = vec3(0.0);
 
 	vec2 refractCoord0 = vec2(0.0);
@@ -271,14 +267,16 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 
 	vec3 refractMask = vec3(0.0);
 
+#endif
+
+vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
+
 	vec2 texCoord = texPosition;
 
 	#ifdef WATER_REFRACT
 		getRefractionCoord(wpos, texPosition, refraction, refractCoord0, refractCoord1, refractCoord2, refractMask);
 
 		texCoord = mix(texCoord, refractCoord2, refractMask.z);
-		texCoord = mix(texCoord, refractCoord1, refractMask.y);
-		texCoord = mix(texCoord, refractCoord0, refractMask.x);
 	#endif
 
 	return mix(texPosition, texCoord, iswater + istransparent);
@@ -289,14 +287,6 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 
 	vec3 waterRefraction(vec3 color, vec3 wpos, vec2 texPosition) {
 
-		vec3 refraction = vec3(0.0);
-
-		vec2 refractCoord0 = vec2(0.0);
-		vec2 refractCoord1 = vec2(0.0);
-		vec2 refractCoord2 = vec2(0.0);
-
-		vec3 refractMask = vec3(0.0);
-
 		getRefractionCoord(wpos, texPosition, refraction, refractCoord0, refractCoord1, refractCoord2, refractMask);
 
 		vec3 rA;
@@ -306,9 +296,9 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 
 		rA = pow(rA, vec3(2.2));
 
-		refraction.r = bool(refractMask.x) ? rA.r : color.r;
-		refraction.g = bool(refractMask.y) ? rA.g : color.g;
-		refraction.b = bool(refractMask.z) ? rA.b : color.b;
+		refraction.r = mix(color.r, rA.r, refractMask.x);
+		refraction.g = mix(color.g, rA.g, refractMask.y);
+		refraction.b = mix(color.b, rA.b, refractMask.z);
 
 		if (iswater > 0.9 || istransparent > 0.9)	color = refraction;
 
@@ -619,7 +609,7 @@ vec3 renderGaux4(vec3 color){
 			float puddles = 1.0;
 		#endif
 
-		const float F0 = 0.05;
+		const float F0 = 0.02;
 
 		vec3 halfVector = normalize(reflectedVector + normalize(-fragpos.rgb));
 		float LdotH	= clamp(dot(reflectedVector, halfVector),0.0,1.0);

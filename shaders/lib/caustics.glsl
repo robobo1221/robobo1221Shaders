@@ -2,9 +2,8 @@
 	#ifdef PROJECTED_CAUSTICS
 
 	vec3 waterCaustics(){
-		vec2 posxz = worldpos.xz - worldpos.y;
 
-		float caustics = dot(getWaveHeight(posxz, 1.0).xyz * 2.0 - 1.0, vec3(1.88888));
+		float caustics = dot(getWaveHeight(worldpos.xyz, 1.0).xyz * 2.0 - 1.0, vec3(1.88888));
 			  caustics = caustics * 0.1 + 0.9;
 			  caustics = clamp(caustics, 0.0, 1.0);
 			  caustics = pow(caustics, 8.0) * 20.0;
@@ -18,9 +17,8 @@
 
 	vec3 waterCaustics(vec3 color, vec3 fpos){
 		vec3 wpos = getWorldSpace(vec4(fpos, 0.0)).rgb + cameraPosition;
-		vec2 posxz = wpos.xz - wpos.y;
 
-		float caustics = dot(getWaveHeight(posxz, 1.0).xyz * 2.0 - 1.0, vec3(1.88888));
+		float caustics = dot(getWaveHeight(wpos, 1.0).xyz * 2.0 - 1.0, vec3(1.88888));
 			  caustics = caustics * 0.1 + 0.9;
 			  caustics = clamp(caustics, 0.0, 1.0);
 			  caustics = pow(caustics, 8.0) * 20.0;

@@ -115,7 +115,7 @@ vec3 getGi(vec3 viewVector){
 	for (int i = 1; i < steps; i++){
 		
 			vec2 offset = (circleDistribution * i + dither);
-				 offset *= sqrt(dot(offset, offset)) * 4.0;
+				 offset *= sqrt(dot(offset, offset)) * 8.0;
 
 			vec2 offsetPosition = vec2(shadowPosition.rg + offset);
 			vec2 biasedPosition = biasedShadows(vec3(offsetPosition, 0.0)).xy;
@@ -123,8 +123,7 @@ vec3 getGi(vec3 viewVector){
 			float shadow = texture2D(shadowtex1, biasedPosition).x;
 			      shadow = -2.5 + 5.0 * (shadow + diffTresh);
 
-			vec3 samplePos = vec3(offsetPosition, shadow);
-				 samplePos -= shadowPosition.xyz;
+			vec3 samplePos = vec3(offsetPosition, shadow) - shadowPosition.xyz;
 			
 			vec3 lPos = normalize(samplePos);
 			float distFromX = sqrt(dot(samplePos, samplePos));
@@ -151,7 +150,7 @@ vec3 getGi(vec3 viewVector){
 	}
 	indirectLight /= weight;
 
-	return max(indirectLight * 25000000.0, 0.0) * giDistanceMask;
+	return max(indirectLight * 20000000.0, 0.0) * giDistanceMask;
 }
 #endif
 
