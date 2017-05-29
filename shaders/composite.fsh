@@ -106,22 +106,20 @@ vec3 getGi(vec3 viewVector){
 
 	float giDistanceMask = clamp(1.0 - (blockDistance / far), 0.0, 1.0);
 	
-	const int steps = 6;
-	const float offsetDistribution = 16.0;
+	const float giSteps = 1.0 / 6.0;
 
-	vec2 circleDistribution = rotationMatrix * vec2(1.0) / offsetDistribution/ float(steps);
-	dither = dither / offsetDistribution / float(steps);
+	vec2 circleDistribution = rotationMatrix * vec2(1.0) / 32.0;
 
-	for (int i = 1; i < steps; i++){
+	for (float i = 1.0; i < 2.0; i += giSteps){
 		
-			vec2 offset = (circleDistribution * i + dither);
-				 offset *= sqrt(dot(offset, offset)) * 8.0;
+			vec2 offset = (circleDistribution * i);
+				 offset *= sqrt(dot(offset, offset)) * 4.0;
 
 			vec2 offsetPosition = vec2(shadowPosition.rg + offset);
 			vec2 biasedPosition = biasedShadows(vec3(offsetPosition, 0.0)).xy;
 
-			float shadow = texture2D(shadowtex1, biasedPosition).x;
-			      shadow = -2.5 + 5.0 * (shadow + diffTresh);
+			float shadow = texture2D(shadowtex1, biasedPosition).x + diffTresh;
+			      shadow = 5.0 * (shadow - 0.5);
 
 			vec3 samplePos = vec3(offsetPosition, shadow) - shadowPosition.xyz;
 			
