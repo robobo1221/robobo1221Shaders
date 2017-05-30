@@ -85,6 +85,7 @@ float bayer16x16(vec2 p){
     return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
 }
 #undef g
+float dither = bayer16x16(texcoord.st);
 
 #include "lib/shadowPos.glsl"
 
@@ -93,7 +94,6 @@ vec3 getGi(vec3 viewVector){
 	float weight = 0.0;
 	vec3 indirectLight = vec3(0.0);
 
-	float dither = bayer16x16(texcoord.st);
 	float rotateMult = dither * pi * 2.0;	//Make sure the offset rotates 360 degrees.
 	mat2 rotationMatrix	= rotate(rotateMult);
 
@@ -148,7 +148,7 @@ vec3 getGi(vec3 viewVector){
 	}
 	indirectLight /= weight;
 
-	return max(indirectLight * 20000000.0, 0.0) * giDistanceMask;
+	return max(indirectLight * 15000000.0, 0.0) * giDistanceMask;
 }
 #endif
 
