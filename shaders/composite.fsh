@@ -148,7 +148,7 @@ vec3 getGi(vec3 viewVector){
 	}
 	indirectLight /= weight;
 
-	return max(indirectLight * 15000000.0, 0.0) * giDistanceMask;
+	return max(indirectLight * 10000000.0, 0.0) * giDistanceMask;
 }
 #endif
 
