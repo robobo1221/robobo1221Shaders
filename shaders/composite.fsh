@@ -104,7 +104,7 @@ vec3 getGi(vec3 viewVector){
 	float blockDistance = sqrt(dot(fragpos, fragpos));
 	float diffTresh = 0.0025 * pow(smoothstep(0.0, 255.0, blockDistance), 0.75) + 0.0001;
 
-	float giDistanceMask = clamp(1.0 - (blockDistance / far), 0.0, 1.0);
+	float giDistanceMask = clamp(1.0 - (blockDistance / 320.0), 0.0, 1.0);
 	
 	const float giSteps = 1.0 / (6.0 * GI_QUALITY);
 
