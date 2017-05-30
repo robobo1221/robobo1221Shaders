@@ -86,7 +86,7 @@ vec3 calcMove(in vec3 pos, in float f0, in float f1, in float f2, in float f3, i
 
 vec4 BiasShadowProjection(vec4 position) {
 
-	vec2 pos = abs(position.xy * 1.5);
+	vec2 pos = abs(position.xy * 1.2);
 	float dist = pow(pow(pos.x, 8.) + pow(pos.y, 8.), 1.0 / 8.0);
 
 	float distortFactor = (1.0 - SHADOW_BIAS) + dist * SHADOW_BIAS;
