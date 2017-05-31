@@ -1,4 +1,4 @@
-float getWaterBump(vec3 posxz, float waveM, float waveZ, float iswater){
+float getWaterBump(vec2 posxz, float waveM, float waveZ, float iswater){
 
 	float radiance = 0.5;
 
@@ -14,7 +14,7 @@ float getWaterBump(vec3 posxz, float waveM, float waveZ, float iswater){
 	vec2 movement = abs(vec2(0.0, -frameTimeCounter * 0.0003));
 
 	vec2 waveMovement = movement * waveM * 697.0;
-	vec2 wavePosition = (posxz.xz - posxz.y) * waveZ;
+	vec2 wavePosition = posxz * waveZ;
 	
 	vec2 coord0 = (wavePosition * rotationMatrix) + waveMovement;
 	vec2 coord1 = (wavePosition * rotationMatrix2) + waveMovement;
@@ -27,7 +27,7 @@ float getWaterBump(vec3 posxz, float waveM, float waveZ, float iswater){
 	wave += 1.0 - noise(coord0) * 10.0;
 	wave += 1.0 - noise(coord1) * 10.0;
 	wave += pow(noise(coord2 * 4.0) * 6.5, 0.5) * 1.7;
-	wave += pow(noise(coord2 * 8.0) * 6.5, 0.5) * 0.7;
+	wave += pow(noise(coord2 * 8.0) * 6.5, 0.5) * 0.85;
 	
 	wave *= mix(0.3,1.0,iswater);
 	wave *= 0.0157;
@@ -36,23 +36,25 @@ float getWaterBump(vec3 posxz, float waveM, float waveZ, float iswater){
 	
 }
 
-vec3 getWaveHeight(vec3 posxz, float iswater){
+vec3 getWaveHeight(vec2 posxz, float iswater){
 
-	vec3 coord = posxz;
+	vec2 coord = posxz;
 
-	float deltaPos = 0.5;
+	float deltaPos = 0.25;
 	
 	float waveZ = mix(2.0,0.25,iswater);
 	float waveM = mix(0.0,2.0,iswater);
 
 	float h0 = getWaterBump(coord, waveM, waveZ, iswater);
-	float h1 = getWaterBump(coord + vec3(deltaPos,0.0, 0.0), waveM, waveZ, iswater);
-	float h2 = getWaterBump(coord + vec3(0.0,deltaPos, 0.0), waveM, waveZ, iswater);
+	float h1 = getWaterBump(coord + vec2(deltaPos,0.0), waveM, waveZ, iswater);
+	float h2 = getWaterBump(coord + vec2(-deltaPos,0.0), waveM, waveZ, iswater);
+	float h3 = getWaterBump(coord + vec2(0.0,deltaPos), waveM, waveZ, iswater);
+	float h4 = getWaterBump(coord + vec2(0.0,-deltaPos), waveM, waveZ, iswater);
 
-	float xDelta = -(h0 - h1)/deltaPos;
-	float yDelta = -(h0 - h2)/deltaPos;
+	float xDelta = ((h1-h0)+(h0-h2))/deltaPos;
+	float yDelta = ((h3-h0)+(h0-h4))/deltaPos;
 
-	vec3 wave = normalize(vec3(xDelta, yDelta, 0.5));
+	vec3 wave = normalize(vec3(xDelta,yDelta,1.0-pow(abs(xDelta+yDelta),2.0)));
 
 	return wave;
 }

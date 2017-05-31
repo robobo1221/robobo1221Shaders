@@ -71,21 +71,29 @@ mat2 rotate(float rad) {
 	);
 }
 
-#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
+#define g(a) abs(dot(mod(floor(a),2.),vec2(3,-2)))
 
-float bayer16x16(vec2 p){
-
+float bayer64x64(vec2 p){
 	p *= vec2(viewWidth,viewHeight);
 
-    vec2 m0 = vec2(mod(floor(p/8.), 2.));
-    vec2 m1 = vec2(mod(floor(p/4.), 2.));
-    vec2 m2 = vec2(mod(floor(p/2.), 2.));
-    vec2 m3 = vec2(mod(floor(p)   , 2.));
+    float m0 = g(p * .03125 );
+    float m1 = g(p * .0625  );
+    float m2 = g(p * .125   );
+    float m3 = g(p * .25    );
+    float m4 = g(p * .5     );
+    float m5 = g(p          );
 
-    return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
+    const float d0 = 1.    / 4096.;
+    const float d1 = 4.    / 4096.;
+    const float d2 = 16.   / 4096.;
+    const float d3 = 64.   / 4096.;
+    const float d4 = 256.  / 4096.;
+    const float d5 = 1024. / 4096.;
+
+    return m0*d0 + m1*d1 + m2*d2 + m3*d3 + m4*d4 + m5*d5;
 }
 #undef g
-float dither = bayer16x16(texcoord.st);
+float dither = bayer64x64(texcoord.st);
 
 #include "lib/shadowPos.glsl"
 

@@ -229,7 +229,7 @@ float refractmask(vec2 coord){
 			float dispersion = 0.0;
 		#endif
 
-		refraction = getWaveHeight(posxz, iswater);
+		refraction = getWaveHeight(posxz.xz - posxz.y, iswater);
 
 			vec2 depth = vec2(0.0);
 			depth.x = getDepth(pixeldepth2);
