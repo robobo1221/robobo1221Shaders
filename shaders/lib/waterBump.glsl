@@ -27,7 +27,7 @@ float getWaterBump(vec2 posxz, float waveM, float waveZ, float iswater){
 	wave += 1.0 - noise(coord0) * 10.0;
 	wave += 1.0 - noise(coord1) * 10.0;
 	wave += pow(noise(coord2 * 4.0) * 6.5, 0.5) * 1.7;
-	wave += pow(noise(coord2 * 8.0) * 6.5, 0.5) * 0.85;
+	wave += pow(noise(coord2 * 8.0) * 6.5, 0.5) * 0.7;
 	
 	wave *= mix(0.3,1.0,iswater);
 	wave *= 0.0157;
