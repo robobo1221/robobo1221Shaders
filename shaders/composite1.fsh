@@ -115,11 +115,12 @@ float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((t
 #include "lib/lightColor.glsl"
 
 //Unpack textures.
-vec3 color = 	texture2D(gcolor, texcoord.st).rgb;
-vec3 normal = 	texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
-vec3 normal2 = 	texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
-vec4 aux = 		texture2D(gaux1, texcoord.st);
-vec4 aux2 = 	texture2D(gdepth, texcoord.st);
+vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
+vec3 normal = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
+vec3 normal2 = 			texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
+vec4 aux = 				texture2D(gaux1, texcoord.st);
+vec4 aux2 = 			texture2D(gdepth, texcoord.st);
+vec4 forWardAlbedo = 	texture2D(gaux2, texcoord.st);
 
 float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
@@ -304,7 +305,7 @@ vec3 getShading(vec3 color){
 	vec3 globalIllumination = vec3(0.0);
 	
 	#ifdef GLOBAL_ILLUMINATION
-		globalIllumination = (getGlobalIllumination(texcoord.st) * (5.0 * GI_MULT)) * (lightCol * transition_fading) * (1.0 - rainStrength);
+		globalIllumination = (getGlobalIllumination(texcoord.st) * (3.0 * GI_MULT)) * (lightCol * transition_fading) * (1.0 - rainStrength);
 	#endif
 
 	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap;
@@ -572,7 +573,7 @@ void main()
 	
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
-	gl_FragData[1] = vec4(aux2.rgb, shadowsForward);
+	gl_FragData[1] = vec4(vec3(forWardAlbedo.a, aux2.gb), shadowsForward);
 
 	#ifdef VOLUMETRIC_CLOUDS
 		gl_FragData[2] = vec4(VolumetricClouds) / MAX_COLOR_RANGE;

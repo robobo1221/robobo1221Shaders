@@ -1,6 +1,6 @@
 vec3 renderGaux2(vec3 color, vec3 normal){
 
-	vec4 albedo = texture2D(gaux2, texcoord.st);
+	vec4 albedo = forWardAlbedo;
 
 	bool multMask = albedo.a > 0.0 + iswater && albedo.a < 1.0;
 
