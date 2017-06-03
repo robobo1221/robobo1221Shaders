@@ -1,7 +1,7 @@
 #ifdef WATER_CAUSTICS
 	#ifdef PROJECTED_CAUSTICS
 
-	vec2 waterCaustics(){
+	vec3 waterCaustics(){
 
 		float caustics = dot(getWaveHeight(worldpos.xz - worldpos.y, 1.0).xyz * 2.0 - 1.0, vec3(1.88888));
 			  caustics = caustics * 0.1 + 0.9;
