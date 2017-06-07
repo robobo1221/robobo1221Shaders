@@ -300,7 +300,7 @@ vec3 getShading(vec3 color){
 	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y);
 
 	vec3 sunlightDirect = (lightCol * sunlightAmount);
-	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.35, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
+	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.25, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 	
 	vec3 globalIllumination = vec3(0.0);
 	
