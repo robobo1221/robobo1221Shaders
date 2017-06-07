@@ -277,8 +277,11 @@ float getSubSurfaceScattering(){
 		float sampleR = texture2D(gcolor, uv, lod).a;
 		float sampleG = texture2D(gdepth, uv, lod).a;
 		float sampleB = texture2D(composite, uv, lod).a;
+
+		vec3 globalIllumination = vec3(sampleR, sampleG, sampleB);
+		globalIllumination /= 1.0 - globalIllumination;
 		
-		return getDesaturation(vec3(sampleR, sampleG, sampleB), min(emissiveLM, 1.0));
+		return getDesaturation(globalIllumination, min(emissiveLM, 1.0));
 	}
 #endif
 
@@ -413,9 +416,9 @@ float getVolumetricCloudNoise(vec3 p){
 	p *= 0.02;
 
 	float noise = noise3D(vec3(p.x - wind * 0.01, p.y, p.z - wind * 0.015));
-		  noise += noise3D(p * 3.5) / 3.5;
-		  noise += abs(noise3D(p * 6.125) * 2.0 - 1.0) / 6.125;
-		  noise += abs(noise3D(p * 6.125 * 2.0) * 2.0 - 1.0) / 6.125 / 2.0;
+		  noise += noise3D(p * 3.5) * 0.28571428571428571428571428571429;
+		  noise += abs(noise3D(p * 6.125) * 2.0 - 1.0) * 0.16326530612244897959183673469388;
+		  noise += abs(noise3D(p * 12.25) * 2.0 - 1.0) * 0.08163265306122448979591836734694;
 
 		  noise = noise * (1.0 - rainStrength * 0.5);
 		  noise = pow(max(1.0 - noise * 1.5 / VOLUMETRIC_CLOUDS_COVERAGE,0.),2.0) * 0.0303030;
@@ -423,22 +426,18 @@ float getVolumetricCloudNoise(vec3 p){
 	return clamp(noise * 10.0, 0.0, 1.0);
 }
 
-vec4 getVolumetricCloudPosition(vec2 coord, float depth)
+vec3 getVolumetricCloudPosition(vec2 coord, float depth)
 {
-	vec4 position = gbufferProjectionInverse * vec4(vec3(coord, expDepth(depth)) * 2.0 - 1.0, 1.0);
-		 position /= position.w;
+	vec3 position = toScreenSpace(vec3(coord, expDepth(depth)));
+	     position = getWorldSpace(vec4(position, 0.0)).rgb;
 
-	     position = getWorldSpace(position);
-
-	     position.rgb += cameraPosition;
-
-	return position;
+	return position + cameraPosition;
 }
 
 vec4 getVolumetricCloudsColor(vec3 wpos){
 	
-	const float height = 170.0;  	//Height of the clouds
-	const float distRatio = 100.0;  	//Distance between top and bottom of the cloud in block * 10.
+	const float height = VOLUMETRIC_CLOUDS_HEIGHT;  		//Height of the clouds
+	const float distRatio = VOLUMETRIC_CLOUDS_THICKNESS;  	//Distance between top and bottom of the cloud in block * 10.
 
 	float maxHeight = (distRatio * 0.5) + height;
 	float minHeight = height - (distRatio * 0.5);
@@ -482,9 +481,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		vec3 totalCloudColor = (dayTimeColor + nightTimeColor) * sunLightAbsorption;
 			 totalCloudColor = mix(totalCloudColor, ambientlight, rainStrength);
 
-		vec3 cloudColor = mix(totalCloudColor, ambientlight * (0.25 + (rainStrength * 0.5)), pow(1.0 - absorption / 2.8, 4.0f));
-
-			cloudColor /= 2.0;
+		vec3 cloudColor = mix(totalCloudColor, ambientlight * (0.25 + (rainStrength * 0.5)), pow(1.0 - absorption / 2.8, 4.0f)) * 0.5;
 
 		return vec4(cloudColor, cloudAlpha);
 	}
@@ -497,7 +494,7 @@ vec4 getVolumetricClouds(vec3 color){
 	float nearPlane = 2.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
 
-    float increment = far / 10.0;
+    float increment = far / (10.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));
 
 	farPlane += dither * increment;
 
@@ -505,36 +502,29 @@ vec4 getVolumetricClouds(vec3 color){
 
 	while (farPlane > nearPlane){
 
-		vec4 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
+		vec3 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
 
-		/*
-		vec4 shadowWPos = getShadowSpace(expDepth(farPlane),texcoord.st);
-			 shadowWPos = biasedShadows(shadowWPos);
-
-		float shadowSample = shadow2D(shadowtex0, shadowWPos.xyz).x;
-		*/
-
-		vec4 result = getVolumetricCloudsColor(wpos.rgb);
-			 result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
-
-		float volumetricDistance = length(wpos.xyz - cameraPosition.xyz);
+		float volumetricDistance = length(wpos - cameraPosition.xyz);
 
 		if (length(fixedWorldPosition) < volumetricDistance){
-			result.a = 0.0;
-		}
+			clouds.a = 0.0;
+		} else {
 
-		if (length(worldPosition) < volumetricDistance){
-			 result.rgb = renderGaux2(result.rgb, normal2);
-		}
+			vec4 result = getVolumetricCloudsColor(wpos);
+				result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
-		clouds.rgb = mix(clouds.rgb, result.rgb, min(result.a * VOLUMETRIC_CLOUDS_DENSITY, 1.0));
-		clouds.a += result.a * VOLUMETRIC_CLOUDS_DENSITY;
+			if (length(worldPosition) < volumetricDistance){
+				result.rgb = renderGaux2(result.rgb, normal2);
+			}
+
+			clouds.rgb = mix(clouds.rgb, result.rgb, min(result.a * VOLUMETRIC_CLOUDS_DENSITY, 1.0));
+			clouds.a += result.a * VOLUMETRIC_CLOUDS_DENSITY;
+		}
 
 		farPlane -= increment;
-
 	}
 
-	return clouds;
+	return clamp(clouds, 0.0, 1.0);
 }
 
 #endif

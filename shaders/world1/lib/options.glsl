@@ -22,8 +22,11 @@
 	#define OCCLUSION_POINTS 16 //[8 16 32 64 128]
 
 #define VOLUMETRIC_CLOUDS
-	#define VOLUMETRIC_CLOUDS_DENSITY 50.0 //[10.0 20.0 40.0 50.0 80.0 100.0 150.0 200.0 250.0]
-	#define VOLUMETRIC_CLOUDS_COVERAGE 1.0 //[0.5 0.75 1.0 1.25 1.5 1.75 2.0]
+	#define VOLUMETRIC_CLOUDS_DENSITY 50.0 //[10.0 20.0 40.0 50.0 80.0 100.0 150.0 200.0 250.0]						//Density of the volumetric clouds
+	#define VOLUMETRIC_CLOUDS_COVERAGE 1.0 //[0.5 0.75 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.5 1.75 2.0]		//Coverage of volumetric clouds. Higher values result in a more clouded day.
+	#define VOLUMETRIC_CLOUDS_QUALITY 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0]										//The quality of the volumetric clouds. Higher this value up to get better quality volumetric clouds. FPS intensive!
+	#define VOLUMETRIC_CLOUDS_HEIGHT 170.0 //[100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 190.0 200.0]	//Height of the volumetric clouds in blocks.
+	#define VOLUMETRIC_CLOUDS_THICKNESS 100.0 //[25.0 50.0 75.0 100.0 125.0 150.0 175.0 200.0]							//Thickness of the volumetric clouds in blocks.
 	
 #define GLOBAL_ILLUMINATION
 	#define GI_MULT 1.0	//[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0] Simple multiplier. Does not effect performace.
