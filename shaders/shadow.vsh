@@ -105,19 +105,19 @@ void main(){
 	texcoord = gl_MultiTexCoord0;
 	lmcoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	
-	vec4 position = ftransform();
+	vec4 viewpos = ftransform();
 	
-	position = shadowProjectionInverse * position;
-	position = shadowModelViewInverse * position;
+	viewpos = shadowProjectionInverse * viewpos;
+	viewpos = shadowModelViewInverse * viewpos;
 	
-	worldpos = position.xyz + cameraPosition;
+	worldpos = viewpos.xyz + cameraPosition;
 	
 	#include "lib/vertexDisplacement.glsl"
 	
-	position = shadowModelView * position;
-	position = shadowProjection * position;
+	viewpos = shadowModelView * viewpos;
+	viewpos = shadowProjection * viewpos;
 	
-	gl_Position = BiasShadowProjection(position);
+	gl_Position = BiasShadowProjection(viewpos);
 	
 	color = gl_Color;
 		

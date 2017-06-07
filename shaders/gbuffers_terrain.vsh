@@ -84,6 +84,8 @@ vec3 calcMove(in vec3 pos, in float f0, in float f1, in float f2, in float f3, i
 
 void main(){
 	mat = 1.0;
+
+	gl_Position = gl_ModelViewMatrix * gl_Vertex;
 	
 	texcoord = gl_MultiTexCoord0;
 	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
@@ -93,14 +95,16 @@ void main(){
 	vtexcoordam.st  = min(texcoord.st,midcoord-texcoordminusmid);
 	vtexcoord.st    = sign(texcoordminusmid) * 0.5 + 0.5;
 	
-	vec4 position = gbufferModelViewInverse * gl_ModelViewMatrix * gl_Vertex;
-	vec3 worldpos = position.xyz + cameraPosition;
+	vec4 viewpos = gbufferModelViewInverse * gl_Position;
+
+	vec3 worldpos = viewpos.xyz + cameraPosition;
 	
 	wpos = worldpos;
 	
 	#include "lib/vertexDisplacement.glsl"
 	
-	gl_Position = gl_ProjectionMatrix * gbufferModelView * position;
+	viewpos = gbufferModelView * viewpos;
+	gl_Position = gl_ProjectionMatrix * viewpos;
 	
 	color = gl_Color;
 	

@@ -26,21 +26,21 @@
 			#ifdef WAVING_LEAVES_TALLFLOWERS
 				if ( mc_Entity.x == ENTITY_LEAVES || mc_Entity.x == ENTITY_LEAVES2 || mc_Entity.x == ENTITY_NEWFLOWERS ) 
 					{
-						position.xyz += waving1;
+						viewpos.xyz += waving1;
 					}
 			#endif
 			
 			#ifdef WAVING_VINES
 				if ( mc_Entity.x == ENTITY_VINES )
 					{
-						position.xyz += waving2;
+						viewpos.xyz += waving2;
 					}
 			#endif
 
 			#ifdef WAVING_COBWEB
 				if ( mc_Entity.x == ENTITY_COBWEB ) 
 					{
-						position.xyz += waving2 * 0.1;
+						viewpos.xyz += waving2 * 0.1;
 					}
 			#endif
 
@@ -50,7 +50,7 @@
 				if ( mc_Entity.x == ENTITY_TALLGRASS || mc_Entity.x == ENTITY_DANDELION || mc_Entity.x == ENTITY_ROSE || mc_Entity.x == ENTITY_WHEAT || mc_Entity.x == ENTITY_FIRE ||
 					 mc_Entity.x == ENTITY_NETHER_WART || mc_Entity.x == ENTITY_DEAD_BUSH || mc_Entity.x == ENTITY_CARROT || mc_Entity.x == ENTITY_POTATO)
 					{
-						position.xyz += waving2;
+						viewpos.xyz += waving2;
 					}
 
 				}
