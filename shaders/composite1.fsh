@@ -497,7 +497,7 @@ vec4 getVolumetricClouds(vec3 color){
 	float nearPlane = 2.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
 
-    float increment = far / (15.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));
+    float increment = far / (13.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));
 
 	farPlane += dither * increment;
 
