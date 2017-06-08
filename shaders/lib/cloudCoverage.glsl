@@ -11,7 +11,7 @@ float noise1D(float p){
 
 float getCloudCoverage(){
     #if defined VOLUMETRIC_CLOUDS && defined VARIABLE_CLOUD_COVERAGE
-        return mix((1.0f - noise1D(frameTimeCounter * 0.005)) * 0.35f + 0.65f, 1.0f, rainStrength);
+        return mix((1.0f - noise1D(frameTimeCounter * 0.005)) * 0.3f + 0.7f, 1.0f, rainStrength);
     #else
         return 1.0f;
     #endif
