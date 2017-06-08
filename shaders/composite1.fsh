@@ -256,6 +256,7 @@ float shadowStep(sampler2D shadow, vec3 sPos) {
 #include "lib/noise.glsl"
 #include "lib/shadowPos.glsl"
 #include "lib/shadows.glsl"
+#include "lib/cloudCoverage.glsl"
 #include "lib/shadingForward.glsl"
 #include "lib/gaux2Forward.glsl"
 #include "lib/phases.glsl"
@@ -300,7 +301,7 @@ vec3 getShading(vec3 color){
 
 	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));
 
-	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y);
+	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * (dynamicCloudCoverage - 0.35f);
 
 	vec3 sunlightDirect = (lightCol * sunlightAmount);
 	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.2, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
@@ -324,7 +325,6 @@ vec3 getShading(vec3 color){
 				rSD.x = 0.0;
 				rSD.y = 4.0 / VL_QUALITY;
 				rSD.z = dither;
-				
 			
 			rSD.z *= rSD.y;
 
@@ -421,7 +421,7 @@ float getVolumetricCloudNoise(vec3 p){
 		  noise += abs(noise3D(p * 12.25) * 2.0 - 1.0) * 0.08163265306122448979591836734694;
 
 		  noise = noise * (1.0 - rainStrength * 0.5);
-		  noise = pow(max(1.0 - noise * 1.4 / VOLUMETRIC_CLOUDS_COVERAGE,0.),2.0) * 0.0303030;
+		  noise = pow(max(1.0 - noise * 1.4 / VOLUMETRIC_CLOUDS_COVERAGE * dynamicCloudCoverage,0.),2.0) * 0.0303030;
 
 	return clamp(noise * 10.0, 0.0, 1.0);
 }
@@ -470,7 +470,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 		float absorption = clamp((-(minHeight - wpos.y) / distRatio), 0.0f, 1.0f);
 
-		float sunLightAbsorption = pow(absorption, 3.25);
+		float sunLightAbsorption = pow(absorption, 3.25) * dynamicCloudCoverage;
 
 		vec3 dayTimeColor = sunlight * 16.0 * sunUpCos;
 			 dayTimeColor += sunlight*sunlight * sunViewCos * 64.0 * sqrt(sunLightAbsorption) * sunUpCos;
@@ -484,7 +484,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		vec3 totalCloudColor = (dayTimeColor + nightTimeColor) * sunLightAbsorption;
 			 totalCloudColor = mix(totalCloudColor, rainColor, rainStrength);
 
-		vec3 cloudColor = mix(totalCloudColor, ambientlight * (0.25 + rainStrength), pow(1.0 - absorption / 2.8, 4.0f)) * 0.5;
+		vec3 cloudColor = mix(totalCloudColor, ambientlight * (0.25 + rainStrength) * dynamicCloudCoverage, pow(1.0 - absorption / 2.8, 4.0f)) * 0.5;
 
 		return vec4(cloudColor, cloudAlpha);
 	}
