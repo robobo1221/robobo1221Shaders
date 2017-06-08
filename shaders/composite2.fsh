@@ -183,6 +183,7 @@ float ld(float dist) {
 }
 
 #include "lib/noise.glsl"
+#include "lib/cloudCoverage.glsl"
 #include "lib/waterBump.glsl"
 #include "lib/phases.glsl"
 #include "lib/skyGradient.glsl"
@@ -341,7 +342,7 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 		float fog = 1.0 - exp(-pow(sqrt(dot(fragposFog,fragposFog))
 		* mix(
 		mix(1.0 / 1200.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
-		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength) * fogAdaption,2.0));
+		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption,2.0));
 		
 		fog = clamp(fog, 0.0, 1.0);
 
@@ -353,6 +354,7 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
 		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter / 4.0 * (1.0 - rainStrength) * (1.0 - time[1].y));
 		fogColor = mix(fogColor, lightCol, 0.05 * (1.0 - rainStrength) * (1.0 - time[1].y));
+		fogColor = mix(fogColor, vec3(0.5), clamp((1.0 - dynamicCloudCoverage) * 3.0, 0.0, 1.0) * 0.5 * (1.0 - time[1].y));
 		
 		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
 		fogColor = pow(fogColor, vec3(2.2));
