@@ -447,7 +447,7 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 
 #ifdef VOLUMETRIC_CLOUDS
 	vec3 getVolumetricClouds(vec3 color, vec2 uv){
-		vec4 sample = texture2DLod(gaux2, uv, 1.75 / max(sqrt(VOLUMETRIC_CLOUDS_QUALITY), 0.000001)) * MAX_COLOR_RANGE;
+		vec4 sample = texture2DLod(gaux2, uv, 1.7 / max(sqrt(VOLUMETRIC_CLOUDS_QUALITY), 0.000001)) * MAX_COLOR_RANGE;
 
 		return mix(color, sample.rgb, clamp(sample.a, 0.0, 1.0));
 	}

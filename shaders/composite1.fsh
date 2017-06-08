@@ -303,7 +303,7 @@ vec3 getShading(vec3 color){
 	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y);
 
 	vec3 sunlightDirect = (lightCol * sunlightAmount);
-	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.25, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
+	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.2, 0.0, rainStrength),0.0,time[1].y), 0.25, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 	
 	vec3 globalIllumination = vec3(0.0);
 	
@@ -421,7 +421,7 @@ float getVolumetricCloudNoise(vec3 p){
 		  noise += abs(noise3D(p * 12.25) * 2.0 - 1.0) * 0.08163265306122448979591836734694;
 
 		  noise = noise * (1.0 - rainStrength * 0.5);
-		  noise = pow(max(1.0 - noise * 1.5 / VOLUMETRIC_CLOUDS_COVERAGE,0.),2.0) * 0.0303030;
+		  noise = pow(max(1.0 - noise * 1.4 / VOLUMETRIC_CLOUDS_COVERAGE,0.),2.0) * 0.0303030;
 
 	return clamp(noise * 10.0, 0.0, 1.0);
 }
@@ -497,7 +497,7 @@ vec4 getVolumetricClouds(vec3 color){
 	float nearPlane = 2.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
 
-    float increment = far / (10.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));
+    float increment = far / (13.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));
 
 	farPlane += dither * increment;
 
