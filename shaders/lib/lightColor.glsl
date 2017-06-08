@@ -26,7 +26,7 @@ vec3 getAmbienLight(){
 
 		 ambientColor = mix(ambientColor, vec3(dot(ambientColor, vec3(0.3333))), 0.2 * time[1].y);
 
-		 ambientColor = mix(ambientColor, vec3(0.2) * (1.0 - time[1].y * 0.97), rainStrength);
+		 ambientColor = mix(ambientColor, vec3(0.2) * (1.0 - time[1].y * 0.99), rainStrength);
 
 	return clamp(ambientColor, 0.0, 1.0);
 }

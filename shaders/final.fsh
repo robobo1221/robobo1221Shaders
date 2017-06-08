@@ -318,7 +318,7 @@ vec3 getLensFlare(vec2 uv){
 
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	lens *= (positionTreshHold * fading) * (lensFlareMask * lensFlareMult) * LENS_FLARE_MULT;
+	lens *= (positionTreshHold * fading) * (lensFlareMask * lensFlareMult) * (LENS_FLARE_MULT * (1.0 - rainStrength));
 
 	return lens / (lens + 1.0);
 }
