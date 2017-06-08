@@ -22,7 +22,7 @@
 	#define OCCLUSION_POINTS 16 //[8 16 32 64 128]
 
 #define VOLUMETRIC_CLOUDS
-	#define VARIABLE_CLOUD_COVERAGE 																				//Makes volumetric cloud's coverage different over time.
+	#define DYNAMIC_WEATHER 																						//Makes volumetric cloud's coverage different over time. Also effects other shaders such as lighting, fog, etc.
 	#define VOLUMETRIC_CLOUDS_DENSITY 50.0 //[10.0 20.0 40.0 50.0 80.0 100.0 150.0 200.0 250.0]						//Density of the volumetric clouds
 	#define VOLUMETRIC_CLOUDS_COVERAGE 1.0 //[0.5 0.75 0.85 0.9 0.95 1.0 1.05 1.1 1.15 1.2 1.25 1.5 1.75 2.0]		//Coverage of volumetric clouds. Higher values result in a more clouded day.
 	#define VOLUMETRIC_CLOUDS_QUALITY 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0]										//The quality of the volumetric clouds. Higher this value up to get better quality volumetric clouds. FPS intensive!
