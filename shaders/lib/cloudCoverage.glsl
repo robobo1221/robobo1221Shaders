@@ -17,7 +17,7 @@ float getCloudCoverage(){
     #if defined VOLUMETRIC_CLOUDS && defined DYNAMIC_WEATHER
         float noiseFactor = getMoonphaseBasedTime();
 
-        return mix(clamp(1.75f - noise1D(noiseFactor * 100.0) * 1.75f, 0.0f, 1.0f) * 0.425f + 0.575f, 1.0f, rainStrength);
+        return mix(clamp(1.75f - noise1D(noiseFactor * 100.0) * 1.75f, 0.0f, 1.0f) * 0.35f + 0.65f, 1.0f, rainStrength);
     #else
         return 1.0f;
     #endif
