@@ -93,6 +93,7 @@ uniform float near;
 
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int moonPhase;
 
 const float pi = 3.141592653589793238462643383279502884197169;
 
@@ -112,6 +113,7 @@ mat2 time = mat2(vec2(
 
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
 
+#include "lib/cloudCoverage.glsl"
 #include "lib/lightColor.glsl"
 
 //Unpack textures.
@@ -256,7 +258,6 @@ float shadowStep(sampler2D shadow, vec3 sPos) {
 #include "lib/noise.glsl"
 #include "lib/shadowPos.glsl"
 #include "lib/shadows.glsl"
-#include "lib/cloudCoverage.glsl"
 #include "lib/shadingForward.glsl"
 #include "lib/gaux2Forward.glsl"
 #include "lib/phases.glsl"
@@ -301,7 +302,7 @@ vec3 getShading(vec3 color){
 
 	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));
 
-	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * max(dynamicCloudCoverage - 0.35f, 0.0);
+	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * max(dynamicCloudCoverage - 0.5f, 0.0);
 
 	vec3 sunlightDirect = (lightCol * sunlightAmount);
 	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.2, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));

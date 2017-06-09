@@ -72,6 +72,7 @@ uniform float viewHeight;
 
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int moonPhase;
 
 uniform float far;
 uniform float near;
@@ -94,6 +95,7 @@ mat2 time = mat2(vec2(
 
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
 
+#include "lib/cloudCoverage.glsl"
 #include "lib/lightColor.glsl"
 
 //Unpack textures.
@@ -183,7 +185,6 @@ float ld(float dist) {
 }
 
 #include "lib/noise.glsl"
-#include "lib/cloudCoverage.glsl"
 #include "lib/waterBump.glsl"
 #include "lib/phases.glsl"
 #include "lib/skyGradient.glsl"
@@ -339,6 +340,8 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 			float fogAdaption = 1.0;
 		#endif
 
+		dynamicCloudCoverage = sqrt(dynamicCloudCoverage);
+
 		float fog = 1.0 - exp(-pow(sqrt(dot(fragposFog,fragposFog))
 		* mix(
 		mix(1.0 / 1200.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
@@ -354,7 +357,6 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
 		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter / 4.0 * (1.0 - rainStrength) * (1.0 - time[1].y));
 		fogColor = mix(fogColor, lightCol, 0.05 * (1.0 - rainStrength) * (1.0 - time[1].y));
-		fogColor = mix(fogColor, vec3(0.5), clamp((1.0 - dynamicCloudCoverage) * 3.0, 0.0, 1.0) * 0.5 * (1.0 - time[1].y));
 		
 		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
 		fogColor = pow(fogColor, vec3(2.2));
@@ -505,8 +507,8 @@ vec3 renderGaux4(vec3 color){
 #ifdef REFLECTIONS
 
 	vec3 getSpec(vec3 rvector, vec3 sunMult, vec3 moonMult){
-		vec3 spec = calcSun(rvector, sunVec) * sunMult;
-			spec += (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545));
+		vec3 spec = calcSun(rvector, sunVec) * sunMult * max(dynamicCloudCoverage - 0.5f, 0.0);
+			spec += (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545)) * max(dynamicCloudCoverage - 0.5f, 0.0);
 
 		return spec;
 	}
