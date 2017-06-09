@@ -440,7 +440,7 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 			 lightCol = lightCol * mix(1.0,VL_INTENSITY_NOON, time[0].y);
 			 lightCol = lightCol * mix(1.0,VL_INTENSITY_SUNSET, time[1].x);
 			 lightCol = lightCol * mix(1.0,VL_INTENSITY_MIDNIGHT, time[1].y);
-			 lightCol *= max(dynamicCloudCoverage * 1.5 - 0.5f, 0.0);
+			 lightCol *= max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
 			
 		volumetricLightSample *= vlMult;
 		volumetricLightSample *= mix(0.02, 0.5 * cosMoonUpAngle, clamp(time[1].y,0.0,1.0));
@@ -508,8 +508,8 @@ vec3 renderGaux4(vec3 color){
 #ifdef REFLECTIONS
 
 	vec3 getSpec(vec3 rvector, vec3 sunMult, vec3 moonMult){
-		vec3 spec = calcSun(rvector, sunVec) * sunMult * max(dynamicCloudCoverage * 1.35 - 0.65f, 0.0);
-			spec += (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545)) * max(dynamicCloudCoverage * 1.35 - 0.65f, 0.0);
+		vec3 spec = calcSun(rvector, sunVec) * sunMult * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
+			spec += (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545)) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
 
 		return spec;
 	}
