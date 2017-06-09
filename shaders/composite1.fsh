@@ -422,7 +422,7 @@ float getVolumetricCloudNoise(vec3 p){
 		  noise += abs(noise3D(p * 12.25) * 2.0 - 1.0) * 0.08163265306122448979591836734694;
 
 		  noise = noise * (1.0 - rainStrength * 0.5);
-		  noise = pow(max(1.0 - noise * 1.4 / VOLUMETRIC_CLOUDS_COVERAGE * dynamicCloudCoverage,0.),2.0) * 0.0303030;
+		  noise = pow(max(1.0 - noise * 1.5 / VOLUMETRIC_CLOUDS_COVERAGE * dynamicCloudCoverage,0.),2.0) * 0.0303030;
 
 	return clamp(noise * 10.0, 0.0, 1.0);
 }
