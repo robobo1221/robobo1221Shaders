@@ -21,7 +21,7 @@ vec3 getShadingForward(vec3 normal, vec3 color){
 		emissiveLightmap = getEmessiveGlow(color, handLightMult * emissiveLightColor, emissiveLightmap, hand);
 	#endif
 
-	vec3 sunlightDirect = (lightCol * sunlightAmount) * (shadowsForward * diffuse) * max(dynamicCloudCoverage - 0.5f, 0.0);
+	vec3 sunlightDirect = (lightCol * sunlightAmount) * (shadowsForward * diffuse) * max(dynamicCloudCoverage * 1.5 - 0.5f, 0.0);
 	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.2, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 
 	return (sunlightDirect + indirectLight) + emissiveLightmap;

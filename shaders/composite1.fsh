@@ -302,7 +302,7 @@ vec3 getShading(vec3 color){
 
 	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));
 
-	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * max(dynamicCloudCoverage - 0.5f, 0.0);
+	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * max(dynamicCloudCoverage * 1.35 - 0.65f, 0.0);
 
 	vec3 sunlightDirect = (lightCol * sunlightAmount);
 	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.2, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
