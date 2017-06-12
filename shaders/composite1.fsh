@@ -128,6 +128,7 @@ float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
 
 float land = float(pixeldepth2 < comp);
+float land2 = float(pixeldepth < comp);
 float translucent = float(aux.g > 0.09 && aux.g < 0.11);
 float emissive = float(aux.g > 0.34 && aux.g < 0.36);
 
@@ -427,10 +428,12 @@ float getVolumetricCloudNoise(vec3 p){
 	return clamp(noise * 10.0, 0.0, 1.0);
 }
 
-vec3 getVolumetricCloudPosition(vec2 coord, float depth)
+vec3 getVolumetricCloudPosition(float depth, float cloudDistance)
 {
-	vec3 position = toScreenSpace(vec3(coord, expDepth(depth)));
+	vec3 position = toScreenSpace(vec3(texcoord.st, expDepth(depth)));
 	     position = getWorldSpace(vec4(position, 0.0)).rgb;
+
+		 position.rgb *= cloudDistance;
 
 	return position + cameraPosition;
 }
@@ -493,31 +496,34 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 vec4 getVolumetricClouds(vec3 color){
 
+	float cloudDistance = 160.0 / far;
+
 	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
 	float nearPlane = 2.0;			//start to where the ray should march.
 	float farPlane = far; 		//End from where the ray should march.
 
-    float increment = far / (13.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));
+    float increment = far / (13.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));		//Max the quality to prevent deviding by 0
 
 	farPlane += dither * increment;
 
 	vec3 fixedWorldPosition = mix(worldPosition2, worldPosition, iswater * (1.0 - isEyeInWater));
+	float worldPositionDistance = length(fixedWorldPosition);
 
 	while (farPlane > nearPlane){
 
-		vec3 wpos = getVolumetricCloudPosition(texcoord.st, farPlane);
+		vec3 wpos = getVolumetricCloudPosition(farPlane, cloudDistance);
 
 		float volumetricDistance = length(wpos - cameraPosition.xyz);
 
-		if (length(fixedWorldPosition) < volumetricDistance){
+		if (worldPositionDistance < volumetricDistance && land2 > 0.0){
 			clouds.a = 0.0;
 		} else {
 
 			vec4 result = getVolumetricCloudsColor(wpos);
 				result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
-			if (length(worldPosition) < volumetricDistance){
+			if (worldPositionDistance < volumetricDistance){
 				result.rgb = renderGaux2(result.rgb, normal2);
 			}
 

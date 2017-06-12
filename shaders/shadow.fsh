@@ -10,7 +10,6 @@ varying float translucentBlocks;
 
 varying vec3 worldpos;
 varying vec3 normal;
-varying vec3 fragPos;
 
 uniform sampler2D tex;
 uniform sampler2D noisetex;
@@ -36,10 +35,6 @@ vec4 nvec4(vec3 pos) {
 #endif
 
 void main() {
-
-	if (dot(normalize(fragPos.rgb), normal) > 0.0) {
-		discard;
-	}
 
 	vec4 fragcolor = texture2D(tex,texcoord.xy) * color;
 	

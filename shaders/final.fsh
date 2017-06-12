@@ -353,20 +353,5 @@ void main(){
 		color += getLensFlare(newTexcoord);
 	#endif
 
-	/*
-	vec4 shadowSample = texture2D(shadowcolor, ((texcoord.st * 2.0) * 2.0 - 1.0) * 0.5 + 0.5);
-	shadowSample.rgb *= 10.0;
-	shadowSample.a = mix(0.0, 1.0, float(dot(shadowSample.rgb, vec3(0.3333)) < 1.0));
-
-	float shadowtexSample = texture2D(shadowtex0, ((vec2(texcoord.s, texcoord.t - 0.5) * 2.0) * 2.0 - 1.0) * 0.5 + 0.5).x;
-
-	if (texcoord.x < 1.0 / 2.0 && texcoord.y < 1.0 / 2.0) {
-		color = mix(color, shadowSample.rgb, shadowSample.a);
-	} if (texcoord.x < 1.0 / 2.0 && texcoord.y > 1.0 / 2.0){
-		color = mix(color, vec3(shadowtexSample), float(shadowtexSample < 1.0));
-	}
-	*/
-
-
 	gl_FragColor = vec4(color, 1.0);
 }
