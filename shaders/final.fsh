@@ -37,6 +37,7 @@ uniform sampler2D gdepth;
 uniform sampler2D depthtex1;
 uniform sampler2D composite;
 uniform sampler2D noisetex;
+uniform sampler2D shadowcolor;
 
 uniform vec3 sunPosition;
 
@@ -352,6 +353,15 @@ void main(){
 	#ifdef LENS_FLARE
 		color += getLensFlare(newTexcoord);
 	#endif
+
+/*
+	vec4 shadowSample = texture2D(shadowcolor, ((texcoord.st * 2.0) * 2.0 - 1.0) * 0.5 + 0.5);
+	shadowSample.rgb *= 10.0;
+	shadowSample.a = mix(0.0, 1.0, float(dot(shadowSample.rgb, vec3(0.3333)) < 1.0));
+
+	if (texcoord.x < 1.0 / 2.0 && texcoord.y < 1.0 / 2.0)
+	color = mix(color, shadowSample.rgb, shadowSample.a);
+*/
 
 	gl_FragColor = vec4(color, 1.0);
 }

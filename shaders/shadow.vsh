@@ -30,6 +30,7 @@ varying float translucentBlocks;
 
 varying vec3 worldpos;
 varying vec3 normal;
+varying vec3 fragPos;
 
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
@@ -108,6 +109,8 @@ void main(){
 	vec4 viewpos = ftransform();
 	
 	viewpos = shadowProjectionInverse * viewpos;
+	fragPos = viewpos.rgb;
+
 	viewpos = shadowModelViewInverse * viewpos;
 	
 	worldpos = viewpos.xyz + cameraPosition;
@@ -118,6 +121,8 @@ void main(){
 	viewpos = shadowProjection * viewpos;
 	
 	gl_Position = BiasShadowProjection(viewpos);
+
+	normal = normalize(gl_NormalMatrix * gl_Normal);
 	
 	color = gl_Color;
 		
@@ -130,6 +135,4 @@ void main(){
 	#if !defined PROJECTED_CAUSTICS || !defined WATER_CAUSTICS
 		gl_Position *= 1.0 - iswater;
 	#endif
-
-	normal = normalize(gl_NormalMatrix * gl_Normal);
 }

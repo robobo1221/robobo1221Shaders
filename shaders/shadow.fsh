@@ -10,6 +10,7 @@ varying float translucentBlocks;
 
 varying vec3 worldpos;
 varying vec3 normal;
+varying vec3 fragPos;
 
 uniform sampler2D tex;
 uniform sampler2D noisetex;
@@ -36,6 +37,10 @@ vec4 nvec4(vec3 pos) {
 
 void main() {
 
+	if (dot(normalize(fragPos.rgb), normal) > 0.0) {
+		discard;
+	}
+
 	vec4 fragcolor = texture2D(tex,texcoord.xy) * color;
 	
 	#if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
@@ -44,6 +49,7 @@ void main() {
 		fragcolor.rgb = bool(iswater) ? caustics : fragcolor.rgb;
 	#endif
 
+	fragcolor.rgb *= mix(1.0, fragcolor.a, translucentBlocks);
 	fragcolor.rgb = mix(fragcolor.rgb, vec3(0.0), smoothstep(0.99, 1.0, fragcolor.a) * translucentBlocks);
 	
 /* DRAWBUFFERS:01 */	
