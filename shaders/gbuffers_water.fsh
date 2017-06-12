@@ -47,7 +47,7 @@ void main(){
 	#endif
 
 	vec4 albedo = texture2D(texture, texcoord.st);
-	albedo = mix(albedo * color, waterColor, iswater);
+		 albedo = mix(albedo * color, waterColor, iswater);
 	
 	vec3 bump;
 		bump = getWaveHeight(posxz.xz - posxz.y,iswater);
