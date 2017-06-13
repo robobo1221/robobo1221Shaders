@@ -278,7 +278,7 @@ float getSubSurfaceScattering(){
 	return clamp(cosV, 0.0, 90.0);
 }
 
-const vec2 biliteralOffets[4] = vec2[4] (
+const vec2 bilateralOffets[4] = vec2[4] (
 	vec2(1.0, 0.0),
 	vec2(0.0, 1.0),
 	vec2(-1.0, 0.0),
@@ -293,7 +293,7 @@ vec3 bilateralUpsamplingGI(vec2 uv){
 	float totalWeight = 0.0;
 
 	for (int i = 0; i < 4; i++){
-		vec2 offset = biliteralOffets[i] * 5.0;
+		vec2 offset = bilateralOffets[i] * 5.0;
 		coord = uv + offset / vec2(viewWidth, viewHeight);
 
 		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
