@@ -1,6 +1,6 @@
 #version 120
 
-/* DRAWBUFFERS:013 */	
+/* DRAWBUFFERS:7 */	
 
 #define SHADOW_BIAS 0.85
 
@@ -9,9 +9,7 @@
 
 varying vec4 texcoord;
 
-uniform sampler2D gcolor;
-uniform sampler2D gdepth;
-uniform sampler2D composite;
+uniform sampler2D gaux4;
 
 #ifdef GLOBAL_ILLUMINATION
 varying vec3 lightVector;
@@ -197,12 +195,8 @@ void main(){
 		globalIllumination = getGi(fragpos);
 	}
 	
-	gl_FragData[0] = vec4(texture2D(gcolor, texcoord.st).rgb, globalIllumination.r);
-	gl_FragData[1] = vec4(texture2D(gdepth, texcoord.st).rgb, globalIllumination.g);
-	gl_FragData[2] = vec4(texture2D(composite, texcoord.st).rgb, globalIllumination.b);
+	gl_FragData[0] = vec4(globalIllumination, texture2D(gaux4, texcoord.st).a);
 #else
 	gl_FragData[0] = texture2D(gcolor, texcoord.st);
-	gl_FragData[1] = texture2D(gdepth, texcoord.st);
-	gl_FragData[2] = texture2D(composite, texcoord.st);
 #endif
 }

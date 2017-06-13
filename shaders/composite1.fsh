@@ -30,8 +30,7 @@ const float 	ambientOcclusionLevel 		= 1.0; //[0.0 0.25 0.5 0.75 1.0]
 const float		eyeBrightnessHalflife		= 16.0; //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 16.0 18.0 20.0 24.0 28.0 32.0 ]
 
 const bool 		gcolorMipmapEnabled			= true;
-const bool 		gdepthMipmapEnabled			= true;
-const bool 		compositeMipmapEnabled		= true;
+const bool 		gaux4MipmapEnabled			= true;
 const bool 		gnormalMipmapEnabled		= true;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -42,7 +41,7 @@ const int 		gcolorFormat				= RGBA16;
 const int 		gaux1Format					= RGB10_A2;
 const int 		gaux2Format					= RGBA16;
 const int 		gaux3Format					= RGB10_A2;
-const int 		gaux4Format					= RGB5_A1;
+const int 		gaux4Format					= RGB10_A2;
 const int 		gnormalFormat				= RGB10_A2;
 const int 		compositeFormat				= RGBA16;
 */
@@ -67,6 +66,7 @@ uniform sampler2D depthtex1;
 uniform sampler2D gdepth;
 uniform sampler2D gaux1;
 uniform sampler2D gaux2;
+uniform sampler2D gaux4;
 uniform sampler2D gnormal;
 uniform sampler2D noisetex;
 
@@ -304,11 +304,7 @@ vec3 bilateralUpsamplingGI(vec2 uv){
 
 		float weight = normalWeight * depthWeight;
 
-		float sampleR = texture2D(gcolor, coord, lod).a;
-		float sampleG = texture2D(gdepth, coord, lod).a;
-		float sampleB = texture2D(composite, coord, lod).a ;
-
-		result += vec3(sampleR, sampleG, sampleB) * weight;
+		result += texture2D(gaux4, coord, lod).rgb * weight;
 
 		totalWeight += weight;
 	}
