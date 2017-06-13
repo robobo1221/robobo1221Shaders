@@ -32,6 +32,7 @@ const float		eyeBrightnessHalflife		= 16.0; //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9
 const bool 		gcolorMipmapEnabled			= true;
 const bool 		gdepthMipmapEnabled			= true;
 const bool 		compositeMipmapEnabled		= true;
+const bool 		gnormalMipmapEnabled		= true;
 
 //----------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -295,7 +296,7 @@ vec3 bilateralUpsampling(vec2 uv){
 		vec2 offset = biliteralOffets[i] * 5.0;
 		coord = uv + offset / viewWidth;
 
-		vec3 offsetNormal = texture2D(gnormal, coord).rgb * 2.0 - 1.0;
+		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
 		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
 
 		float offsetDepth = ld(texture2D(depthtex1, coord).r);
