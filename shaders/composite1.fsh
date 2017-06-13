@@ -286,7 +286,7 @@ const vec2 biliteralOffets[4] = vec2[4] (
 );
 
 vec3 bilateralUpsampling(vec2 uv){
-	const float lod = 1.75;
+	const float lod = 2.5;
 
 	vec3 result = vec3(0.0);
 	vec2 coord = vec2(0.0);
