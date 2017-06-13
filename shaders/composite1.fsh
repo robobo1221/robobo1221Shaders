@@ -151,6 +151,40 @@ float ld(float dist) {
     return (2.0 * near) / (far + near - dist * (far - near));
 }
 
+const vec2 bilateralOffets[4] = vec2[4] (
+	vec2(1.0, 0.0),
+	vec2(0.0, 1.0),
+	vec2(-1.0, 0.0),
+	vec2(0.0, -1.0)
+);
+
+vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
+
+	float totalWeight = 0.0;
+	vec4 result = vec4(0.0);
+
+	for (int i = 0; i < 4; i++){
+		vec2 offset = bilateralOffets[i] * 5.0;
+		vec2 coord = position + offset / vec2(viewWidth, viewHeight);
+
+		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
+		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
+
+		float offsetDepth = ld(texture2D(depthtex1, coord).r);
+		float depthWeight = 1.0 / (0.0001 + abs(ld(pixeldepth2) - offsetDepth));
+
+		float weight = normalWeight * depthWeight;
+
+		result += texture2D(sample, coord, lod) * weight;
+
+		totalWeight += weight;
+	}
+
+	result /= totalWeight;
+
+	return max(result, 0.0);
+}
+
 #define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
 
 float bayer16x16(vec2 p){
@@ -278,46 +312,12 @@ float getSubSurfaceScattering(){
 	return clamp(cosV, 0.0, 90.0);
 }
 
-const vec2 bilateralOffets[4] = vec2[4] (
-	vec2(1.0, 0.0),
-	vec2(0.0, 1.0),
-	vec2(-1.0, 0.0),
-	vec2(0.0, -1.0)
-);
-
-vec3 bilateralUpsamplingGI(vec2 uv){
-	const float lod = 2.5;
-
-	vec3 result = vec3(0.0);
-	vec2 coord = vec2(0.0);
-	float totalWeight = 0.0;
-
-	for (int i = 0; i < 4; i++){
-		vec2 offset = bilateralOffets[i] * 5.0;
-		coord = uv + offset / vec2(viewWidth, viewHeight);
-
-		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
-		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
-
-		float offsetDepth = ld(texture2D(depthtex1, coord).r);
-		float depthWeight = 1.0 / (0.0001 + abs(ld(pixeldepth2) - offsetDepth));
-
-		float weight = normalWeight * depthWeight;
-
-		result += texture2D(gaux4, coord, lod).rgb * weight;
-
-		totalWeight += weight;
-	}
-
-	result /= totalWeight;
-
-	return max(result, 0.0);
-}
-
 #ifdef GLOBAL_ILLUMINATION
 	vec3 getGlobalIllumination(vec2 uv){
 
-		vec3 globalIllumination = bilateralUpsamplingGI(uv);
+		const float lod = 2.5;
+
+		vec3 globalIllumination = bilateralTexture(gaux4, uv, lod).rgb;
 		globalIllumination /= 1.0 - globalIllumination;
 		
 		return getDesaturation(globalIllumination, min(emissiveLM, 1.0));
@@ -347,7 +347,7 @@ vec3 getShading(vec3 color){
 	vec3 globalIllumination = vec3(0.0);
 	
 	#ifdef GLOBAL_ILLUMINATION
-		globalIllumination = (getGlobalIllumination(texcoord.st) * GI_MULT * 2.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
+		globalIllumination = getGlobalIllumination(texcoord.st) * (GI_MULT * 2.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
 	#endif
 
 	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap;

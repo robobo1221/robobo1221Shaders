@@ -5,7 +5,7 @@ float getTerrainBump(vec2 posxz){
 	float noise = texture2D(noisetex, coord0).x;
 		  noise += texture2D(noisetex, coord1).x;
 	
-	return noise * 0.1 * wetness;
+	return noise * 0.05 * wetness;
 	
 }
 

@@ -459,10 +459,10 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 #endif
 
 vec3 renderGaux4(vec3 color){
-	float albedo = pow(texture2D(gaux4, texcoord.st).a, 2.2);
-	vec3 rainColor = vec3(0.05, 0.2, 1.0);
+	float albedo = texture2D(gaux4, texcoord.st).a;
+	vec3 rainColor = vec3(2.0);
 
-	return mix(color, rainColor * sqrt(color), albedo * (0.5 * rainStrength));
+	return mix(color, rainColor * color, albedo * rainStrength);
 }
 
 #ifdef WATER_DEPTH_FOG
