@@ -103,7 +103,7 @@ float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((t
 vec3 specular = 		texture2D(gaux3, texcoord.st).rgb;
 #endif
 vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
-vec3 normals = 			texture2D(gnormal, texcoord.st, 2.0).rgb * 2.0 - 1.0;
+vec3 normals = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
 vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);
 vec4 aux2 = 			texture2D(gdepth, texcoord.st);
