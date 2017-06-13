@@ -285,7 +285,7 @@ const vec2 biliteralOffets[4] = vec2[4] (
 	vec2(0.0, -1.0)
 );
 
-vec3 bilateralUpsampling(vec2 uv){
+vec3 bilateralUpsamplingGI(vec2 uv){
 	const float lod = 2.5;
 
 	vec3 result = vec3(0.0);
@@ -294,7 +294,7 @@ vec3 bilateralUpsampling(vec2 uv){
 
 	for (int i = 0; i < 4; i++){
 		vec2 offset = biliteralOffets[i] * 5.0;
-		coord = uv + offset / viewWidth;
+		coord = uv + offset / vec2(viewWidth, viewHeight);
 
 		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
 		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
@@ -321,7 +321,7 @@ vec3 bilateralUpsampling(vec2 uv){
 #ifdef GLOBAL_ILLUMINATION
 	vec3 getGlobalIllumination(vec2 uv){
 
-		vec3 globalIllumination = bilateralUpsampling(uv);
+		vec3 globalIllumination = bilateralUpsamplingGI(uv);
 		globalIllumination /= 1.0 - globalIllumination;
 		
 		return getDesaturation(globalIllumination, min(emissiveLM, 1.0));
@@ -376,7 +376,7 @@ vec3 getShading(vec3 color){
 
 			float weight = 128.0 / rSD.y;
 
-			float diffthresh = 0.0005;	// Fixes light leakage from walls
+			const float diffthresh = 0.0005;	// Fixes light leakage from walls
 			
 			vec3 worldposition = vec3(0.0);
 
