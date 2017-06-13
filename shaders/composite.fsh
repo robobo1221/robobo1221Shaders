@@ -197,6 +197,6 @@ void main(){
 	
 	gl_FragData[0] = vec4(globalIllumination, texture2D(gaux4, texcoord.st).a);
 #else
-	gl_FragData[0] = texture2D(gcolor, texcoord.st);
+	gl_FragData[0] = texture2D(gaux4, texcoord.st);
 #endif
 }
