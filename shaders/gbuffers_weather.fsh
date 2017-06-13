@@ -7,5 +7,5 @@ void main(){
 
 /* DRAWBUFFERS:7 */
 
-	gl_FragData[0] = texture2D(texture, texcoord.st);
+	gl_FragData[0] = vec4(vec3(1.0), texture2D(texture, texcoord.st).a);
 }
