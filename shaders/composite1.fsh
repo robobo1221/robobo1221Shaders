@@ -464,12 +464,10 @@ float getVolumetricCloudNoise(vec3 p){
 	return clamp(noise * 10.0, 0.0, 1.0);
 }
 
-vec3 getVolumetricCloudPosition(float depth, float cloudDistance)
+vec3 getVolumetricCloudPosition(float depth)
 {
 	vec3 position = toScreenSpace(vec3(texcoord.st, expDepth(depth)));
 	     position = getWorldSpace(vec4(position, 0.0)).rgb;
-
-		 position.rgb *= cloudDistance;
 
 	return position + cameraPosition;
 }
@@ -532,8 +530,6 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 vec4 getVolumetricClouds(vec3 color){
 
-	float cloudDistance = 160.0 / far;
-
 	vec4 clouds = vec4(pow(color, vec3(2.2)), 0.0);
 
 	float nearPlane = 2.0;			//start to where the ray should march.
@@ -548,11 +544,11 @@ vec4 getVolumetricClouds(vec3 color){
 
 	while (farPlane > nearPlane){
 
-		vec3 wpos = getVolumetricCloudPosition(farPlane, cloudDistance);
+		vec3 wpos = getVolumetricCloudPosition(farPlane);
 
 		float volumetricDistance = length(wpos - cameraPosition.xyz);
 
-		if (worldPositionDistance < volumetricDistance && land2 > 0.0){
+		if (worldPositionDistance < volumetricDistance){
 			clouds.a = 0.0;
 		} else {
 

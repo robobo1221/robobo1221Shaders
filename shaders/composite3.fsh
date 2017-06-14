@@ -1,6 +1,6 @@
 #version 120
 
-	#define BLOOM									//Makes glow effect on bright stuffs.
+#define BLOOM									//Makes glow effect on bright stuffs.
 
 const bool gcolorMipmapEnabled = true;
 
@@ -10,6 +10,8 @@ uniform sampler2D gcolor;
 
 uniform float aspectRatio;
 uniform float viewWidth;
+
+#ifdef BLOOM
 
 float pw = 1.0/ viewWidth;
 
@@ -32,12 +34,7 @@ vec3 makeBloom(float lod,vec2 offset){
 
 	return bloom;
 }
-
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
+#endif
 
 void main() {
 vec3 blur = vec3(0);
