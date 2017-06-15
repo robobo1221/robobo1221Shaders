@@ -7,6 +7,7 @@
 #define WATER_REFRACT
 	#define WATER_REFRACT_MULT 1.0 //[0.5 1.0 1.5 2.0]
 	#define WATER_REFRACT_DISPERSION //Makes the primary wavelength split up (RGB)
+	#define RAINPUDDLE_REFRACTION //Makes rain puddles refract light.
 
 #define FOG
 	#define FOG_DENSITY_DAY		1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
@@ -186,6 +187,7 @@ float ld(float dist) {
 
 #include "lib/noise.glsl"
 #include "lib/waterBump.glsl"
+#include "lib/terrainBump.glsl"
 #include "lib/phases.glsl"
 #include "lib/skyGradient.glsl"
 #include "lib/calcClouds.glsl"
@@ -195,13 +197,20 @@ float ld(float dist) {
 	#include "lib/rainPuddles.glsl"
 #endif
 
+#ifdef RAIN_PUDDLES
+	float puddles = getRainPuddles(worldPosition + cameraPosition) * (1.0 - clamp(iswater + istransparent, 0.0 ,1.0));
+#else
+	float puddles = 1.0;
+#endif
+
 vec3 shadows = vec3(aux2.a);
 
 float refractmask(vec2 coord){
 
 	float sample = texture2D(gdepth, coord.st).g;
+	float mask = bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);
 
-	return bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);
+	return mix(mask, puddles, 1.0-clamp(mask + hand + isEyeInWater, 0.0, 1.0));
 
 }
 
@@ -232,12 +241,18 @@ float refractmask(vec2 coord){
 		#endif
 
 		refraction = getWaveHeight(posxz.xz - posxz.y, iswater);
+		#ifdef RAINPUDDLE_REFRACTION
+			refraction += getTerrainHeight(posxz.xz - posxz.y) * (1.0 - (iswater + istransparent));
+		#endif
 
 			vec2 depth = vec2(0.0);
 			depth.x = getDepth(pixeldepth2);
 			depth.y = getDepth(pixeldepth);
 
 			refractionMult.y = clamp(depth.x - depth.y,0.0,1.0);
+			#ifdef RAINPUDDLE_REFRACTION
+				refractionMult.y = mix(refractionMult.y, 0.2, 1.0 - (iswater + istransparent));
+			#endif
 			refractionMult.y /= depth.y;
 			refractionMult.y *= WATER_REFRACT_MULT * 0.2;
 			refractionMult.y *= mix(0.3,1.0,iswater);
@@ -281,7 +296,7 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 		texCoord = mix(texCoord, refractCoord2, refractMask.z);
 	#endif
 
-	return mix(texPosition, texCoord, iswater + istransparent);
+	return texCoord;
 
 }
 
@@ -302,7 +317,7 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 		refraction.g = mix(color.g, rA.g, refractMask.y);
 		refraction.b = mix(color.b, rA.b, refractMask.z);
 
-		if (iswater > 0.9 || istransparent > 0.9)	color = refraction;
+		color = refraction;
 
 		return color;
 	}
@@ -607,12 +622,6 @@ vec3 renderGaux4(vec3 color){
 		#endif	
 
 		float iswet = smoothstep(0.8,0.9,aux.b * (1.0 - clamp(iswater + istransparent, 0.0 ,1.0))) * clamp(dot(upVec, normal),0.0,1.0);
-
-		#ifdef RAIN_PUDDLES
-			float puddles = getRainPuddles(worldPosition + cameraPosition) * (1.0 - clamp(iswater + istransparent, 0.0 ,1.0));
-		#else
-			float puddles = 1.0;
-		#endif
 
 		const float F0 = 0.02;
 

@@ -113,6 +113,7 @@ mat2 time = mat2(vec2(
 );	//time[0].xy = sunrise and noon. time[1].xy = sunset and mindight.
 
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
+float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
 
 #include "lib/cloudCoverage.glsl"
 #include "lib/lightColor.glsl"
@@ -124,20 +125,17 @@ vec3 normal2 = 			texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);
 vec4 aux2 = 			texture2D(gdepth, texcoord.st);
 vec4 forWardAlbedo = 	texture2D(gaux2, texcoord.st);
-
-float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
-float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
+float pixeldepth = 		texture2D(gdepthtex, texcoord.st).x;
+float pixeldepth2 = 	texture2D(depthtex1, texcoord.st).x;
 
 float land = float(pixeldepth2 < comp);
 float land2 = float(pixeldepth < comp);
+
 float translucent = float(aux.g > 0.09 && aux.g < 0.11);
 float emissive = float(aux.g > 0.34 && aux.g < 0.36);
-
 float iswater = float(aux2.g > 0.12 && aux2.g < 0.28);
 float istransparent = float(aux2.g > 0.28 && aux2.g < 0.32);
 float hand = float(aux2.g > 0.85 && aux2.g < 0.87);
-
-float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
 
 float expDepth(float dist){
 	return (far * (dist - near)) / (dist * (far - near));
@@ -283,10 +281,10 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
     float g = max(0.0, dot(v - n * NdotV, l - n * NdotL));
     float c = g/t - g*t;
     
-    float a = .285 / (r+.57) + .5;
-    float b = .45 * r / (r+.09);
+    float a = 0.285 / (r+0.57) + 0.5;
+    float b = 0.45 * r / (r+0.09);
 
-    return max(0., NdotL) * ( b * c + a);
+    return max(0.0, NdotL) * ( b * c + a);
 
 }
 
