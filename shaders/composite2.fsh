@@ -241,6 +241,7 @@ float refractmask(vec2 coord){
 		#endif
 
 		refraction = getWaveHeight(posxz.xz - posxz.y, iswater);
+		refraction = mix(refraction, vec3(0.0), (1.0 - (iswater + istransparent)));
 		#ifdef RAINPUDDLE_REFRACTION
 			refraction += getTerrainHeight(posxz.xz - posxz.y) * (1.0 - (iswater + istransparent));
 		#endif
@@ -251,7 +252,7 @@ float refractmask(vec2 coord){
 
 			refractionMult.y = clamp(depth.x - depth.y,0.0,1.0);
 			#ifdef RAINPUDDLE_REFRACTION
-				refractionMult.y = mix(refractionMult.y, 0.2, 1.0 - (iswater + istransparent));
+				refractionMult.y = mix(refractionMult.y, 0.5*puddles, 1.0 - (iswater + istransparent));
 			#endif
 			refractionMult.y /= depth.y;
 			refractionMult.y *= WATER_REFRACT_MULT * 0.2;
