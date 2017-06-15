@@ -164,8 +164,8 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 	vec4 result = vec4(0.0);
 
 	for (int i = 0; i < 4; i++){
-		vec2 offset = bilateralOffets[i] * 5.0;
-		vec2 coord = position + offset / vec2(viewWidth, viewHeight);
+		vec2 offset = bilateralOffets[i] * 5.0 / vec2(viewWidth, viewHeight);
+		vec2 coord = position + offset;
 
 		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
 		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
@@ -247,7 +247,7 @@ vec3 worldPosition2 = getWorldSpace(vec4(fragpos2, 0.0)).rgb;
 
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
-	emissiveMap += (emissivetColor * ((20.0)) ) * pow(sqrt(dot(color.rgb,color.rgb)), 1.0) * emissive;
+	emissiveMap += (emissivetColor * 20.0) * pow(sqrt(dot(color.rgb,color.rgb)), 1.0) * emissive;
 
 	return emissiveMap;
 }
@@ -350,7 +350,7 @@ vec3 getShading(vec3 color){
 		globalIllumination = getGlobalIllumination(texcoord.st) * (GI_MULT * 2.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
 	#endif
 
-	return ((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap;
+	return (((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap) * color;
 }
 
 #ifdef VOLUMETRIC_LIGHT
@@ -579,7 +579,7 @@ void main()
 	vec3 moonMult = vec3(0.0);
 
 	if (land > 0.9)
-		color = getShading(color) * color;
+		color = getShading(color);
 	else {
 
 		//color = pow(color, vec3(2.2)); // Uncomment this line to get minecraft's default sky. And comment the line under to get minecraft's default sky.
