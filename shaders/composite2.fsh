@@ -266,6 +266,8 @@ float refractmask(vec2 coord){
 		refractMask = vec3(refractmask(refractCoord0),
 						   refractmask(refractCoord1),
 						   refractmask(refractCoord2));
+						   
+		refractMask *= iswater + istransparent;
 	}
 
 	vec3 refraction = vec3(0.0);
