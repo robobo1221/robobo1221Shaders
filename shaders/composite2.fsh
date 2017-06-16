@@ -187,7 +187,6 @@ float ld(float dist) {
 
 #include "lib/noise.glsl"
 #include "lib/waterBump.glsl"
-#include "lib/terrainBump.glsl"
 #include "lib/phases.glsl"
 #include "lib/skyGradient.glsl"
 #include "lib/calcClouds.glsl"
@@ -208,9 +207,8 @@ vec3 shadows = vec3(aux2.a);
 float refractmask(vec2 coord){
 
 	float sample = texture2D(gdepth, coord.st).g;
-	float mask = bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);
 
-	return mix(mask, puddles, 1.0-clamp(mask + hand + isEyeInWater, 0.0, 1.0));
+	return bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);;
 
 }
 
@@ -241,19 +239,12 @@ float refractmask(vec2 coord){
 		#endif
 
 		refraction = getWaveHeight(posxz.xz - posxz.y, iswater);
-		refraction = mix(refraction, vec3(0.0), (1.0 - (iswater + istransparent)));
-		#ifdef RAINPUDDLE_REFRACTION
-			refraction += getTerrainHeight(posxz.xz - posxz.y) * (1.0 - (iswater + istransparent));
-		#endif
 
 			vec2 depth = vec2(0.0);
 			depth.x = getDepth(pixeldepth2);
 			depth.y = getDepth(pixeldepth);
 
 			refractionMult.y = clamp(depth.x - depth.y,0.0,1.0);
-			#ifdef RAINPUDDLE_REFRACTION
-				refractionMult.y = mix(refractionMult.y, 0.5*puddles, 1.0 - (iswater + istransparent));
-			#endif
 			refractionMult.y /= depth.y;
 			refractionMult.y *= WATER_REFRACT_MULT * 0.2;
 			refractionMult.y *= mix(0.3,1.0,iswater);
