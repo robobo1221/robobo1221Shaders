@@ -162,6 +162,7 @@ vec3 shadowsForward = vec3(aux2.a);
 #include "lib/fragment/sky/skyGradient.glsl"
 #include "lib/fragment/sky/calcClouds.glsl"
 #include "lib/fragment/sky/calcStars.glsl"
+#include "lib/fragment/waterFog.glsl"
 
 #ifdef RAIN_PUDDLES
 	#include "lib/fragment/rainPuddles.glsl"
@@ -588,6 +589,10 @@ void main()
 	#endif
 
 	color = renderGaux4(color);
+
+	#if defined WATER_DEPTH_FOG && defined UNDERWATER_FOG
+		if (isEyeInWater > 0.9) color = getWaterDepthFog(color, fragpos, vec3(0.0));
+	#endif
 
 	#ifdef VOLUMETRIC_LIGHT
 		color = getVolumetricLight(color, texcoord.st);

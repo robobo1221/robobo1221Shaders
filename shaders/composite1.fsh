@@ -574,11 +574,6 @@ void main()
 
 		#ifdef WATER_DEPTH_FOG
 			if (isEyeInWater < 0.9) color = getWaterDepthFog(color, fragpos, fragpos2);
-			else {
-				#ifdef UNDERWATER_FOG
-					color = getWaterDepthFog(color, fragpos, vec3(0.0));
-				#endif
-			}
 		#endif
 	}
 
@@ -586,10 +581,6 @@ void main()
 
 	#ifdef VOLUMETRIC_CLOUDS
 		vec4 VolumetricClouds = getVolumetricClouds(color);
-
-		#if defined WATER_DEPTH_FOG && defined UNDERWATER_FOG
-			if (isEyeInWater > 0.9) VolumetricClouds.rgb = getWaterDepthFog(VolumetricClouds.rgb, fragpos, vec3(0.0));
-		#endif
 	#endif
 	
 /* DRAWBUFFERS:015 */
