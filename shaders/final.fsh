@@ -106,7 +106,7 @@ vec3 tonemap(vec3 x){
 	vec3 d = vec3(LIFT);
 	vec3 e = vec3(INVERSE_LIFT);
 	
-	x = mix(x, vec3(0.33333), 1.0 - c);
+	x = mix(x, vec3(0.33333), 1.1 - c);
 
 	x = pow(x, vec3(2.2)) * a;
 
@@ -117,7 +117,7 @@ vec3 tonemap(vec3 x){
 
 vec3 reinhardTonemap(vec3 color)
 {
-	return color / (1.0 + color);
+	return color / (color + 1.0);
 }
 
 
