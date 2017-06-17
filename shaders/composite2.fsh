@@ -108,17 +108,17 @@ vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);
 vec4 aux2 = 			texture2D(gdepth, texcoord.st);
 
-float pixeldepth = texture2D(gdepthtex, texcoord.st).x;
-float pixeldepth2 = texture2D(depthtex1, texcoord.st).x;
+float pixeldepth = 		texture2D(gdepthtex, texcoord.st).x;
+float pixeldepth2 = 	texture2D(depthtex1, texcoord.st).x;
 
-float emissive = float(aux.g > 0.34 && aux.g < 0.36);
+float emissive = 		float(aux.g > 0.34 && aux.g < 0.36);
 
-float iswater = float(aux2.g > 0.12 && aux2.g < 0.28);
-float istransparent = float(aux2.g > 0.28 && aux2.g < 0.32);
-float hand = float(aux2.g > 0.85 && aux2.g < 0.87);
-float translucent = 0.0;
+float iswater =			float(aux2.g > 0.12 && aux2.g < 0.28);
+float istransparent = 	float(aux2.g > 0.28 && aux2.g < 0.32);
+float hand = 			float(aux2.g > 0.85 && aux2.g < 0.87);
+float translucent = 	0.0;
 
-vec3 normal = mix(normals, compositeNormals, iswater + istransparent + hand);
+vec3 normal = 			mix(normals, compositeNormals, iswater + istransparent + hand);
 
 float getEyeBrightnessSmooth = pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
 

@@ -102,6 +102,7 @@ float comp = 1.0-near/far/far;
 
 float timefract = worldTime;
 
+
 mat2 time = mat2(vec2(
 				((clamp(timefract, 23000.0f, 25000.0f) - 23000.0f) / 1000.0f) + (1.0f - (clamp(timefract, 0.0f, 2000.0f)/2000.0f)),
 				((clamp(timefract, 0.0f, 2000.0f)) / 2000.0f) - ((clamp(timefract, 9000.0f, 12000.0f) - 9000.0f) / 3000.0f)),
@@ -125,14 +126,14 @@ vec4 forWardAlbedo = 	texture2D(gaux2, texcoord.st);
 float pixeldepth = 		texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = 	texture2D(depthtex1, texcoord.st).x;
 
-float land = float(pixeldepth2 < comp);
-float land2 = float(pixeldepth < comp);
+float land = 			float(pixeldepth2 < comp);
+float land2 = 			float(pixeldepth < comp);
 
-float translucent = float(aux.g > 0.09 && aux.g < 0.11);
-float emissive = float(aux.g > 0.34 && aux.g < 0.36);
-float iswater = float(aux2.g > 0.12 && aux2.g < 0.28);
-float istransparent = float(aux2.g > 0.28 && aux2.g < 0.32);
-float hand = float(aux2.g > 0.85 && aux2.g < 0.87);
+float translucent = 	float(aux.g > 0.09 && aux.g < 0.11);
+float emissive = 		float(aux.g > 0.34 && aux.g < 0.36);
+float iswater = 		float(aux2.g > 0.12 && aux2.g < 0.28);
+float istransparent = 	float(aux2.g > 0.28 && aux2.g < 0.32);
+float hand = 			float(aux2.g > 0.85 && aux2.g < 0.87);
 
 #include "lib/util/spaceConversions.glsl"
 
@@ -148,14 +149,13 @@ float ld(float dist) {
     return (2.0 * near) / (far + near - dist * (far - near));
 }
 
-const vec2 bilateralOffets[4] = vec2[4] (
-	vec2(1.0, 0.0),
-	vec2(0.0, 1.0),
-	vec2(-1.0, 0.0),
-	vec2(0.0, -1.0)
-);
-
 vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
+	const vec2 bilateralOffets[4] = vec2[4] (
+		vec2(1.0, 0.0),
+		vec2(0.0, 1.0),
+		vec2(-1.0, 0.0),
+		vec2(0.0, -1.0)
+	);
 
 	float totalWeight = 0.0;
 	vec4 result = vec4(0.0);
