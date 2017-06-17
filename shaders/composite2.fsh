@@ -155,25 +155,12 @@ float ld(float dist) {
     return (2.0 * near) / (far + near - dist * (far - near));
 }
 
-<<<<<<< HEAD
 #include "lib/util/noise.glsl"
 #include "lib/displacement/normalDisplacement/waterBump.glsl"
 #include "lib/util/phases.glsl"
 #include "lib/fragment/sky/skyGradient.glsl"
 #include "lib/fragment/sky/calcClouds.glsl"
 #include "lib/fragment/sky/calcStars.glsl"
-=======
-#include "lib/noise.glsl"
-#include "lib/waterBump.glsl"
-#include "lib/phases.glsl"
-#include "lib/skyGradient.glsl"
-#include "lib/calcClouds.glsl"
-#include "lib/calcStars.glsl"
-
-#ifdef RAIN_PUDDLES
-	#include "lib/rainPuddles.glsl"
-#endif
->>>>>>> 00f011792270a61b7f065ebeb031174ed2e7171d
 
 #ifdef RAIN_PUDDLES
 	#include "lib/fragment/rainPuddles.glsl"
@@ -219,11 +206,7 @@ float refractmask(vec2 coord){
 		#endif
 
 		refraction = getWaveHeight(posxz.xz - posxz.y, iswater);
-<<<<<<< HEAD
 		refraction = mix(refraction, vec3(0.0), (1.0 - (iswater + istransparent)));
-=======
-
->>>>>>> 00f011792270a61b7f065ebeb031174ed2e7171d
 			vec2 depth = vec2(0.0);
 			depth.x = getDepth(pixeldepth2);
 			depth.y = getDepth(pixeldepth);
@@ -250,13 +233,8 @@ float refractmask(vec2 coord){
 		refractMask = vec3(refractmask(refractCoord0),
 						   refractmask(refractCoord1),
 						   refractmask(refractCoord2));
-<<<<<<< HEAD
 
 		refractMask *= iswater + istransparent; 
-=======
-						   
-		refractMask *= iswater + istransparent;
->>>>>>> 00f011792270a61b7f065ebeb031174ed2e7171d
 	}
 
 	vec3 refraction = vec3(0.0);
