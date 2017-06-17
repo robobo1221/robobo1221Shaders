@@ -116,7 +116,7 @@ vec3 getGi(){
 
 	for (float i = 1.0; i < 2.0; i += giSteps){
 		
-			vec2 offset = (circleDistribution * i);
+			vec2 offset = circleDistribution * i;
 				 offset *= sqrt(dot(offset, offset)) * GI_RADIUS;
 
 			vec2 offsetPosition = vec2(shadowPosition.rg + offset);
