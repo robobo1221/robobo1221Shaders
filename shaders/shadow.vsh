@@ -46,7 +46,7 @@ uniform float frameTimeCounter;
 
 uniform int worldTime;
 
-#include "lib/options.glsl"
+#include "lib/options/options.glsl"
 
 float timefract = worldTime;
 
@@ -113,7 +113,7 @@ void main(){
 	
 	worldpos = viewpos.xyz + cameraPosition;
 	
-	#include "lib/vertexDisplacement.glsl"
+	#include "lib/displacement/vertexDisplacement.glsl"
 	
 	viewpos = shadowModelView * viewpos;
 	viewpos = shadowProjection * viewpos;

@@ -10,7 +10,7 @@ void main(){
 
 	vec4 albedo = texture2D(texture, texcoord.st) * color;
 	
-	#include "lib/lmCoord.glsl"
+	#include "lib/fragment/position/lmCoord.glsl"
 
 /* DRAWBUFFERS:042 */
 

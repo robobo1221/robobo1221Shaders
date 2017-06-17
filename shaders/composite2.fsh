@@ -1,8 +1,9 @@
 #version 120
 #extension GL_ARB_shader_texture_lod : enable
 
-#include "lib/colorRange.glsl"
-#include "lib/options.glsl"
+#include "lib/util/colorRange.glsl"
+#include "lib/options/options.glsl"
+#include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 
 #define WATER_REFRACT
 	#define WATER_REFRACT_MULT 1.0 //[0.5 1.0 1.5 2.0]
@@ -23,8 +24,6 @@
 #define WATER_DEPTH_FOG
 	#define DEPTH_FOG_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 	#define UNDERWATER_FOG
-
-#include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 
 const bool gcolorMipmapEnabled = true;
 const bool gaux2MipmapEnabled = true;
@@ -96,7 +95,7 @@ mat2 time = mat2(vec2(
 
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
 
-#include "lib/cloudCoverage.glsl"
+#include "lib/util/etc/cloudCoverage.glsl"
 #include "lib/lightColor.glsl"
 
 //Unpack textures.
@@ -123,22 +122,6 @@ vec3 normal = mix(normals, compositeNormals, iswater + istransparent + hand);
 
 float getEyeBrightnessSmooth = pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
 
-#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
-
-float bayer16x16(vec2 p){
-
-	p *= vec2(viewWidth,viewHeight);
-	
-    vec2 m0 = vec2(mod(floor(p/8.), 2.));
-    vec2 m1 = vec2(mod(floor(p/4.), 2.));
-    vec2 m2 = vec2(mod(floor(p/2.), 2.));
-    vec2 m3 = vec2(mod(floor(p)   , 2.));
-
-    return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
-}
-
-#undef g
-
 vec3 nvec3(vec4 pos) {
     return pos.xyz/pos.w;
 }
@@ -147,27 +130,14 @@ vec4 nvec4(vec3 pos) {
     return vec4(pos.xyz, 1.0);
 }
 
-vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-
-vec3 toScreenSpace(vec3 p) {
-        vec3 p3 = vec3(p) * 2. - 1.;
-        vec4 fragposition = iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
-        return fragposition.xyz / fragposition.w;
-}
+#include "lib/util/spaceConversions.glsl"
 
 vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
 vec3 uPos = normalize(fragpos.rgb);
 
 vec3 fragpos2 = toScreenSpace(vec3(texcoord.st, pixeldepth));
 
-vec4 getWorldSpace(vec4 fragpos){
-
-	vec4 wpos = gbufferModelViewInverse * fragpos;
-
-	return wpos;
-}
-
-vec3 worldPosition = getWorldSpace(vec4(fragpos, 0.0)).rgb;
+vec3 worldPosition = toWorldSpace(fragpos).rgb;
 
 float cdist(vec2 coord) {
 	return max(abs(coord.x-0.5),abs(coord.y-0.5))*2.0;
@@ -185,19 +155,15 @@ float ld(float dist) {
     return (2.0 * near) / (far + near - dist * (far - near));
 }
 
-#include "lib/noise.glsl"
-#include "lib/waterBump.glsl"
-#include "lib/terrainBump.glsl"
-#include "lib/phases.glsl"
-#include "lib/skyGradient.glsl"
-#include "lib/calcClouds.glsl"
-#include "lib/calcStars.glsl"
+#include "lib/util/noise.glsl"
+#include "lib/displacement/normalDisplacement/waterBump.glsl"
+#include "lib/util/phases.glsl"
+#include "lib/fragment/sky/skyGradient.glsl"
+#include "lib/fragment/sky/calcClouds.glsl"
+#include "lib/fragment/sky/calcStars.glsl"
 
 #ifdef RAIN_PUDDLES
-	#include "lib/rainPuddles.glsl"
-#endif
-
-#ifdef RAIN_PUDDLES
+	#include "lib/fragment/rainPuddles.glsl"
 	float puddles = getRainPuddles(worldPosition + cameraPosition) * (1.0 - clamp(iswater + istransparent, 0.0 ,1.0));
 #else
 	float puddles = 1.0;
@@ -208,9 +174,8 @@ vec3 shadows = vec3(aux2.a);
 float refractmask(vec2 coord){
 
 	float sample = texture2D(gdepth, coord.st).g;
-	float mask = bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);
 
-	return mix(mask, puddles, 1.0-clamp(mask + hand + isEyeInWater, 0.0, 1.0));
+	return bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);;
 
 }
 
@@ -242,18 +207,11 @@ float refractmask(vec2 coord){
 
 		refraction = getWaveHeight(posxz.xz - posxz.y, iswater);
 		refraction = mix(refraction, vec3(0.0), (1.0 - (iswater + istransparent)));
-		#ifdef RAINPUDDLE_REFRACTION
-			refraction += getTerrainHeight(posxz.xz - posxz.y) * (1.0 - (iswater + istransparent));
-		#endif
-
 			vec2 depth = vec2(0.0);
 			depth.x = getDepth(pixeldepth2);
 			depth.y = getDepth(pixeldepth);
 
 			refractionMult.y = clamp(depth.x - depth.y,0.0,1.0);
-			#ifdef RAINPUDDLE_REFRACTION
-				refractionMult.y = mix(refractionMult.y, 0.5*puddles, 1.0 - (iswater + istransparent));
-			#endif
 			refractionMult.y /= depth.y;
 			refractionMult.y *= WATER_REFRACT_MULT * 0.2;
 			refractionMult.y *= mix(0.3,1.0,iswater);
@@ -275,6 +233,8 @@ float refractmask(vec2 coord){
 		refractMask = vec3(refractmask(refractCoord0),
 						   refractmask(refractCoord1),
 						   refractmask(refractCoord2));
+
+		refractMask *= iswater + istransparent; 
 	}
 
 	vec3 refraction = vec3(0.0);
@@ -337,7 +297,7 @@ vec3 fragposRef = toScreenSpace(vec3(texcoord.st, pixeldepthRef));
 vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 
 #if defined WATER_CAUSTICS && !defined PROJECTED_CAUSTICS
-		#include "lib/caustics.glsl"
+		#include "lib/fragment/caustics.glsl"
 #endif
 
 #ifdef FOG
@@ -378,7 +338,7 @@ vec3 fragposRef2 = toScreenSpace(vec3(texcoord.st, pixeldepthRef2));
 		fogColor = pow(fogColor, vec3(2.2));
 		fogColor = mix(mix(fogColor * 0.25, fogColor, rainStrength), fogColor, pow(cosMoonUpAngle, 5.0) * time[1].y);
 		
-		float rawHeight = getWorldSpace(vec4(fragposFog, 1.0)).y + cameraPosition.y;
+		float rawHeight = toWorldSpace(fragposFog).y + cameraPosition.y;
 
 		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) / 100.0, 4.4),0.0,1.0) * 3.0 + 0.05;
 

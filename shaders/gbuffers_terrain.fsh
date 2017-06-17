@@ -1,7 +1,7 @@
 #version 120
 #extension GL_ARB_shader_texture_lod : enable
 
-#include "lib/options.glsl"
+#include "lib/options/options.glsl"
 
 const vec3 intervalMult = vec3(1.0, 1.0, 1.0/(POM_DEPTH / 8.0))/POM_MAP_RES * 64 / OCCLUSION_POINTS;
 const float MAX_OCCLUSION_DISTANCE = 22.0;
@@ -33,10 +33,10 @@ uniform vec3 upPosition;
 uniform float wetness;
 uniform float frameTimeCounter;
 
-#include "lib/terrainBump.glsl"
+#include "lib/displacement/normalDisplacement/terrainBump.glsl"
 
 #ifdef RAIN_PUDDLES
-	#include "lib/rainPuddles.glsl"
+	#include "lib/fragment/rainPuddles.glsl"
 #endif
 
 const float mincoord = 1.0/4096.0;
@@ -83,8 +83,7 @@ void main(){
 	}
 	#endif
 
-
-	#include "lib/lmCoord.glsl"
+	#include "lib/fragment/position/lmCoord.glsl"
 
 	vec2 posxz = wpos.xz - wpos.y;
 	

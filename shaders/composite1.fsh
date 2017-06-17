@@ -1,7 +1,7 @@
 #version 120
 //#extension GL_ARB_gpu_shader5 : enable
 
-#include "lib/colorRange.glsl"
+#include "lib/util/colorRange.glsl"
 
 #define SHADOW_BIAS 0.85
 
@@ -9,8 +9,8 @@
 
 //-------------------------------------------------//
 
-#include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
-#include "lib/options.glsl"
+#include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
+#include "lib/options/options.glsl"
 
 /*
 
@@ -115,9 +115,6 @@ mat2 time = mat2(vec2(
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
 float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
 
-#include "lib/cloudCoverage.glsl"
-#include "lib/lightColor.glsl"
-
 //Unpack textures.
 vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
 vec3 normal = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
@@ -136,6 +133,8 @@ float emissive = float(aux.g > 0.34 && aux.g < 0.36);
 float iswater = float(aux2.g > 0.12 && aux2.g < 0.28);
 float istransparent = float(aux2.g > 0.28 && aux2.g < 0.32);
 float hand = float(aux2.g > 0.85 && aux2.g < 0.87);
+
+#include "lib/util/spaceConversions.glsl"
 
 float expDepth(float dist){
 	return (far * (dist - near)) / (dist * (far - near));
@@ -183,23 +182,6 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 	return max(result, 0.0);
 }
 
-#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
-
-float bayer16x16(vec2 p){
-
-	p *= vec2(viewWidth,viewHeight);
-	
-    vec2 m0 = vec2(mod(floor(p/8.), 2.));
-    vec2 m1 = vec2(mod(floor(p/4.), 2.));
-    vec2 m2 = vec2(mod(floor(p/2.), 2.));
-    vec2 m3 = vec2(mod(floor(p)   , 2.));
-
-    return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
-}
-#undef g
-
-float dither = bayer16x16(texcoord.st);
-
 float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 
 	float lightmap = aux.r;
@@ -220,28 +202,13 @@ float getSkyLightmap(float l){
 	return pow(l, skyLightAtten);
 }
 
-vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-
-vec3 toScreenSpace(vec3 p) {
-        vec3 p3 = vec3(p) * 2. - 1.;
-        vec4 fragposition = iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
-        return fragposition.xyz / fragposition.w;
-}
-
 vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
 vec3 uPos = normalize(fragpos);
 
 vec3 fragpos2 = toScreenSpace(vec3(texcoord.st, pixeldepth2));
 
-vec4 getWorldSpace(vec4 fragpos){
-
-	vec4 wpos = gbufferModelViewInverse * fragpos;
-
-	return wpos;
-}
-
-vec3 worldPosition = getWorldSpace(vec4(fragpos, 0.0)).rgb;
-vec3 worldPosition2 = getWorldSpace(vec4(fragpos2, 0.0)).rgb;
+vec3 worldPosition = toWorldSpace(fragpos).rgb;
+vec3 worldPosition2 = toWorldSpace(fragpos2).rgb;
 
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
@@ -288,20 +255,19 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 
 }
 
-float shadowStep(sampler2D shadow, vec3 sPos) {
-	return clamp(1.0 - max(sPos.z - texture2D(shadow, sPos.xy).x, 0.0) * float(shadowMapResolution), 0.0, 1.0);
-}
-
-#include "lib/nightDesat.glsl"
-#include "lib/noise.glsl"
-#include "lib/shadowPos.glsl"
-#include "lib/shadows.glsl"
-#include "lib/shadingForward.glsl"
-#include "lib/gaux2Forward.glsl"
-#include "lib/phases.glsl"
-#include "lib/skyGradient.glsl"
-#include "lib/calcClouds.glsl"
-#include "lib/calcStars.glsl"
+#include "lib/util/etc/cloudCoverage.glsl"
+#include "lib/util/noise.glsl"
+#include "lib/util/dither.glsl"
+#include "lib/util/phases.glsl"
+#include "lib/util/etc/nightDesat.glsl"
+#include "lib/lightColor.glsl"
+#include "lib/fragment/position/shadowPos.glsl"
+#include "lib/fragment/shading/shadows.glsl"
+#include "lib/fragment/shading/shadingForward.glsl"
+#include "lib/fragment/sky/skyGradient.glsl"
+#include "lib/fragment/sky/calcClouds.glsl"
+#include "lib/fragment/sky/calcStars.glsl"
+#include "lib/fragment/gaux2Forward.glsl"
 
 float getSubSurfaceScattering(){
 	float cosV = pow(clamp(dot(uPos.xyz, lightVector), 0.0, 1.0), 10.0) * 4.0;
@@ -465,7 +431,7 @@ float getVolumetricCloudNoise(vec3 p){
 vec3 getVolumetricCloudPosition(float depth)
 {
 	vec3 position = toScreenSpace(vec3(texcoord.st, expDepth(depth)));
-	     position = getWorldSpace(vec4(position, 0.0)).rgb;
+	     position = toWorldSpace(position);
 
 	return position + cameraPosition;
 }

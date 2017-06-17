@@ -1,7 +1,6 @@
 
 #define CLOUD_PLANE_2D
 
-
 #ifdef CLOUD_PLANE_2D
 
 	float subSurfaceScattering(vec3 lPos, vec3 uPos, float size){
@@ -49,8 +48,8 @@
 			//Cloud Generation Constants.
 			const float cloudHeight = 600.0;
 
-			vec4 fposition = normalize(vec4(fpos,0.0));
-			vec3 tPos = getWorldSpace(fposition).rgb;
+			vec3 fposition = normalize(fpos);
+			vec3 tPos = toWorldSpace(fposition);
 			vec3 wVec = normalize(tPos);
 
 			float height = cloudHeight / wVec.y;

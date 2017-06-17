@@ -26,12 +26,12 @@ vec4 nvec4(vec3 pos) {
     return vec4(pos.xyz, 1.0);
 }
 
-#include "lib/noise.glsl"
-#include "lib/waterBump.glsl"
-#include "lib/options.glsl"
+#include "lib/util/noise.glsl"
+#include "lib/displacement/normalDisplacement/waterBump.glsl"
+#include "lib/options/options.glsl"
 
 #if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
-	#include "lib/caustics.glsl"
+	#include "lib/fragment/caustics.glsl"
 #endif
 
 void main() {

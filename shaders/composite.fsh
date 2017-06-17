@@ -4,8 +4,8 @@
 
 #define SHADOW_BIAS 0.85
 
-#include "lib/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
-#include "lib/options.glsl"
+#include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
+#include "lib/options/options.glsl"
 
 varying vec4 texcoord;
 
@@ -44,23 +44,6 @@ const float pi = 3.141592653589793238462643383279502884197169;
 vec3 normal = 		texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
 float pixeldepth = texture2D(depthtex1, texcoord.st).r;
 float aux = 		texture2D(gaux1, texcoord.st).b;
-
-vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-
-vec3 toScreenSpace(vec3 p) {
-        vec3 p3 = vec3(p) * 2. - 1.;
-        vec4 fragposition = iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
-        return fragposition.xyz / fragposition.w;
-}
-
-vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
-
-vec4 getWorldSpace(vec4 fragpos){
-
-	vec4 wpos = gbufferModelViewInverse * fragpos;
-
-	return wpos;
-}
 
 mat2 rotate(float rad) {
 	return mat2(
@@ -104,35 +87,23 @@ float bayer64x64(vec2 p){
     return m0*d0 + m1*d1 + m2*d2 + m3*d3 + m4*d4 + m5*d5;
 }
 */
-#define g(a) (-4.*a.x*a.y+3.*a.x+a.y*2.)
+#include "lib/util/spaceConversions.glsl"
+#include "lib/util/dither.glsl"
+#include "lib/fragment/position/shadowPos.glsl"
 
-float bayer16x16(vec2 p){
-
-	p *= vec2(viewWidth,viewHeight);
-
-    vec2 m0 = vec2(mod(floor(p/8.), 2.));
-    vec2 m1 = vec2(mod(floor(p/4.), 2.));
-    vec2 m2 = vec2(mod(floor(p/2.), 2.));
-    vec2 m3 = vec2(mod(floor(p)   , 2.));
-
-    return (g(m0)+g(m1)*4.0+g(m2)*16.0+g(m3)*64.0)/255.;
-}
-#undef g
-float dither = bayer16x16(texcoord.st);
-
-#include "lib/shadowPos.glsl"
-
-vec3 getGi(vec3 viewVector){
+vec3 getGi(){
 
 	float weight = 0.0;
 	vec3 indirectLight = vec3(0.0);
 
+	vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
+
 	float rotateMult = dither * pi * 2.0;	//Make sure the offset rotates 360 degrees.
 	mat2 rotationMatrix	= rotate(rotateMult);
 
-	vec4 shadowSpaceNormal = normalize(shadowModelView * getWorldSpace(vec4(normal, 0.0)));
+	vec4 shadowSpaceNormal = normalize(shadowModelView * vec4(toWorldSpace(normal), 0.0));
 
-	vec3 shadowPosition = toShadowSpace(viewVector);
+	vec3 shadowPosition = toShadowSpace(fragpos);
 
 	float blockDistance = sqrt(dot(fragpos, fragpos));
 	float diffTresh = 0.0025 * pow(smoothstep(0.0, 255.0, blockDistance), 0.75) + 0.0001;
@@ -192,7 +163,7 @@ void main(){
 	vec3 globalIllumination = vec3(0.0);
 
 	if (pixeldepth < 1.0){
-		globalIllumination = getGi(fragpos);
+		globalIllumination = getGi();
 	}
 	
 	gl_FragData[0] = vec4(globalIllumination, texture2D(gaux4, texcoord.st).a);

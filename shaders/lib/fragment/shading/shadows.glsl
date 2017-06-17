@@ -1,5 +1,5 @@
 #ifdef SHADOW_FILTER
-vec2 shadowOffset[8] = vec2[8] (
+const vec2 shadowOffset[8] = vec2[8] (
 		vec2(1.0, 0.0),
 		vec2(0.0, 1.0),
 		vec2(-1.0, 0.0),
@@ -9,6 +9,10 @@ vec2 shadowOffset[8] = vec2[8] (
 		vec2(-0.5, 0.0),
 		vec2(0.0, -0.5));
 #endif
+
+float shadowStep(sampler2D shadow, vec3 sPos) {
+	return clamp(1.0 - max(sPos.z - texture2D(shadow, sPos.xy).x, 0.0) * float(shadowMapResolution), 0.0, 1.0);
+}
 
 vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor, bool isClamped){
 

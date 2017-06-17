@@ -1,6 +1,6 @@
 #version 120
 
-#include "lib/options.glsl"
+#include "lib/options/options.glsl"
 
 varying vec4 texcoord;
 varying vec4 lmcoord;
@@ -19,7 +19,7 @@ void main(){
 	vec4 albedo = texture2D(texture, texcoord.st) * color;
 	albedo.rgb = mix(albedo.rgb, entityColor.rgb, entityColor.a);
 	
-	#include "lib/lmCoord.glsl"
+	#include "lib/fragment/position/lmCoord.glsl"
 
 /* DRAWBUFFERS:0246 */
 

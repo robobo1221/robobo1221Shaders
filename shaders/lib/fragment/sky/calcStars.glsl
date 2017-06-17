@@ -5,8 +5,8 @@
 #ifdef STARS
 	vec3 getStars(vec3 color, vec3 fpos, float land){
 		if (land < 0.9) {
-			vec4 fposition = normalize(vec4(fpos,0.0));
-			vec3 tPos = getWorldSpace(fposition).rgb;
+			vec3 fposition = normalize(fpos);
+			vec3 tPos = toWorldSpace(fposition);
 			vec3 wVec = normalize(tPos);
 			
 			const float moonAngularDiameterCos = 0.99833194915;

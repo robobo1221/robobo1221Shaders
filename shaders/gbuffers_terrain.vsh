@@ -101,7 +101,7 @@ void main(){
 	
 	wpos = worldpos;
 	
-	#include "lib/vertexDisplacement.glsl"
+	#include "lib/displacement/vertexDisplacement.glsl"
 	
 	viewpos = gbufferModelView * viewpos;
 	gl_Position = gl_ProjectionMatrix * viewpos;

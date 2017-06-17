@@ -21,17 +21,20 @@ varying float mat;
 uniform sampler2D texture;
 
 uniform float frameTimeCounter;
-#include "lib/noise.glsl"
-#include "lib/waterBump.glsl"
+#include "lib/util/noise.glsl"
+#include "lib/displacement/normalDisplacement/waterBump.glsl"
+
 
 #ifdef PRALLAX_WATER
 vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 
 	float waveZ = mix(2.0,0.25,iswater);
 	float waveM = 2.0 * iswater;
+
+	vec2 offset = viewVector.xy * (12.5 * PW_DEPTH) / dist / float(PW_POINTS);
 	
 	for(int i = 0; i < PW_POINTS; i++){
-		posxz.xz += ((getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * 0.5) * viewVector.xy) * (30.0 * PW_DEPTH) / dist / float(PW_POINTS);
+		posxz.xz += getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * offset;
 	}
 	return posxz;
 }
@@ -58,7 +61,7 @@ void main(){
 						  
 	vec4 normalTangentSpace = vec4(normalize(bump * tbnMatrix) * 0.5 + 0.5, 1.0);
 	
-	#include "lib/lmCoord.glsl"
+	#include "lib/fragment/position/lmCoord.glsl"
 	
 /* DRAWBUFFERS:531 */
 
