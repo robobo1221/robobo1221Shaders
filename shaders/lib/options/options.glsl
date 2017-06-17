@@ -33,3 +33,7 @@
 	#define GI_MULT 1.0	//[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0] Simple multiplier. Does not effect performace.
 	#define GI_RADIUS 4.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 5.5 6.0 6.5 7.0 7.5 8.0] Simple radius multiplier. Does not effect performace. Lowering this might fix under-sampling.
 	#define GI_QUALITY 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 4.0 5.0 6.0] Highering this will improve the GI quality. TOO HIGH NUMBERS CAUSES BAD FPS ISSUES! 
+
+#define WATER_DEPTH_FOG
+	#define DEPTH_FOG_DENSITY 0.2 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+	#define UNDERWATER_FOG

@@ -7,6 +7,12 @@
 
 #define DYNAMIC_HANDLIGHT
 
+#define FOG
+	#define FOG_DENSITY_DAY		1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
+	#define FOG_DENSITY_NIGHT	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
+	#define FOG_DENSITY_STORM	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
+	#define NO_UNDERGROUND_FOG
+
 //-------------------------------------------------//
 
 #include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
@@ -114,12 +120,12 @@ mat2 time = mat2(vec2(
 );	//time[0].xy = sunrise and noon. time[1].xy = sunset and mindight.
 
 float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
-float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
+float getEyeBrightnessSmooth = 1.0 - pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
 
 //Unpack textures.
 vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
 vec3 normal = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
-vec3 normal2 = 			texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
+vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);
 vec4 aux2 = 			texture2D(gdepth, texcoord.st);
 vec4 forWardAlbedo = 	texture2D(gaux2, texcoord.st);
@@ -192,7 +198,7 @@ float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 	lightmap 		= 1.0 / (1.0 - lightmap) - 1.0;
 	lightmap 		= clamp(lightmap, 0.0, 100000.0);
 	
-	lightmap 		*= 0.08 * (1.0 + mix(dynamicExposure,1.0,time[1].y) / 0.08) * 0.23;
+	lightmap 		*= 0.08 * (1.0 + mix(getEyeBrightnessSmooth,1.0,time[1].y) / 0.08) * 0.23;
 	
 	lightmap		= isForwardRendered ? lightmap * (1.0 - emissive) + emissive : lightmap; //Prevent glowstone and all emissive stuff to clip with the lightmap
 	lightmap		= isForwardRendered ? lightmap * (1.0 - handLightMult * hand) + handLightMult * hand : lightmap; //Also do this to the hand
@@ -257,12 +263,12 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 
 }
 
+#include "lib/util/etc/nightDesat.glsl"
 #include "lib/util/etc/cloudCoverage.glsl"
+#include "lib/lightColor.glsl"
 #include "lib/util/noise.glsl"
 #include "lib/util/dither.glsl"
 #include "lib/util/phases.glsl"
-#include "lib/util/etc/nightDesat.glsl"
-#include "lib/lightColor.glsl"
 #include "lib/fragment/position/shadowPos.glsl"
 #include "lib/fragment/shading/shadows.glsl"
 #include "lib/fragment/shading/shadingForward.glsl"
@@ -270,6 +276,9 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 #include "lib/fragment/sky/calcClouds.glsl"
 #include "lib/fragment/sky/calcStars.glsl"
 #include "lib/fragment/gaux2Forward.glsl"
+#include "lib/displacement/normalDisplacement/waterBump.glsl"
+#include "lib/fragment/caustics.glsl"
+#include "lib/fragment/waterFog.glsl"
 
 float getSubSurfaceScattering(){
 	float cosV = pow(clamp(dot(uPos.xyz, lightVector), 0.0, 1.0), 10.0) * 4.0;
@@ -311,6 +320,10 @@ vec3 getShading(vec3 color){
 	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.2, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 	
 	vec3 globalIllumination = vec3(0.0);
+
+	#if defined WATER_CAUSTICS && !defined PROJECTED_CAUSTICS
+		sunlightDirect = waterCaustics(sunlightDirect, fragpos2);
+	#endif
 	
 	#ifdef GLOBAL_ILLUMINATION
 		globalIllumination = getGlobalIllumination(texcoord.st) * (GI_MULT * 2.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
@@ -522,7 +535,7 @@ vec4 getVolumetricClouds(vec3 color){
 				result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
 			if (length(worldPosition) < volumetricDistance){
-				result.rgb = renderGaux2(result.rgb, normal2);
+				result.rgb = renderGaux2(result.rgb, compositeNormals);
 			}
 
 			clouds.rgb = mix(clouds.rgb, result.rgb, min(result.a * VOLUMETRIC_CLOUDS_DENSITY, 1.0));
@@ -537,6 +550,57 @@ vec4 getVolumetricClouds(vec3 color){
 
 #endif
 
+#ifdef FOG
+	vec3 getFog(vec3 fogColor, vec3 color, vec3 fragpos){
+
+		color = pow(color, vec3(2.2));
+		
+		float cosSunUpAngle = dot(sunVec, upVec) * 0.9 + 0.1; //Has a lower offset making it scatter when sun is below the horizon.
+		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
+		
+		#ifdef NO_UNDERGROUND_FOG
+			float fogAdaption =  clamp(1.0 - getEyeBrightnessSmooth, 0.0,1.0);
+		#else
+			float fogAdaption = 1.0;
+		#endif
+
+		dynamicCloudCoverage = sqrt(dynamicCloudCoverage);
+
+		float fog = 1.0 - exp(-pow(sqrt(dot(fragpos,fragpos))
+		* mix(
+		mix(1.0 / 1200.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
+		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption,2.0));
+		
+		fog = clamp(fog, 0.0, 1.0);
+
+		vec3 lightCol = mix(sunlight, moonlight, time[1].y * transition_fading);
+
+		float sunMoonScatter = pow(clamp(dot(uPos, lightVector),0.0,1.0),2.0) * transition_fading;
+
+		fogColor *= mix(1.0, 0.5, (1.0 - min(time[1].y + rainStrength + time[0].y, 1.0)));
+		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
+		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter / 4.0 * (1.0 - rainStrength) * (1.0 - time[1].y));
+		fogColor = mix(fogColor, lightCol, 0.05 * (1.0 - rainStrength) * (1.0 - time[1].y));
+		
+		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
+		fogColor = pow(fogColor, vec3(2.2));
+		fogColor = mix(mix(fogColor * 0.25, fogColor, rainStrength), fogColor, pow(cosMoonUpAngle, 5.0) * time[1].y);
+		
+		float rawHeight = worldPosition.y + cameraPosition.y;
+
+		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) / 100.0, 4.4),0.0,1.0) * 3.0 + 0.05;
+
+		color = mix(color, fogColor, clamp(fog * rainStrength * (1.0 - isEyeInWater), 0.0, 1.0));
+		color = mix(color, fogColor, clamp(fog * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * (1.0 - time[1].y), 0.0, 1.0));
+
+		getHeight = clamp(pow(1.0 - ((rawHeight - 70.0) / 100.0), 4.4),0.0,1.0) + 0.05;
+
+		color = mix(color, fogColor * 0.25, clamp(fog * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * time[1].y * 0.9, 0.0, 1.0));
+
+		return pow(max(color, 0.0), vec3(0.4545));
+	}
+#endif
+
 void main()
 {
 	color = getDesaturation(pow(color, vec3(2.2)), min(emissiveLM, 1.0));
@@ -544,8 +608,9 @@ void main()
 	vec3 sunMult = vec3(0.0);
 	vec3 moonMult = vec3(0.0);
 
-	if (land > 0.9)
-		color = getShading(color);
+	if (land > 0.9) {
+		color = getShading(color);	
+	}
 	else {
 
 		//color = pow(color, vec3(2.2)); // Uncomment this line to get minecraft's default sky. And comment the line under to get minecraft's default sky.
@@ -560,8 +625,18 @@ void main()
 			color = getClouds(color, fragpos2.rgb, land);
 		#endif
 	}
-	
-	color = renderGaux2(color, normal2);
+
+	if (land2 > 0.9){
+		color = renderGaux2(color, compositeNormals);
+
+		#ifdef WATER_DEPTH_FOG
+		if (isEyeInWater < 0.9) color = getWaterDepthFog(color, fragpos, fragpos2);
+		#endif
+
+		#ifdef FOG
+			color = getFog(ambientlight, color, fragpos);
+		#endif
+	}
 
 	color = pow(color, vec3(0.4545));
 
@@ -571,7 +646,7 @@ void main()
 	
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
-	gl_FragData[1] = vec4(vec3(forWardAlbedo.a, aux2.gb), shadowsForward);
+	gl_FragData[1] = vec4(vec3(forWardAlbedo.a, aux2.gb), 0.0);
 
 	#ifdef VOLUMETRIC_CLOUDS
 		gl_FragData[2] = vec4(VolumetricClouds) / MAX_COLOR_RANGE;
