@@ -7,12 +7,6 @@
 
 #define DYNAMIC_HANDLIGHT
 
-#define FOG
-	#define FOG_DENSITY_DAY		1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
-	#define FOG_DENSITY_NIGHT	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
-	#define FOG_DENSITY_STORM	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
-	#define NO_UNDERGROUND_FOG
-
 //-------------------------------------------------//
 
 #include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
@@ -550,57 +544,6 @@ vec4 getVolumetricClouds(vec3 color){
 
 #endif
 
-#ifdef FOG
-	vec3 getFog(vec3 fogColor, vec3 color, vec3 fragpos){
-
-		color = pow(color, vec3(2.2));
-		
-		float cosSunUpAngle = dot(sunVec, upVec) * 0.9 + 0.1; //Has a lower offset making it scatter when sun is below the horizon.
-		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
-		
-		#ifdef NO_UNDERGROUND_FOG
-			float fogAdaption =  clamp(1.0 - getEyeBrightnessSmooth, 0.0,1.0);
-		#else
-			float fogAdaption = 1.0;
-		#endif
-
-		dynamicCloudCoverage = sqrt(dynamicCloudCoverage);
-
-		float fog = 1.0 - exp(-pow(sqrt(dot(fragpos,fragpos))
-		* mix(
-		mix(1.0 / 1200.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
-		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption,2.0));
-		
-		fog = clamp(fog, 0.0, 1.0);
-
-		vec3 lightCol = mix(sunlight, moonlight, time[1].y * transition_fading);
-
-		float sunMoonScatter = pow(clamp(dot(uPos, lightVector),0.0,1.0),2.0) * transition_fading;
-
-		fogColor *= mix(1.0, 0.5, (1.0 - min(time[1].y + rainStrength + time[0].y, 1.0)));
-		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
-		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter / 4.0 * (1.0 - rainStrength) * (1.0 - time[1].y));
-		fogColor = mix(fogColor, lightCol, 0.05 * (1.0 - rainStrength) * (1.0 - time[1].y));
-		
-		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
-		fogColor = pow(fogColor, vec3(2.2));
-		fogColor = mix(mix(fogColor * 0.25, fogColor, rainStrength), fogColor, pow(cosMoonUpAngle, 5.0) * time[1].y);
-		
-		float rawHeight = worldPosition.y + cameraPosition.y;
-
-		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) / 100.0, 4.4),0.0,1.0) * 3.0 + 0.05;
-
-		color = mix(color, fogColor, clamp(fog * rainStrength * (1.0 - isEyeInWater), 0.0, 1.0));
-		color = mix(color, fogColor, clamp(fog * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * (1.0 - time[1].y), 0.0, 1.0));
-
-		getHeight = clamp(pow(1.0 - ((rawHeight - 70.0) / 100.0), 4.4),0.0,1.0) + 0.05;
-
-		color = mix(color, fogColor * 0.25, clamp(fog * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * time[1].y * 0.9, 0.0, 1.0));
-
-		return pow(max(color, 0.0), vec3(0.4545));
-	}
-#endif
-
 void main()
 {
 	color = getDesaturation(pow(color, vec3(2.2)), min(emissiveLM, 1.0));
@@ -630,11 +573,12 @@ void main()
 		color = renderGaux2(color, compositeNormals);
 
 		#ifdef WATER_DEPTH_FOG
-		if (isEyeInWater < 0.9) color = getWaterDepthFog(color, fragpos, fragpos2);
-		#endif
-
-		#ifdef FOG
-			color = getFog(ambientlight, color, fragpos);
+			if (isEyeInWater < 0.9) color = getWaterDepthFog(color, fragpos, fragpos2);
+			else {
+				#ifdef UNDERWATER_FOG
+					color = getWaterDepthFog(color, fragpos, vec3(0.0));
+				#endif
+			}
 		#endif
 	}
 
@@ -642,6 +586,10 @@ void main()
 
 	#ifdef VOLUMETRIC_CLOUDS
 		vec4 VolumetricClouds = getVolumetricClouds(color);
+
+		#if defined WATER_DEPTH_FOG && defined UNDERWATER_FOG
+			if (isEyeInWater > 0.9) VolumetricClouds.rgb = getWaterDepthFog(VolumetricClouds.rgb, fragpos, vec3(0.0));
+		#endif
 	#endif
 	
 /* DRAWBUFFERS:015 */
