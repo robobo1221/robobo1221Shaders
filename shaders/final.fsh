@@ -98,20 +98,20 @@ vec2 customTexcoord(){
 
 vec2 newTexcoord = clampScreen(customTexcoord());
 
-vec3 tonemap(vec3 x)
-{
-	float a = BRIGHTNESS;
-	float b = GAMMA;
-	float c = CONTRAST;
-	float d = LIFT;
-	float e = INVERSE_LIFT;
+vec3 tonemap(vec3 x){
+
+	vec3 a = vec3(BRIGHTNESS);
+	vec3 b = vec3(GAMMA);
+	vec3 c = vec3(CONTRAST);
+	vec3 d = vec3(LIFT);
+	vec3 e = vec3(INVERSE_LIFT);
 	
 	x = mix(x, vec3(0.33333), 1.0 - c);
 
 	x = pow(x, vec3(2.2)) * a;
 
-	x = max(vec3(0.0),x - INVERSE_LIFT) + LIFT;
-	x = pow((x * (6.2 * x)) / (x * (6.2 * x + 0.7)), vec3(b));
+	x = max(vec3(0.0),x - e) + d;
+	x = pow((x * (6.2 * x)) / (x * (6.2 * x + 0.7)), b);
 	return x;
 }
 
