@@ -298,7 +298,7 @@ vec3 getShading(vec3 color){
 		  diffuse = diffuse * mix(1.0, pow(skyLightMap, 0.25) * 0.9 + 0.1, isEyeInWater * (1.0 - iswater));
 		  diffuse = clamp(diffuse*1.01-0.01, 0.0, 1.0);
 
-	vec3 emissiveLightmap = emissiveLM * emissiveLightColor;
+	vec3 emissiveLightmap = emissiveLM * mix(emissiveLightColor, vec3(1.0), emissiveLM * 0.05);
 		emissiveLightmap = getEmessiveGlow(color,emissiveLightmap, emissiveLightmap, emissive);
 
 	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));

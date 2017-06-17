@@ -12,7 +12,7 @@ float RayleighPhase(float c)
 	return (3.0 / (16.0 * pi)) * (mc*mc + 1.0);
 }
 
-#undef c
+#undef mc
 
 float hgPhase(float c, float g)
 {
