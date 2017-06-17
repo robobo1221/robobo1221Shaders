@@ -646,7 +646,7 @@ void main()
 	
 /* DRAWBUFFERS:015 */
 	gl_FragData[0] = vec4(color.rgb / MAX_COLOR_RANGE, getVolumetricRays());
-	gl_FragData[1] = vec4(vec3(forWardAlbedo.a, aux2.gb), 0.0);
+	gl_FragData[1] = vec4(vec3(forWardAlbedo.a, aux2.gb), shadowsForward);
 
 	#ifdef VOLUMETRIC_CLOUDS
 		gl_FragData[2] = vec4(VolumetricClouds) / MAX_COLOR_RANGE;
