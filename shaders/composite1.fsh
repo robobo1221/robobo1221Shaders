@@ -160,15 +160,17 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 	float totalWeight = 0.0;
 	vec4 result = vec4(0.0);
 
+	float linearDepth = ld(pixeldepth2);
+	vec2 offsetMult = 5.0 / vec2(viewWidth, viewHeight);
+
 	for (int i = 0; i < 4; i++){
-		vec2 offset = bilateralOffets[i] * 5.0 / vec2(viewWidth, viewHeight);
-		vec2 coord = position + offset;
+		vec2 coord = bilateralOffets[i] * offsetMult + position;
 
 		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
 		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
 
 		float offsetDepth = ld(texture2D(depthtex1, coord).r);
-		float depthWeight = 1.0 / (0.0001 + abs(ld(pixeldepth2) - offsetDepth));
+		float depthWeight = 1.0 / (1e-36 + abs(linearDepth - offsetDepth));
 
 		float weight = normalWeight * depthWeight;
 
