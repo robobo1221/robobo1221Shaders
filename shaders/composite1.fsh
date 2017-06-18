@@ -186,7 +186,7 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 
 float getEmissiveLightmap(vec4 aux, bool isForwardRendered){
 
-	float lightmap = aux.r;
+	float lightmap = aux.r * 2.0;
 	
 	lightmap		= pow(lightmap, 2.0 * EMISSIVE_LIGHT_ATTEN);
 	lightmap 		= 1.0 / (1.0 - lightmap) - 1.0;

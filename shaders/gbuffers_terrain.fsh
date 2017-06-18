@@ -110,12 +110,12 @@ void main(){
 	bump += getTerrainHeight(posxz) * 0.05 * rainpuddles;
 						  
 	vec4 normalTangentSpace = vec4(normalize(bump * tbnMatrix) * 0.5 + 0.5, 1.0);
-
+	
 /* DRAWBUFFERS:0246 */
 
 	gl_FragData[0] = albedo;
 	gl_FragData[1] = normalTangentSpace;
-	gl_FragData[2] = vec4(lightmaps.x, mat, lightmaps.y, 1.0);
+	gl_FragData[2] = vec4(lightmaps.x, mat, lightmaps.y, 0.0);
 	#ifdef SPECULAR_MAPPING
 		gl_FragData[3] = vec4(specularity, 1.0);
 	#endif

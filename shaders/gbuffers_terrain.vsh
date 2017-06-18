@@ -86,6 +86,8 @@ void main(){
 	mat = 1.0;
 
 	gl_Position = gl_ModelViewMatrix * gl_Vertex;
+
+	lmcoord = vec4(0.0);
 	
 	texcoord = gl_MultiTexCoord0;
 	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
