@@ -329,12 +329,12 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) / 100.0, 4.4),0.0,1.0) * 3.0 + 0.05;
 
-		color = mix(color, fogColor, clamp(fog * rainStrength * (1.0 - isEyeInWater), 0.0, 1.0));
-		color = mix(color, fogColor, clamp(fog * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * (1.0 - time[1].y), 0.0, 1.0));
+		color = mix(color, fogColor, clamp(fog * land * rainStrength * (1.0 - isEyeInWater), 0.0, 1.0));
+		color = mix(color, fogColor, clamp(fog * land * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * (1.0 - time[1].y), 0.0, 1.0));
 
 		getHeight = clamp(pow(1.0 - ((rawHeight - 70.0) / 100.0), 4.4),0.0,1.0) + 0.05;
 
-		color = mix(color, fogColor * 0.25, clamp(fog * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * time[1].y * 0.9, 0.0, 1.0));
+		color = mix(color, fogColor * 0.25, clamp(fog * land * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * time[1].y * 0.9, 0.0, 1.0));
 
 		return pow(max(color, 0.0), vec3(0.4545));
 	}
