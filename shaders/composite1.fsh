@@ -223,7 +223,7 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 	float getHandItemLightFactor(vec3 fragpos, vec3 normal){
 		float handItemLightFactor = length(fragpos.xyz);
 			handItemLightFactor = 1.0 - handItemLightFactor / 25.0;
-			handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor);
+			handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor) * 0.5;
 		
 			handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor), true);
 			
