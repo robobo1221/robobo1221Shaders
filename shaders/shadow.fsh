@@ -39,7 +39,7 @@ void main() {
 	vec4 fragcolor = texture2D(tex,texcoord.xy) * color;
 	
 	#if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
-		vec3 caustics = waterCaustics();
+		vec3 caustics = waterCaustics(worldpos);
 	
 		fragcolor.rgb = bool(iswater) ? caustics : fragcolor.rgb;
 	#endif
