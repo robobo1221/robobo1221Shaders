@@ -489,7 +489,9 @@ vec3 renderGaux4(vec3 color){
 
 		land = fragdepth < comp;
 
-		color.rgb = getFog(ambientlight, color.rgb, pos.st);
+		#ifdef FOG
+			color.rgb = getFog(ambientlight, color.rgb, pos.st);
+		#endif
 		
 		color.rgb = land ? color.rgb : fogColor;
 
