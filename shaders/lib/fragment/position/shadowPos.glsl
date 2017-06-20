@@ -11,8 +11,8 @@ vec3 toShadowSpace(vec3 p3){
 float getDistordFactor(vec3 worldposition){
 	vec2 pos1 = abs(worldposition.xy * 1.2);
 
-	float distb = pow(pow(pos1.x, 8.) + pow(pos1.y, 8.), 1.0 / 8.0);
-	return (1.0 - SHADOW_DISTORTION) + distb * SHADOW_DISTORTION;
+	float dist = pow(pow(pos1.x, 8.) + pow(pos1.y, 8.), 1.0 / 8.0);
+	return mix(1.0, dist, SHADOW_DISTORTION);
 }
 
 vec3 biasedShadows(vec3 worldposition){

@@ -89,10 +89,7 @@ vec4 BiasShadowProjection(vec4 position) {
 	vec2 pos = abs(position.xy * 1.2);
 	float dist = pow(pow(pos.x, 8.) + pow(pos.y, 8.), 1.0 / 8.0);
 
-	float distortFactor = (1.0 - SHADOW_DISTORTION) + dist * SHADOW_DISTORTION;
-	
-	position.xy /= distortFactor;
-	
+	position.xy /= mix(1.0, dist, SHADOW_DISTORTION);
 	position.z /= 2.5;
 
 	
