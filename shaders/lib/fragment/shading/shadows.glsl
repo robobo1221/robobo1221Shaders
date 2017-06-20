@@ -33,20 +33,20 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	vec3 shading2 = vec3(0.0);
 	vec3 colorShading = vec3(0.0);
 
-	float noise = fract(sin(dot(texcoord.xy, vec2(18.9898f, 28.633f))) * 4378.5453f) * 4.0;
-		mat2 noiseM = mat2(cos(noise), -sin(noise),
-						   sin(noise), cos(noise));
+	dither *= pi;
+	mat2 rotationMat = mat2(cos(dither), -sin(dither),
+					   sin(dither), cos(dither));
 
 	if (max(abs(shadowPosition.x),abs(shadowPosition.y)) < 0.99) {
 
 	#ifdef SHADOW_FILTER
 	for (int i = 0; i < 8; i++) {
 
-		shading += shadowStep(shadowtex1, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh));
+		shading += shadowStep(shadowtex1, vec3(shadowPosition.xy + rotationMat * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh));
 
 		#ifdef COLOURED_SHADOWS
-			shading2 += shadowStep(shadowtex0, vec3(shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh));
-			colorShading += texture2D(shadowcolor0, shadowPosition.xy + noiseM * shadowOffset[i] * step * stepSize).rgb * 10.0;
+			shading2 += shadowStep(shadowtex0, vec3(shadowPosition.xy + rotationMat * shadowOffset[i] * step * stepSize, shadowPosition.z - diffthresh));
+			colorShading += texture2D(shadowcolor0, shadowPosition.xy + rotationMat * shadowOffset[i] * step * stepSize).rgb * 10.0;
 		#endif
 	}
 
