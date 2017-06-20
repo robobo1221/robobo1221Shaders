@@ -3,7 +3,7 @@
 
 #include "lib/util/colorRange.glsl"
 
-#define SHADOW_BIAS 0.85
+#define SHADOW_DISTORTION 0.85
 
 #define DYNAMIC_HANDLIGHT
 

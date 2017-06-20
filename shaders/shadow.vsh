@@ -18,7 +18,7 @@
 #define ENTITY_POTATO		142.0
 #define ENTITY_COBWEB		 30.0
 
-#define SHADOW_BIAS 0.85
+#define SHADOW_DISTORTION 0.85
 
 varying vec4 texcoord;
 varying vec4 color;
@@ -89,7 +89,7 @@ vec4 BiasShadowProjection(vec4 position) {
 	vec2 pos = abs(position.xy * 1.2);
 	float dist = pow(pow(pos.x, 8.) + pow(pos.y, 8.), 1.0 / 8.0);
 
-	float distortFactor = (1.0 - SHADOW_BIAS) + dist * SHADOW_BIAS;
+	float distortFactor = (1.0 - SHADOW_DISTORTION) + dist * SHADOW_DISTORTION;
 	
 	position.xy /= distortFactor;
 	

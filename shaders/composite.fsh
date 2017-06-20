@@ -2,7 +2,7 @@
 
 /* DRAWBUFFERS:7 */	
 
-#define SHADOW_BIAS 0.85
+#define SHADOW_DISTORTION 0.85
 
 #include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 #include "lib/options/options.glsl"
