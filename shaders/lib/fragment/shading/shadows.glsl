@@ -33,9 +33,9 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	vec3 shading2 = vec3(0.0);
 	vec3 colorShading = vec3(0.0);
 
-	dither *= pi;
-	mat2 rotationMat = mat2(cos(dither), -sin(dither),
-					   sin(dither), cos(dither));
+	float rotationMult = dither * pi;
+	mat2 rotationMat = mat2(cos(rotationMult), -sin(rotationMult),
+					   sin(rotationMult), cos(rotationMult));
 
 	if (max(abs(shadowPosition.x),abs(shadowPosition.y)) < 0.99) {
 
