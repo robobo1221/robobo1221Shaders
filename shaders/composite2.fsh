@@ -307,7 +307,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 		float fog = 1.0 - exp(-pow(sqrt(dot(fragpos,fragpos))
 		* mix(
-		mix(1.0 / 1200.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
+		mix(1.0 / 1000.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
 		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption,2.0));
 		
 		fog = clamp(fog, 0.0, 1.0);
@@ -319,7 +319,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		fogColor *= mix(1.0, 0.5, (1.0 - min(time[1].y + rainStrength + time[0].y, 1.0)));
 		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
 		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter / 4.0 * (1.0 - rainStrength) * (1.0 - time[1].y));
-		fogColor = mix(fogColor, lightCol, 0.05 * (1.0 - rainStrength) * (1.0 - time[1].y));
+		fogColor = mix(fogColor, lightCol, 0.025 * (1.0 - rainStrength) * (1.0 - time[1].y));
 		
 		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
 		fogColor = pow(fogColor, vec3(2.2));
