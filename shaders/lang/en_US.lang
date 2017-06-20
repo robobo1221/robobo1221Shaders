@@ -1,0 +1,124 @@
+####################################################################################
+#option names
+
+option.shadowMapResolution=Shadow Resolution
+option.COLOURED_SHADOWS=Coloured Shadows
+option.SHADOW_FILTER=Shadow Filter
+
+option.DYNAMIC_HANDLIGHT=Dynamic Handlight
+option.EMISSIVE_LIGHT_MULT=Emissive Light Multiplier
+option.EMISSIVE_LIGHT_ATTEN=Emissive Light Attenuation
+option.SKY_LIGHT_ATTEN=Sky Light Attenuation
+option.MIN_LIGHT=Minimum Light
+
+option.VOLUMETRIC_LIGHT=Volumetric Light
+option.VL_QUALITY=Quality
+option.VL_DISTANCE=Distance
+option.VL_INTENSITY=Main Intensity
+option.VL_INTENSITY_SUNRISE=Sunrise
+option.VL_INTENSITY_NOON=Noon
+option.VL_INTENSITY_SUNSET=Sunset
+option.VL_INTENSITY_MIDNIGHT=Night
+
+option.sunlightAmount=Sunlight Amount
+option.shadowDarkness=Shadow Darkness
+
+option.GLOBAL_ILLUMINATION=Global Illumination
+option.GI_MULT=Strength
+option.GI_RADIUS=Radius
+option.GI_QUALITY=Quality
+
+option.REFLECTIONS=Reflections
+option.WATER_REFLECTION=Water Reflections
+option.RAIN_REFLECTION=Rain Reflections
+option.SPECULAR_MAPPING=Specular Mapping
+option.RAIN_PUDDLES=Rain Puddles
+option.REFLECTION_STRENGTH=Strength
+
+option.WATER_CAUSTICS=Water Caustics
+option.PROJECTED_CAUSTICS=Projected Caustics
+option.CAUSTIC_MULT=Multiplier
+
+option.WATER_REFRACT=Water Refract
+option.WATER_REFRACT_MULT=Multiplier
+option.WATER_REFRACT_DISPERSION=Dispersion
+option.SCREEN_REFRACTION=Screen Refract
+option.SCREEN_REFRACTION_MULT=Multiplier
+
+option.CLOUD_PLANE_2D=2D Clouds
+option.STARS=Stars
+
+option.WATER_DEPTH_FOG=Water Fog
+option.DEPTH_FOG_DENSITY=Density
+
+option.POM=Parallax Occlusion Mapping
+option.POM_MAP_RES=Resolution
+option.POM_DEPTH=Depth
+option.OCCLUSION_POINTS=Quality
+
+option.PARALLAX_WATER=Parallax Water
+option.PW_DEPTH=Depth
+option.PW_POINTS=Quality
+
+option.FOG=Fog
+option.FOG_DENSITY_DAY=Fog Density Day
+option.FOG_DENSITY_NIGHT=Density Night
+option.FOG_DENSITY_STORM=Density Storm
+option.NO_UNDERGROUND_FOG=Disable Underground Fog
+
+option.VOLUMETRIC_CLOUDS=Volumetric Clouds
+option.VOLUMETRIC_CLOUDS_DENSITY=Density
+option.VOLUMETRIC_CLOUDS_COVERAGE=Coverage
+option.VOLUMETRIC_CLOUDS_HEIGHT=Height
+option.VOLUMETRIC_CLOUDS_THICKNESS=Thickness
+option.VOLUMETRIC_CLOUDS_QUALITY=Quality
+option.DYNAMIC_WEATHER=Dynamic Weather
+
+option.BRIGHTNESS=Brightness
+option.GAMMA=Gamma
+option.CONTRAST=Contrast
+option.LIFT=Lift
+option.INVERSE_LIFT=Inverse Lift
+
+option.RED_MULT=Strength Red
+option.GREEN_MULT=Strength Green
+option.BLUE_MULT=Strength Blue
+
+option.BLOOM=Bloom
+option.BLOOM_MULT=Strength
+option.MAX_COLOR_RANGE=Maximum Color Range
+
+option.VIGNETTE=Vignette
+option.VIGNETTE_MULT=Strength
+
+option.LENS_FLARE=Lens Flare
+option.LENS_FLARE_MULT=Strength
+
+option.DOF=Depth Of Field
+option.DOF_FOCAL_LENGTH=Focal Length
+option.DOF_APERTURE=Aperture
+option.DOF_SIZE_MULT=Size Multiplier
+
+option.WAVING_TERRAIN=Waving Terrain
+option.WAVING_WATER=Waving Water
+option.WAVING_LEAVES_TALLFLOWERS=Leaves and tall flowers
+option.WAVING_PLANTS=Plants
+option.WAVING_VINES=Vines
+option.WAVING_COBWEB=Cobweb
+
+option.ambientOcclusionLevel=Ambient Occlusion Level
+option.sunPathRotation=Sun Rotation
+option.eyeBrightnessHalflife=Eyebrightness Halflife
+option.wetnessHalflife=Wetness Halflife
+option.drynessHalflife=Dryness Halflife
+
+option.DRAW_GALAXY=Procedural Galaxy
+
+####################################################################################
+#value names
+value.VL_DISTANCE.16.0=16 Blocks
+value.VL_DISTANCE.32.0=32 Blocks
+value.VL_DISTANCE.64.0=64 Blocks
+value.VL_DISTANCE.128.0=128 Blocks
+value.VL_DISTANCE.256.0=256 Blocks
+value.VL_DISTANCE.512.0=512 Blocks
