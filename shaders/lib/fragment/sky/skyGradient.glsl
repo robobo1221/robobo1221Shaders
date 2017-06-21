@@ -28,14 +28,16 @@ vec3 ToneMap(vec3 color) {
     return toneMappedColor;
 }
 
-float calcSun(vec3 fragpos, vec3 sunVec){
+const vec3 K = vec3(0.686, 0.678, 0.666);
+
+vec3 calcSun(vec3 fragpos, vec3 sunVec){
 
 	const float sunAngularDiameterCos = 0.99873194915;
 
 	float cosViewSunAngle = dot(normalize(fragpos.rgb), sunVec);
 	float sundisk = smoothstep(sunAngularDiameterCos,sunAngularDiameterCos+0.0001,cosViewSunAngle);
 
-	return 7000.0 * sundisk * (1.0 - rainStrength);
+	return 7000.0 * sundisk * (1.0 - rainStrength) * K;
 
 }
 
@@ -74,8 +76,6 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	// optical length at zenith for molecules
 	const float rayleighZenithLength = 8.4E3 ;
 	const float mieZenithLength = 1.25E3;
-
-	const vec3 K = vec3(0.686, 0.678, 0.666);
 
 	const float sunIntensity = 1000.0;
 
@@ -120,7 +120,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 sky = scattering * (1.0 - Fex);
 		 sky *= mix(vec3(1.0),sqrt(scattering * Fex),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
 
-	vec3 sun = K * calcSun(fragpos, sunVec);
+	vec3 sun = calcSun(fragpos, sunVec);
 	vec3 moon = pow(moonlight, vec3(0.4545)) * calcMoon(fragpos, moonVec);
 
 	sunMax = sunE * pow(mix(Fex2, Fex, clamp(pow(1.0-cosUpViewAngle,4.0),0.0,1.0)), vec3(0.4545))
