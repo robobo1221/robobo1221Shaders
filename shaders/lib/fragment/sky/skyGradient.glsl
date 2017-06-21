@@ -52,7 +52,7 @@ float calcMoon(vec3 fragpos, vec3 moonVec){
 
 }
 
-vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 fogColor, out vec3 sunMax, out vec3 moonMax){
+vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 fogColor, vec3 sunVec, vec3 moonVec, out vec3 sunMax, out vec3 moonMax){
 
 	vec3 uPos = normalize(fragpos.rgb);
 
@@ -121,7 +121,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 		 sky *= mix(vec3(1.0),sqrt(scattering * Fex),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
 
 	vec3 sun = calcSun(fragpos, sunVec);
-	vec3 moon = pow(moonlight, vec3(0.4545)) * calcMoon(fragpos, moonVec);
+	vec3 moon = pow(vec3(0.3, 0.55, 1.0) * 0.07, vec3(0.4545)) * calcMoon(fragpos, moonVec);
 
 	sunMax = sunE * pow(mix(Fex2, Fex, clamp(pow(1.0-cosUpViewAngle,4.0),0.0,1.0)), vec3(0.4545))
 	* mix(0.000005, 0.00003, clamp(pow(1.0-cosSunUpAngle,3.0),0.0,1.0)) * (1.0 - rainStrength);

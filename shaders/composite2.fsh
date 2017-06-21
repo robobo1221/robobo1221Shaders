@@ -374,11 +374,9 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		//volumetricLightSample = texture2D(gcolor, pos.xy).a;
 
 		float sunViewCos = dot(lightVector, uPos.xyz) * 0.5 + 0.5;
-			//Inverse Square Root
-			//Min it to prevent black dot bug on the sun
-			sunViewCos = min((0.5 / sqrt(1.0 - sunViewCos)) - 0.5, 100000.0);
-			//Reinhard to prevent over exposure
-			sunViewCos /= 1.0 + sunViewCos * 0.5; 
+
+		float mieFactor = min((0.5 / sqrt(1.0 - sunViewCos)) - 0.5, 100000.0);
+			  mieFactor /= 1.0 + mieFactor; 
 
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.85 + 0.15; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
@@ -393,8 +391,8 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		#endif
 
 		vec3 lightCol = mix(sunlight, moonlight * 0.75, time[1].y);
-			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.5, clamp(sunViewCos, 0.0, 1.0)), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
-			 lightCol *= 1.0 + sunViewCos * mix(4.0, 2.0, time[1].y);
+			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.5, mieFactor), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
+			 lightCol *= 1.0 + mieFactor * mix(4.0, 2.0, time[1].y);
 			 lightCol *= (1.0 + clamp(time[1].y * transition_fading * 0.5 + mix(0.0,1.0 - transition_fading, time[0].x),0.0,1.0)) * 0.5;
 			 lightCol = mix(lightCol, vec3(0.1, 0.5, 0.8) * lightCol, isEyeInWater);
 			
@@ -506,7 +504,7 @@ vec3 renderGaux4(vec3 color){
 
 
 	vec3 getSkyReflection(vec3 reflectedVector, out vec3 sunMult, out vec3 moonMult){
-		vec3 sky = pow(getAtmosphericScattering(vec3(0.0), reflectedVector, 0.0, ambientlight, sunMult, moonMult), vec3(2.2));
+		vec3 sky = pow(getAtmosphericScattering(vec3(0.0), reflectedVector, 0.0, ambientlight, sunVec, moonVec, sunMult, moonMult), vec3(2.2));
 
 		#ifdef STARS
 			sky = getStars(sky, reflectedVector, 1.0 - land);
