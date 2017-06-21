@@ -163,7 +163,7 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 	float linearDepth = ld(pixeldepth2);
 	vec2 offsetMult = 5.0 / vec2(viewWidth, viewHeight);
 
-	for (int i = 0; i < 4; i++){
+	for (int i = 0; i < 1; i++){
 		vec2 coord = bilateralOffets[i] * offsetMult + position;
 
 		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;

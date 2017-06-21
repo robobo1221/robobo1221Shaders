@@ -86,6 +86,8 @@ vec3 normal2 = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = texture2D(gaux1, texcoord.st);
 vec4 aux2 = texture2D(gdepth, texcoord.st);
 
+vec4 forWardAlbedo = texture2D(gaux2, texcoord.st);
+
 float land = float(pixeldepth2 < comp);
 float translucent = float(aux.g > 0.09 && aux.g < 0.11);
 float emissive = float(aux.g > 0.34 && aux.g < 0.36);
