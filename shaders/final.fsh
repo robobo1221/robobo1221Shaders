@@ -159,7 +159,7 @@ vec3 reinhardTonemap(vec3 color)
 	vec3 aux = texture2D(gdepth, newTexcoord.st).rgb;
 	float hand = float(aux.g > 0.85 && aux.g < 0.87);
 
-	const vec2 dofOffset[49] = vec2[49] (
+const vec2 dofOffset[49] = vec2[49] (
 		vec2(0.25, 0.0),
 		vec2(0.0, 0.25),
 		vec2(-0.25, 0.0),
@@ -220,14 +220,14 @@ vec3 reinhardTonemap(vec3 color)
 				//Calculate pixel Circle of Confusion that will be used for bokeh depth of field
 				float z = ld(texture2D(depthtex1, vec2(newTexcoord.st)).r)*far;
 				float focus = ld(texture2D(depthtex1, vec2(0.5)).r)*far;
-				float pcoc = min(abs(aperture * (focal * (z - focus)) / (z * (focus - focal)))*sizemult,(1.0 / viewWidth)*5.0);
+				float pcoc = min(abs(aperture * (focal * (z - focus)) / (z * (focus - focal)))*sizemult,(1.0 / viewWidth)*5.0) * 1.5;
 				vec4 sample = vec4(0.0);
 				vec3 bcolor = vec3(0.0);
 				float nb = 0.0;
 				vec2 bcoord = vec2(0.0);
 
 				for ( int i = 0; i < 49; i++) {
-					sample = texture2D(gcolor, newTexcoord.xy + dofOffset[i]*pcoc*vec2(1.0,aspectRatio));
+					sample = texture2D(gcolor, newTexcoord.xy + dofOffset[i]*pcoc*vec2(1.0,aspectRatio), abs(pcoc * 100.0));
 
 					sample.rgb *= MAX_COLOR_RANGE;
 
