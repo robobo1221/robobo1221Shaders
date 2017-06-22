@@ -517,19 +517,33 @@ vec3 renderGaux4(vec3 color){
 		return sky;
 	}
 
+	vec3 getPbrReflections(vec3 x, vec3 r, float f, vec3 s){	//x = color, r = reflection, f = fresnel, s = specular mask
+		vec3 a = x / mix(vec3(1.0), moonlight * 2.0, time[1].y);
+			 a /= a * 0.25 + 1.0;	//Someone please help me putting albedo in here instead of just raw color!
+		
+		float m = 1.0 - (iswater + istransparent);
+
+		float roughness = s.r;
+		float metal = s.g;
+
+		f *= roughness;
+		f = mix(f, 1.0, metal);
+
+		r = mix(r, r * a, metal);
+		x = mix(x, vec3(0.0), metal);
+
+		x = mix(x, r, f * m);
+
+		return x;
+	}
+
 	vec3 getReflection(vec3 color){
 
 		vec3 reflectedVector = reflect(uPos, normal);
-		
-		#ifdef SPECULAR_MAPPING
-			float specMap = mix(specular.r, 0.0, iswater + istransparent + emissive);
-		#else
-			float specMap = 0.0;
-		#endif	
 
 		float iswet = smoothstep(0.8,0.9,aux.b * (1.0 - clamp(iswater + istransparent, 0.0 ,1.0))) * clamp(dot(upVec, normal),0.0,1.0);
 
-		const float F0 = 0.02;
+		const float F0 = 0.02; //Default minimum frensel for water.
 
 		vec3 halfVector = normalize(reflectedVector + normalize(-fragpos.rgb));
 		float LdotH	= clamp(dot(reflectedVector, halfVector),0.0,1.0);
@@ -541,21 +555,23 @@ vec3 renderGaux4(vec3 color){
 		float reflectionMask = clamp(iswater + istransparent, 0.0 ,1.0);
 
 		vec3 sky = getSkyReflection(reflectedVector, sunMult, moonMult);
-		sky += pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2)) * shadowsForward / fresnel;
+		 	 sky += pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2)) * shadowsForward / mix(1.0, fresnel, iswater + istransparent);
 
 		vec4 reflection = raytrace(fragpos.rgb, reflectedVector, fresnel, sky);
-		reflection.rgb = mix(sky * smoothstep(0.5,0.9,mix(aux.b, aux2.b, clamp(iswater + istransparent + hand, 0.0 ,1.0))), reflection.rgb, reflection.a);
+			 reflection.rgb = mix(sky * smoothstep(0.5,0.9,mix(aux.b, aux2.b, clamp(iswater + istransparent + hand, 0.0 ,1.0))), reflection.rgb, reflection.a);
 		
-		color.rgb = mix(color.rgb, reflection.rgb, fresnel * specMap * 0.5);
+		#ifdef SPECULAR_MAPPING
+			color = getPbrReflections(color, reflection.rgb, fresnel, specular);
+		#endif
 		
 		reflection.rgb *= (1.0 - hand);
 		
 		#ifdef WATER_REFLECTION
-			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * (1.0 - isEyeInWater) * REFLECTION_STRENGTH * (1.0 - specMap));
+			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * (1.0 - isEyeInWater) * REFLECTION_STRENGTH);
 		#endif
 		
 		#if defined RAIN_REFLECTION && defined RAIN_PUDDLES
-			color.rgb *= mix(1.0,clamp(max(1.0 - puddles * 2.0,0.0) + 0.4,0.0,1.0), iswet * pow(fresnel, 0.3) * (1.0 - specMap) * wetness * (1.0 - hand));
+			color.rgb *= mix(1.0,clamp(max(1.0 - puddles * 2.0,0.0) + 0.4,0.0,1.0), iswet * pow(fresnel, 0.3) * (1.0 - specular.r) * wetness * (1.0 - hand));
 		#endif
 
 		#ifdef RAIN_REFLECTION
@@ -597,7 +613,7 @@ void main()
 	#ifdef VOLUMETRIC_LIGHT
 		color = getVolumetricLight(color, texcoord.st);
 	#endif
-	
+
 	color = pow(color, vec3(0.4545));
 
 /* DRAWBUFFERS:0 */

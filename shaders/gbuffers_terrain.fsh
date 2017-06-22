@@ -101,9 +101,8 @@ void main(){
 	#else 
 		vec3 specularity = vec3(0.0);
 	#endif
-	float atten = 1.0-(specularity.g);
 	
-	float bumpmult = 0.75 * atten * (1.0 - clamp(rainpuddles * 1.25, 0.0, 1.0));
+	float bumpmult = 0.5 * (1.0 - clamp(rainpuddles * 1.5, 0.0, 1.0));
 
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 	

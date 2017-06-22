@@ -83,12 +83,11 @@ void main(){
 	#else 
 		vec3 specularity = vec3(0.0);
 	#endif
-	float atten = 1.0-(specularity.g);
 
 	vec4 albedo = texture2D(texture, adjustedTexCoord.st) * color;
 	vec3 bump = (texture2D(normals, adjustedTexCoord.st).rgb * 2.0 - 1.0);
 	
-	float bumpmult = 0.75;
+	float bumpmult = 0.5;
 
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 						  
