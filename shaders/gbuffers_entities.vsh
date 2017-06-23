@@ -6,10 +6,7 @@ varying vec4 color;
 
 varying vec3 normal;
 
-varying float mat;
-
 void main(){
-	mat = 1.0;
 
 	gl_Position = ftransform();
 
