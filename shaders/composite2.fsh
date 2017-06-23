@@ -15,6 +15,8 @@
 #define WATER_REFLECTION
 #define RAIN_REFLECTION
 
+//github test lol
+
 #define FOG
 	#define FOG_DENSITY_DAY		1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 	#define FOG_DENSITY_NIGHT	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
