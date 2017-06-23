@@ -530,7 +530,7 @@ vec3 renderGaux4(vec3 color){
 		float metal = s.g;
 
 		f *= roughness;
-		f = mix(f, 1.0, metal);
+		f = mix(f, 1.0, metal * 0.8);
 
 		r = mix(r, r * a, metal);
 		x = mix(x, vec3(0.0), metal);
