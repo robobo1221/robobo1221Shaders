@@ -522,12 +522,11 @@ vec3 renderGaux4(vec3 color){
 
 	vec3 getPbrReflections(vec3 x, vec3 r, float f, vec3 s){	//x = color, r = reflection, f = fresnel, s = specular mask
 		vec3 a = x / mix(vec3(1.0), moonlight * 2.0, time[1].y);
-			 a /= a * 0.25 + 1.0;	//Someone please help me putting albedo in here instead of just raw color!
 		
 		float m = 1.0 - (iswater + istransparent);
 
 		float roughness = s.r * 0.5;
-		float metal = s.g;
+		float metal = s.g * m;
 
 		f *= roughness;
 		f = mix(f, 1.0, metal * 0.8);
