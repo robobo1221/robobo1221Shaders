@@ -3,7 +3,7 @@
 
 #include "lib/options.glsl"
 
-const vec3 intervalMult = vec3(1.0, 1.0, 1.0/(POM_DEPTH / 8.0))/POM_MAP_RES * 64 / OCCLUSION_POINTS;
+const vec3 intervalMult = vec3(1.0, 1.0, 0.5/(POM_DEPTH / 8.0))/POM_MAP_RES * 64.0 / OCCLUSION_POINTS;
 const float MAX_OCCLUSION_DISTANCE = 22.0;
 const float MIX_OCCLUSION_DISTANCE = 18.0;
 const int   MAX_OCCLUSION_POINTS   = OCCLUSION_POINTS;
@@ -91,9 +91,8 @@ void main(){
 	#else 
 		vec3 specularity = vec3(0.0);
 	#endif
-	float atten = 1.0-(specularity.g);
 	
-	float bumpmult = 0.75 * atten;
+	float bumpmult = 0.5;
 
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 						  
