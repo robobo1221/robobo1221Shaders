@@ -526,7 +526,7 @@ vec3 renderGaux4(vec3 color){
 		
 		float m = 1.0 - (iswater + istransparent);
 
-		float roughness = s.r;
+		float roughness = s.r * 0.5;
 		float metal = s.g;
 
 		f *= roughness;
