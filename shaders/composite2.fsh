@@ -296,6 +296,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		color = pow(color, vec3(2.2));
 
 		vec3 fragpos = toScreenSpace(vec3(uv, texture2D(gdepthtex, uv).x));
+		vec3 wpos = toWorldSpace(fragpos);
 		
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.9 + 0.1; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
@@ -328,7 +329,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		fogColor = pow(fogColor, vec3(2.2));
 		fogColor = mix(mix(fogColor * 0.25, fogColor, rainStrength), fogColor, pow(cosMoonUpAngle, 5.0) * time[1].y);
 		
-		float rawHeight = worldPosition.y + cameraPosition.y;
+		float rawHeight = wpos.y + cameraPosition.y;
 
 		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) / 100.0, 4.4),0.0,1.0) * 3.0 + 0.05;
 
