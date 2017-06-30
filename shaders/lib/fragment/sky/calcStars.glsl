@@ -30,23 +30,22 @@
 				
 				#ifdef DRAW_GALAXY
 				
-					float galaxyNoise = length((starCoord.z + 50.0) * 0.01 + 0.25);
-					
-					float oldGalaxy = texture2D(noisetex, fract(starCoord / 5000.0).xz).x * 0.125;
-						  oldGalaxy += texture2D(noisetex, fract(starCoord / 2500.0).xz).x * 0.125 * 0.5;
-						  oldGalaxy += texture2D(noisetex, fract(starCoord / 1250.0).xz).x * 0.125 * 0.25;
-					
-					galaxyNoise += oldGalaxy;
-					galaxyNoise = min(galaxyNoise, 1.0 - galaxyNoise);
-					galaxyNoise = max(galaxyNoise * 8.0 - 1.5,0.0);
-					galaxyNoise *= 0.45;
-					galaxyNoise *= galaxyNoise * 0.8;
-				
-					vec3 galaxy = vec3(galaxyNoise);
-						 galaxy *= mix(vec3(1.0, 1.0, 2.0), vec3(1.0, 0.75, 0.5) * 100.0, pow(oldGalaxy * 0.75 + 0.25, 3.0));
-						 galaxy = mix(galaxy, vec3(1.0) * 50.0, pow(vec3(dot(galaxy * 0.14, vec3(0.33333))), vec3(7.0)));
-						 galaxy += 1.0;
-						 galaxy *= time[1].y;
+			float galaxyMask = length((starCoord.z + 50.0) * 0.01 + 0.25);
+			
+			float galaxyMask0 = texture2D(noisetex, fract(starCoord / 5000.0).xz).x * 0.125;
+					galaxyMask0 += texture2D(noisetex, fract(starCoord / 2500.0).xz).x * 0.0675;
+					galaxyMask0 += texture2D(noisetex, fract(starCoord / 1250.0 * 2.0).xz).x * 0.0335;
+			
+			galaxyMask += galaxyMask0;
+			galaxyMask = min(galaxyMask, 1.0 - galaxyMask);
+			galaxyMask = max(galaxyMask * 8.0 - 1.5,0.0);
+			galaxyMask *= 0.45;
+			galaxyMask *= galaxyMask * 0.8;
+		
+			vec3 galaxy = galaxyMask * mix(vec3(1.0, 1.0, 2.0), vec3(100.0, 75.0, 50.0), pow(galaxyMask0 * 0.75 + 0.25, 3.0));
+				 galaxy = mix(galaxy, vec3(50.0), pow(vec3(dot(galaxy * 0.14, vec3(0.33333))), vec3(7.0))) * 2.0;
+				 galaxy += 1.0;
+				 galaxy *= time[1].y;
 
 				return mix(color, mix(vec3(1.0), galaxy, transition_fading),(star * 2.0 * galaxy + galaxy * 0.001 * transition_fading) * cosT * time[1].y * (1.0 - rainStrength) * (1.0 - moondisk));
 				
