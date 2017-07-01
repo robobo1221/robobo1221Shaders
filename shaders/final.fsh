@@ -106,12 +106,12 @@ vec3 tonemap(vec3 x){
 	vec3 d = vec3(LIFT);
 	vec3 e = vec3(INVERSE_LIFT);
 	
-	x = mix(x, vec3(0.33333), 1.1 - c);
+	x = mix(x, vec3(0.33333), 1.0 - c);
 
 	x = pow(x, vec3(2.2)) * a;
 
 	x = max(vec3(0.0),x - e) + d;
-	x = pow((x * (6.2 * x)) / (x * (6.2 * x + 0.7)), b);
+	x = pow((x * (6.2 * x)) / (x * (6.2 * x + 0.7)) + 0.02, b);
 	return x;
 }
 
