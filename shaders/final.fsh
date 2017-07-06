@@ -12,7 +12,10 @@
 
 //#define LENS_FLARE
 	#define LENS_FLARE_MULT 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
-	
+
+//#define DIRTY_LENS
+	#define DIRTY_LENS_MULT 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
+
 #define BRIGHTNESS 1.0 //[0.0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 #define GAMMA 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
 #define CONTRAST 1.0 //[0.25 0.5 0.75 1.0 1.25 1.5 1.75 2.0]
@@ -56,6 +59,8 @@ uniform float near;
 
 uniform int isEyeInWater;
 uniform int worldTime;
+
+const float pi = 3.141592653589793238462643383279502884197169;
 
 float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
 
@@ -120,20 +125,74 @@ vec3 reinhardTonemap(vec3 color)
 	return color / (color + 1.0);
 }
 
+float shape(vec2 p, vec2 cp){
+	float result = 0.0;
+
+	const float points = 6.0;
+
+	float r = 2.0 * pi / points;
+	mat2 rotationMatrix = mat2(cos(r), -sin(r), sin(r), cos(r));
+
+	vec2 refPos = vec2(0.0, 1.0);
+
+	p.y = 1.0 - p.y;
+	p *= vec2(aspectRatio, 1.0);
+
+	for (float i = 0; i < points; i++){
+		refPos = rotationMatrix * refPos;
+
+		result = max(result, dot(p - cp, normalize(refPos)));
+	}
+
+	result = 1.0 - result;
+	result = 1.0 - smoothstep(0.7, 0.68, result);
+	
+	return result;
+}
+
+float rand(float n){return fract(sin(n) * 43758.5453123);}
+
+float noise1D(float p){
+	float fl = floor(p);
+  float fc = fract(p);
+	return mix(rand(fl), rand(fl + 1.0), fc);
+}
+
+float generateDirtyLens(vec2 p){
+	float lens = 0.0;
+	const int itter = 32;
+
+	const float scale = 7.0;
+	float increment = 1.0 / float(itter) * scale ;
+
+	if (p.x > 0.0 && p.y > 0.0 && p.x < 1.0 && p.y < 1.0){
+		for (int i = 0; i < itter; i++){
+			lens += shape(p * scale, vec2(float(i) * 1.8, -noise1D(float(i)) * float(itter) + 5.0) * increment) * 0.5;
+		}
+	}
+
+	return lens;
+}
 
 #ifdef BLOOM
 
-	vec3 getBloom(in vec2 bCoord){
+	vec3 getBloom(vec2 bCoord){
 
 		vec3 blur = vec3(0.0);
+		
+		#ifdef DIRTY_LENS
+		float dirt = (1.0 + generateDirtyLens(bCoord) * 3.0 * DIRTY_LENS_MULT);
+		#else
+		const float dirt = 1.0;
+		#endif
 
 		float bloomPowMult = mix(1.0, 0.8, float(isEyeInWater));
-		bloomPowMult = mix(bloomPowMult, 0.8, rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure));
+			  bloomPowMult = mix(bloomPowMult, 0.8, rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure));
 
 		blur += pow(texture2D(composite,bCoord/pow(2.0,2.0) + vec2(0.0,0.0)).rgb,vec3(2.2) * bloomPowMult)*pow(7.0,1.0);
 		blur += pow(texture2D(composite,bCoord/pow(2.0,3.0) + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult)*pow(6.0,1.0);
 		blur += pow(texture2D(composite,bCoord/pow(2.0,4.0) + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(5.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,5.0) + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(4.0,1.0);
+		blur += pow(texture2D(composite,bCoord/pow(2.0,5.0) + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(4.0,1.0) * dirt;
 		blur += pow(texture2D(composite,bCoord/pow(2.0,6.0) + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(3.0,1.0);
 
 		return blur * 0.25;
