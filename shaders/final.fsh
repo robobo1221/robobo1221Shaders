@@ -125,54 +125,56 @@ vec3 reinhardTonemap(vec3 color)
 	return color / (color + 1.0);
 }
 
-float shape(vec2 p, vec2 cp){
-	float result = 0.0;
+#ifdef DIRTY_LENS
+	float shape(vec2 p, vec2 cp){
+		float result = 0.0;
 
-	const float points = 6.0;
+		const float points = 6.0;
 
-	float r = 2.0 * pi / points;
-	mat2 rotationMatrix = mat2(cos(r), -sin(r), sin(r), cos(r));
+		float r = 2.0 * pi / points;
+		mat2 rotationMatrix = mat2(cos(r), -sin(r), sin(r), cos(r));
 
-	vec2 refPos = vec2(0.0, 1.0);
+		vec2 refPos = vec2(0.0, 1.0);
 
-	p.y = 1.0 - p.y;
-	p *= vec2(aspectRatio, 1.0);
+		p.y = 1.0 - p.y;
+		p *= vec2(aspectRatio, 1.0);
 
-	for (float i = 0; i < points; i++){
-		refPos = rotationMatrix * refPos;
+		for (float i = 0; i < points; i++){
+			refPos = rotationMatrix * refPos;
 
-		result = max(result, dot(p - cp, normalize(refPos)));
-	}
-
-	result = 1.0 - result;
-	result = 1.0 - smoothstep(0.7, 0.68, result);
-	
-	return result;
-}
-
-float rand(float n){return fract(sin(n) * 43758.5453123);}
-
-float noise1D(float p){
-	float fl = floor(p);
-  float fc = fract(p);
-	return mix(rand(fl), rand(fl + 1.0), fc);
-}
-
-float generateDirtyLens(vec2 p){
-	float lens = 0.0;
-	const int itter = 32;
-
-	const float scale = 7.0;
-	float increment = 1.0 / float(itter) * scale ;
-
-	if (p.x > 0.0 && p.y > 0.0 && p.x < 1.0 && p.y < 1.0){
-		for (int i = 0; i < itter; i++){
-			lens += shape(p * scale, vec2(float(i) * 1.8, -noise1D(float(i)) * float(itter) + 5.0) * increment) * 0.5;
+			result = max(result, dot(p - cp, normalize(refPos)));
 		}
+
+		result = 1.0 - result;
+		result = 1.0 - smoothstep(0.7, 0.68, result);
+		
+		return result;
 	}
 
-	return lens;
-}
+	float rand(float n){return fract(sin(n) * 43758.5453123);}
+
+	float noise1D(float p){
+		float fl = floor(p);
+	float fc = fract(p);
+		return mix(rand(fl), rand(fl + 1.0), fc);
+	}
+
+	float generateDirtyLens(vec2 p){
+		float lens = 0.0;
+		const int itter = 32;
+
+		const float scale = 7.0;
+		float increment = 1.0 / float(itter) * scale ;
+
+		if (p.x > 0.0 && p.y > 0.0 && p.x < 1.0 && p.y < 1.0){
+			for (int i = 0; i < itter; i++){
+				lens += shape(p * scale, vec2(float(i) * 1.8, -noise1D(float(i)) * float(itter) + 5.0) * increment) * 0.5;
+			}
+		}
+
+		return lens;
+	}
+#endif
 
 #ifdef BLOOM
 

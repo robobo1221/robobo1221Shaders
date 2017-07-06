@@ -541,7 +541,7 @@ vec4 getVolumetricClouds(vec3 color){
 		farPlane -= increment;
 	}
 
-	return clamp(clouds, 0.0, 1.0);
+	return clouds;
 }
 
 #endif
@@ -583,6 +583,7 @@ void main()
 
 	#ifdef VOLUMETRIC_CLOUDS
 		vec4 VolumetricClouds = getVolumetricClouds(color);
+			 VolumetricClouds /= MAX_COLOR_RANGE;
 	#endif
 	
 /* DRAWBUFFERS:015 */
@@ -590,6 +591,6 @@ void main()
 	gl_FragData[1] = vec4(vec3(forWardAlbedo.a, aux2.gb), shadowsForward);
 
 	#ifdef VOLUMETRIC_CLOUDS
-		gl_FragData[2] = vec4(VolumetricClouds) / MAX_COLOR_RANGE;
+		gl_FragData[2] = VolumetricClouds;
 	#endif
 }
