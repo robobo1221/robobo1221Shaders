@@ -150,7 +150,8 @@ float ld(float dist) {
 }
 
 vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
-	const vec2 bilateralOffets[4] = vec2[4] (
+
+	const vec2 offset[4] = vec2[4](
 		vec2(1.0, 0.0),
 		vec2(0.0, 1.0),
 		vec2(-1.0, 0.0),
@@ -164,13 +165,14 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 	vec2 offsetMult = 5.0 / vec2(viewWidth, viewHeight);
 
 	for (int i = 0; i < 4; i++){
-		vec2 coord = bilateralOffets[i] * offsetMult + position;
+
+		vec2 coord = offset[i] * offsetMult + position;
 
 		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
 		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
 
 		float offsetDepth = ld(texture2D(depthtex1, coord).r);
-		float depthWeight = 1.0 / (1e-36 + abs(linearDepth - offsetDepth));
+		float depthWeight = 1.0 / (0.01 + abs(linearDepth - offsetDepth));
 
 		float weight = normalWeight * depthWeight;
 
@@ -558,7 +560,7 @@ void main()
 
 		//color = pow(color, vec3(2.2)); // Uncomment this line to get minecraft's default sky. And comment the line under to get minecraft's default sky.
 		
-		color = pow(getAtmosphericScattering(vec3(0.0), fragpos2.rgb, 1.0, ambientlight, sunVec, moonVec, sunMult, moonMult), vec3(2.2));
+		color = pow(getAtmosphericScattering(vec3(0.0), fragpos2.rgb, 1.0, ambientlight, sunVec, moonVec, upVec, sunMult, moonMult), vec3(2.2));
 
 		#ifdef STARS
 			color = getStars(color, fragpos2.rgb, land);

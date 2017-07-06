@@ -98,7 +98,7 @@ vec2 customTexcoord(){
 
 vec2 newTexcoord = clampScreen(customTexcoord());
 
-vec3 tonemap(vec3 x){
+vec3 burgress(vec3 x){
 
 	vec3 a = vec3(BRIGHTNESS);
 	vec3 b = vec3(GAMMA);
@@ -111,7 +111,7 @@ vec3 tonemap(vec3 x){
 	x = pow(x, vec3(2.2)) * a;
 
 	x = max(vec3(0.0),x - e) + d;
-	x = pow((x * (6.2 * x)) / (x * (6.2 * x + 0.7)) + 0.02, b);
+	x = pow((x * (6.2 * x + 0.03)) / (x * (6.2 * x + 0.8)), b);
 	return x;
 }
 
@@ -334,14 +334,14 @@ void main(){
 	#endif
 
 	#ifdef BLOOM
-		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.025 * BLOOM_MULT / reinhardTonemap(vec3(1.0)), vec3(2.2)) * 3.0;
+		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.055 * BLOOM_MULT, vec3(2.2)) * 3.0;
 	#endif
 	
 	color.r *= RED_MULT;
 	color.g *= GREEN_MULT;
 	color.b *= BLUE_MULT;
 	
-	color.rgb = pow(tonemap(pow(color.rgb, vec3(0.454545))), vec3(2.2));
+	color.rgb = pow(burgress(pow(color.rgb, vec3(0.454545))), vec3(2.2));
 
 	#ifdef VIGNETTE
 		color = pow(getVignette(pow(color, vec3(0.4545)), texcoord.st), vec3(2.2));

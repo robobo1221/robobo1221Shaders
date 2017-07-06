@@ -395,7 +395,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		#endif
 
 		vec3 lightCol = mix(sunlight, moonlight * 0.75, time[1].y);
-			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.5, mieFactor), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
+			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol, mieFactor), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
 			 lightCol *= 1.0 + mieFactor * mix(4.0, 2.0, time[1].y);
 			 lightCol *= (1.0 + clamp(time[1].y * transition_fading * 0.5 + mix(0.0,1.0 - transition_fading, time[0].x),0.0,1.0)) * 0.5;
 			 lightCol = mix(lightCol, vec3(0.1, 0.5, 0.8) * lightCol, isEyeInWater);
@@ -436,7 +436,7 @@ vec3 renderGaux4(vec3 color){
 		vec3 spec = calcSun(rvector, sunVec) * sunMult * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
 			spec += (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545)) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
 
-		return spec;
+		return spec * shadowsForward;
 	}
 	
 	vec4 raytrace(vec3 fragpos, vec3 rvector, float fresnel, vec3 fogColor) {
@@ -508,7 +508,7 @@ vec3 renderGaux4(vec3 color){
 
 
 	vec3 getSkyReflection(vec3 reflectedVector, out vec3 sunMult, out vec3 moonMult){
-		vec3 sky = pow(getAtmosphericScattering(vec3(0.0), reflectedVector, 0.0, ambientlight, sunVec, moonVec, sunMult, moonMult), vec3(2.2));
+		vec3 sky = pow(getAtmosphericScattering(vec3(0.0), reflectedVector, 0.0, ambientlight, sunVec, moonVec, upVec, sunMult, moonMult), vec3(2.2));
 
 		#ifdef STARS
 			sky = getStars(sky, reflectedVector, 1.0 - land);
@@ -558,7 +558,7 @@ vec3 renderGaux4(vec3 color){
 		float reflectionMask = clamp(iswater + istransparent, 0.0 ,1.0);
 
 		vec3 sky = getSkyReflection(reflectedVector, sunMult, moonMult);
-		 	 sky += pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2)) * shadowsForward / mix(1.0, fresnel, iswater + istransparent);
+		 	 sky += pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2));
 
 		vec4 reflection = raytrace(fragpos.rgb, reflectedVector, fresnel, sky);
 			 reflection.rgb = mix(sky * smoothstep(0.5,0.9,mix(aux.b, aux2.b, clamp(iswater + istransparent + hand, 0.0 ,1.0))), reflection.rgb, reflection.a);
