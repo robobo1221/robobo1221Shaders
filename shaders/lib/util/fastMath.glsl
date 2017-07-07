@@ -3,27 +3,27 @@
 #define fLengthSource(x) sqrt(dotX(x))
 #define dotXSource(x) dot(x, x)
 
-float dotX(in vec2 x) {
+float dotX(vec2 x) {
     return dotXSource(x);
 }
 
-float dotX(in vec3 x) {
+float dotX(vec3 x) {
     return dotXSource(x);
 }
 
-float dotX(in vec4 x) {
+float dotX(vec4 x) {
     return dotXSource(x);
 }
 
-float fLength(in vec4 x) {
+float fLength(vec4 x) {
     return fLengthSource(x);
 }
 
-float fLength(in vec3 x) {
+float fLength(vec3 x) {
     return fLengthSource(x);
 }
 
-float fLength(in vec2 x) {
+float fLength(vec2 x) {
     return fLengthSource(x);
 }
 

@@ -165,7 +165,7 @@ vec3 reinhardTonemap(vec3 color)
 		float lens = 0.0;
 		const int itter = 32;
 
-		const float scale = 7.0;
+		const float scale = 8.0;
 		float increment = 1.0 / float(itter) * scale ;
 
 		if (p.x > 0.0 && p.y > 0.0 && p.x < 1.0 && p.y < 1.0){

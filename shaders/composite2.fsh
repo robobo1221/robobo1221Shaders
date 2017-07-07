@@ -397,7 +397,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		#endif
 
 		vec3 lightCol = mix(sunlight, moonlight * 0.75, time[1].y);
-			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol, mieFactor), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
+			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.75, mieFactor), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
 			 lightCol *= 1.0 + mieFactor * mix(4.0, 2.0, time[1].y);
 			 lightCol *= (1.0 + clamp(time[1].y * transition_fading * 0.5 + mix(0.0,1.0 - transition_fading, time[0].x),0.0,1.0)) * 0.5;
 			 lightCol = mix(lightCol, vec3(0.1, 0.5, 0.8) * lightCol, isEyeInWater);
@@ -467,7 +467,7 @@ vec3 renderGaux4(vec3 color){
 
 			float err = distance(fragpos.xyz, spos.xyz);
 			
-			if(err < pow(fLength(vector)*pow(fLength(vector),0.11),1.1) * 1.1){
+			if(err < pow(sqrt(dot(vector, vector))*sqrt(dot(vector, vector)),0.11),1.1) * 1.1){
 
 				sr++;
 				
@@ -479,7 +479,8 @@ vec3 renderGaux4(vec3 color){
 				tvector -=vector;
 				vector *=ref;
 
-	}
+			}
+
 			vector *= inc;
 			oldpos = fragpos;
 			tvector += vector;
@@ -601,12 +602,13 @@ void main()
 		if (land > 0.9) color = getReflection(color);
 	#endif
 
-	#ifdef FOG
-		color = getFog(ambientlight, color, texcoord.st);
-	#endif
-
 	#ifdef VOLUMETRIC_CLOUDS
 		color = getVolumetricClouds(color, refTexC.st);
+	#endif
+
+
+	#ifdef FOG
+		color = getFog(ambientlight, color, texcoord.st);
 	#endif
 
 	color = renderGaux4(color);

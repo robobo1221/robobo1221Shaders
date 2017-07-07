@@ -23,7 +23,7 @@ uniform float viewWidth;
 			for (int i = -5; i < 5; i++) {
 				for (int j = -5; j < 5; j++) {
 				
-					float wg = pow((1.0-fLength(vec2(i,j))* 0.125),5.0)*pow(0.5,0.5)*20.0;
+					float wg = pow((1.0-fLength(vec2(i,j)) * 0.125),5.0) * 14.142135623730950488016887242097;
 					vec2 bcoord = (texcoord.xy - offset + vec2(i,j) / viewWidth * vec2(1.0,aspectRatio))*scale;
 
 					if (wg > 0) bloom += pow(texture2D(gcolor,bcoord).rgb,vec3(2.2))*wg;

@@ -530,7 +530,7 @@ vec4 getVolumetricClouds(vec3 color){
 			vec4 result = getVolumetricCloudsColor(wpos);
 				result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
-			if (fLength(worldPosition) < volumetricDistance){
+			if (length(worldPosition) < volumetricDistance){
 				result.rgb = renderGaux2(result.rgb, compositeNormals);
 			}
 
