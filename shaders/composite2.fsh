@@ -311,7 +311,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 		dynamicCloudCoverage = sqrt(dynamicCloudCoverage);
 
-		float fog = 1.0 - fExp(-pow(fLength(fragpos)
+		float fog = 1.0 - exp(-pow(fLength(fragpos)
 		* mix(
 		mix(1.0 / 1000.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
 		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption,2.0));

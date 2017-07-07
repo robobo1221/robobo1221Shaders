@@ -208,7 +208,7 @@ vec3 reinhardTonemap(vec3 color)
 	vec3 getVignette(vec3 color, vec2 pos){
 		float factor = distance(pos, vec2(0.5));
 
-		factor = pow(factor, 4.4);
+		factor *= factor*factor*factor * 2.0;
 		factor *= VIGNETTE_MULT;
 
 		factor = clamp(1.0 - factor, 0.0, 1.0);

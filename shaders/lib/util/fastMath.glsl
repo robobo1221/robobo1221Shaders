@@ -1,7 +1,6 @@
 #define rcpln2 1.44269504089
 
 #define fLengthSource(x) sqrt(dotX(x))
-#define fExpSource(x) exp2(x * rcpln2)
 #define dotXSource(x) dot(x, x)
 
 float dotX(in vec2 x) {
@@ -14,18 +13,6 @@ float dotX(in vec3 x) {
 
 float dotX(in vec4 x) {
     return dotXSource(x);
-}
-
-float fExp(in float x) {
-    return fExpSource(x);
-}
-
-vec2 fExp(in vec2 x) {
-    return fExpSource(x);
-}
-
-vec3 fExp(in vec3 x) {
-    return fExpSource(x);
 }
 
 float fLength(in vec4 x) {
