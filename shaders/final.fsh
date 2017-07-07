@@ -188,16 +188,16 @@ vec3 reinhardTonemap(vec3 color)
 		const float dirt = 1.0;
 		#endif
 
-		float bloomPowMult = mix(1.0, 0.8, float(isEyeInWater));
-			  bloomPowMult = mix(bloomPowMult, 0.8, rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure));
+		float bloomPowMult = 1.0 - 0.2 * float(isEyeInWater);
+			  bloomPowMult *= 1.0 - 0.2 * rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure);
 
-		blur += pow(texture2D(composite,bCoord/pow(2.0,2.0) + vec2(0.0,0.0)).rgb,vec3(2.2) * bloomPowMult)*pow(7.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,3.0) + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult)*pow(6.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,4.0) + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(5.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,5.0) + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(4.0,1.0) * dirt;
-		blur += pow(texture2D(composite,bCoord/pow(2.0,6.0) + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(3.0,1.0);
+		blur += pow(texture2D(composite,bCoord * 0.25).rgb,vec3(2.2) * bloomPowMult) * 1.75;
+		blur += pow(texture2D(composite,bCoord * 0.125 + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult) * 1.5;
+		blur += pow(texture2D(composite,bCoord * 0.0625 + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult) * 1.25;
+		blur += pow(texture2D(composite,bCoord * 0.03125 + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult) * dirt;
+		blur += pow(texture2D(composite,bCoord * 0.015625 + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult) * 0.75;
 
-		return blur * 0.25;
+		return blur;
 	}
 
 #endif
@@ -276,8 +276,6 @@ const vec2 dofOffset[49] = vec2[49] (
 	float focal = float(DOF_FOCAL_LENGTH);
 	float aperture = float(DOF_APERTURE);
 	float sizemult = float(DOF_SIZE_MULT);
-
-		float DoFGamma = 4.4;
 				//Calculate pixel Circle of Confusion that will be used for bokeh depth of field
 				float z = ld(texture2D(depthtex1, vec2(newTexcoord.st)).r)*far;
 				float focus = ld(texture2D(depthtex1, vec2(0.5)).r)*far;
@@ -292,9 +290,9 @@ const vec2 dofOffset[49] = vec2[49] (
 
 					sample.rgb *= MAX_COLOR_RANGE;
 
-					bcolor += pow(sample.rgb, vec3(DoFGamma));
+					bcolor += pow(sample.rgb, vec3(4.4));
 				}
-		color.rgb = pow(bcolor/49.0, vec3(1.0/DoFGamma));
+		color.rgb = pow(bcolor * 0.0204081632653, vec3(0.227272727273));
 
 	return color;
 	}

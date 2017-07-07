@@ -19,8 +19,8 @@ vec3 getTerrainHeight(vec2 posxz){
 		float h1 = getTerrainBump(coord + vec2(deltaPos,0.0));
 		float h2 = getTerrainBump(coord + vec2(0.0,deltaPos));
 
-		float xDelta = (h0 - h1) / deltaPos;
-		float yDelta = (h0 - h2) / deltaPos;
+		float xDelta = (h0 - h1) * 10.0;
+		float yDelta = (h0 - h2) * 10.0;
 
 		vec3 wave = normalize(vec3(xDelta,yDelta,1.0-pow(abs(xDelta+yDelta),2.0)));
 

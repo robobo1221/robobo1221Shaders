@@ -26,7 +26,7 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 
 	float distortFactor = getDistordFactor(shadowPosition);
 
-	float diffthresh = pow(distortFactor, 4.0)/ 5000.0 * sqrt(1.0 - NdotL*NdotL)/NdotL + clamp(pow(dot(fragpos,fragpos),.125),0.0,1.0) / 4096;
+	float diffthresh = distortFactor*distortFactor*distortFactor*distortFactor * 0.0002 * sqrt(1.0 - NdotL*NdotL)/NdotL + clamp(pow(dot(fragpos,fragpos),.125),0.0,1.0) * 0.000244140625;
 		  diffthresh = mix(advDisFactor ? diffthresh : 0.0003 , 0.0003, translucent);
 
 	vec3 shading = vec3(0.0);
@@ -62,14 +62,14 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 	#endif
 
 	#ifdef SHADOW_FILTER
-		shading /= 8.0;
+		shading *= 0.125;
 	#endif
 
 	#ifdef COLOURED_SHADOWS
 
 		#ifdef SHADOW_FILTER
-			shading2 /= 8.0;
-			colorShading /= 8.0;
+			shading2 *= 0.125;
+			colorShading *= 0.125;
 		#endif
 
 		colorShading = getDesaturation(colorShading, min(emissiveLM, 1.0));

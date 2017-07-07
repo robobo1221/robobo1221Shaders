@@ -38,8 +38,6 @@ void main()
 	
 	handLightMult = 0.0;
 	
-	float heldItemIdCombined = heldItemId + heldItemId2;
-	
 	if (heldItemId == 50 || heldItemId2 == 50 ) {
 		// torch
 		handLightMult = 0.5;

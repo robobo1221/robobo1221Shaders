@@ -51,8 +51,8 @@ vec3 getWaveHeight(vec2 posxz, float iswater){
 	float h3 = getWaterBump(coord + vec2(0.0,deltaPos), waveM, waveZ, iswater);
 	float h4 = getWaterBump(coord + vec2(0.0,-deltaPos), waveM, waveZ, iswater);
 
-	float xDelta = ((h1-h0)+(h0-h2))/deltaPos;
-	float yDelta = ((h3-h0)+(h0-h4))/deltaPos;
+	float xDelta = ((h1-h0)+(h0-h2)) * 4.0;
+	float yDelta = ((h3-h0)+(h0-h4)) * 4.0;
 
 	vec3 wave = normalize(vec3(xDelta,yDelta,1.0-pow(abs(xDelta+yDelta),2.0)));
 

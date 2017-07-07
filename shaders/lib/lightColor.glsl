@@ -21,11 +21,12 @@ vec3 getAmbienLight(){
 	vec3 ambientColor = vec3(0.0643302716096, 0.125492581616, 0.280039153702) * 0.5 * time[0].x;
 		 ambientColor = mix(ambientColor, vec3(0.0643302716096, 0.125492581616, 0.280039153702), time[0].y);
 		 ambientColor = mix(ambientColor, vec3(0.0643302716096, 0.125492581616, 0.280039153702) * 0.5, time[1].x);
-		 ambientColor /= ambientColor.b;
+
+		 ambientColor *= 3.57092923179;
+
 		 ambientColor = mix(ambientColor, vec3(0.3, 0.55, 1.0) * 0.1, time[1].y);
 
 		 ambientColor = mix(ambientColor, vec3(dot(ambientColor, vec3(0.3333))), 0.2 * time[1].y);
-
 		 ambientColor = mix(ambientColor, vec3(0.2) * (1.0 - time[1].y * 0.99), rainStrength + (clamp(1.0 - max(dynamicCloudCoverage * 2.4 - 1.4, 0.0), 0.0, 1.0) * (1.0 - rainStrength) * (1.0 - time[1].y * 0.25)));
 
 	return clamp(ambientColor, 0.0, 1.0);

@@ -7,7 +7,7 @@ const float 	shadowDistance 				= 130.0;
 #define shadowDarkness 2.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0] Intensity of ambient color on the shadows
 #define sunlightAmount 2.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0] Intensity of the sunlight and the moonlight
 
-vec3 emissiveLightColor = vec3(1.0, 0.4, 0.07);
+const vec3 emissiveLightColor = vec3(1.0, 0.4, 0.07);
 
 #define EMISSIVE_LIGHT_ATTEN 1.0 //[0.25 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 #define EMISSIVE_LIGHT_MULT 1.0 //[0.25 0.5 1.0 2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0]

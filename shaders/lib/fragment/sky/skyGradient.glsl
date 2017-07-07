@@ -19,7 +19,7 @@ vec3 calcSun(vec3 fragpos, vec3 sunVec){
 	const float sunAngularDiameterCos = 0.99873194915;
 
 	float cosViewSunAngle = dot(normalize(fragpos.rgb), sunVec);
-	float sundisk = smoothstep(sunAngularDiameterCos,sunAngularDiameterCos+0.0001,cosViewSunAngle);
+	float sundisk = smoothstep(sunAngularDiameterCos, sunAngularDiameterCos + 0.0001, cosViewSunAngle);
 
 	return 14000.0 * sundisk * (1.0 - rainStrength) * K;
 
@@ -30,7 +30,7 @@ float calcMoon(vec3 fragpos, vec3 moonVec){
 	const float moonAngularDiameterCos = 0.99833194915;
 
 	float cosViewSunAngle = dot(fragpos.rgb, moonVec);
-	float moondisk = smoothstep(moonAngularDiameterCos,moonAngularDiameterCos+0.001,cosViewSunAngle);
+	float moondisk = smoothstep(moonAngularDiameterCos, moonAngularDiameterCos + 0.001, cosViewSunAngle);
 
 	return clamp(4.0 * moondisk, 0.0, 15.0) * (1.0 - rainStrength);
 
@@ -64,7 +64,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	const float sunIntensity = 1000.0;
 
 	// earth shadow hack
-	float cutoffAngle = pi * 0.5128205128205128;
+	const float cutoffAngle = pi * 0.5128205128205128;
 	const float steepness = 1.5;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 		 sky *= mix(vec3(1.0),sqrt(scattering * absorption),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
 
 	vec3 sun = calcSun(uPos, sunVec);
-	vec3 moon = pow(vec3(0.3, 0.55, 1.0) * 0.07, vec3(0.4545)) * calcMoon(uPos, moonVec);
+	vec3 moon = pow(moonlight, vec3(0.4545)) * calcMoon(uPos, moonVec);
 
 	sunMax = sunE * pow(mix(Fex2, absorption, clamp(pow(1.0-cosUpViewAngle,4.0),0.0,1.0)), vec3(0.4545))
 	* mix(0.000005, 0.00003, clamp(pow(1.0-cosSunUpAngle,3.0),0.0,1.0));

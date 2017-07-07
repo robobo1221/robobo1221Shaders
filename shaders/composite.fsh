@@ -12,13 +12,6 @@ varying vec4 texcoord;
 uniform sampler2D gaux4;
 
 #ifdef GLOBAL_ILLUMINATION
-varying vec3 lightVector;
-varying vec3 sunVec;
-varying vec3 moonVec;
-varying vec3 upVec;
-
-varying float handLightMult;
-
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 shadowModelView;
@@ -108,11 +101,11 @@ vec3 getGi(){
 	float blockDistance = sqrt(dot(fragpos, fragpos));
 	float diffTresh = 0.0025 * pow(smoothstep(0.0, 255.0, blockDistance), 0.75) + 0.0001;
 
-	float giDistanceMask = clamp(1.0 - (blockDistance / 320.0), 0.0, 1.0);
+	float giDistanceMask = clamp(1.0 - (blockDistance * 0.003125), 0.0, 1.0);
 	
 	const float giSteps = 1.0 / (6.0 * GI_QUALITY);
 
-	vec2 circleDistribution = rotationMatrix * vec2(1.0) / 32.0;
+	vec2 circleDistribution = rotationMatrix * vec2(0.03125);
 
 	for (float i = 1.0; i < 2.0; i += giSteps){
 		

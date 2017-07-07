@@ -25,7 +25,7 @@ float hgPhase(float c, float g)
 	*/
 
 
-	return (1.0 / (4.0 * pi)) * ((1.0 - g*g) / pow((g*g + 1.0) - 2.0*g * c, 1.5));
+	return (1.0 * 0.0795774715459) * ((1.0 - g*g) / pow((g*g + 1.0) - 2.0*g * c, 1.5));
 }
 
 vec3 totalMie(vec3 lambda, vec3 K, float T, float v)

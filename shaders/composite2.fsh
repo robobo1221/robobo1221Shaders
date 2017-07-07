@@ -322,7 +322,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 		fogColor *= mix(1.0, 0.5, (1.0 - min(time[1].y + rainStrength + time[0].y, 1.0)));
 		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
-		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter / 4.0 * (1.0 - rainStrength) * (1.0 - time[1].y));
+		fogColor = mix(fogColor, lightCol * 2.0, sunMoonScatter * 0.25 * (1.0 - rainStrength) * (1.0 - time[1].y));
 		fogColor = mix(fogColor, lightCol, 0.025 * (1.0 - rainStrength) * (1.0 - time[1].y));
 		
 		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
@@ -331,12 +331,12 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		
 		float rawHeight = wpos.y + cameraPosition.y;
 
-		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) / 100.0, 4.4),0.0,1.0) * 3.0 + 0.05;
+		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) * 0.01, 4.4),0.0,1.0) * 3.0 + 0.05;
 
 		color = mix(color, fogColor, clamp(fog * land * rainStrength * (1.0 - isEyeInWater), 0.0, 1.0));
 		color = mix(color, fogColor, clamp(fog * land * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * (1.0 - time[1].y), 0.0, 1.0));
 
-		getHeight = clamp(pow(1.0 - ((rawHeight - 70.0) / 100.0), 4.4),0.0,1.0) + 0.05;
+		getHeight = clamp(pow(1.0 - ((rawHeight - 70.0) * 0.01), 4.4),0.0,1.0) + 0.05;
 
 		color = mix(color, fogColor * 0.25, clamp(fog * land * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * time[1].y * 0.9, 0.0, 1.0));
 
