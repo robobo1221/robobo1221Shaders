@@ -1,6 +1,8 @@
 #version 120
 #extension GL_ARB_shader_texture_lod : enable
 
+#include "lib/util/fastMath.glsl"
+
 #include "lib/options/options.glsl"
 
 const vec3 intervalMult = vec3(1.0, 1.0, 0.5/(POM_DEPTH * 0.125))/POM_MAP_RES * 64.0 / OCCLUSION_POINTS;

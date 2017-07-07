@@ -1,4 +1,6 @@
 #version 120
+#include "lib/util/fastMath.glsl"
+
 #include "lib/util/colorRange.glsl"
 
 #define BLOOM
@@ -301,7 +303,7 @@ const vec2 dofOffset[49] = vec2[49] (
 
 vec3 toClipSpace(vec3 p)
 {
-	vec4 clipSpace = gbufferProjection * vec4(p, 1.0);
+	vec4 clipSpace = projMAD4(gbufferProjection, p);
 		 clipSpace /= clipSpace.w;
 		 clipSpace = 0.5 * clipSpace + 0.5;
 
@@ -370,8 +372,8 @@ vec3 getLensFlare(vec2 uv){
 		lens += getflare(uv, lPos, vec3(0.0, 0.25, 1.0) * 0.5, 1.4, 200.0, 2.0, false);
 
 		vec3 ring = getflare(uv, lPos, vec3(1.0, 0.0, 0.0), 0.0, 2.5, 1.0, true);
-			ring += getflare(uv, lPos, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * sqrt(0.75), 1.0, true);
-			ring += getflare(uv, lPos, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * sqrt(0.5), 1.0, true);
+			ring += getflare(uv, lPos, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * 0.866025403784, 1.0, true);
+			ring += getflare(uv, lPos, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * 0.707106781187, 1.0, true);
 		lens += ring * 4.0;
 	}
 

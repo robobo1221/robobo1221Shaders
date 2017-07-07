@@ -1,5 +1,5 @@
 #version 120
-//#extension GL_ARB_gpu_shader5 : enable
+#include "lib/util/fastMath.glsl"
 
 #include "lib/util/colorRange.glsl"
 
@@ -216,20 +216,20 @@ vec3 worldPosition2 = toWorldSpace(fragpos2).rgb;
 
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
-	emissiveMap += (emissivetColor * 20.0) * pow(sqrt(dot(color.rgb,color.rgb)), 1.0) * emissive;
+	emissiveMap += (emissivetColor * 20.0) * (fLength(color) * emissive);
 
 	return emissiveMap;
 }
 
 #ifdef DYNAMIC_HANDLIGHT
 	float getHandItemLightFactor(vec3 fragpos, vec3 normal){
-		float handItemLightFactor = length(fragpos.xyz);
+		float handItemLightFactor = fLength(fragpos.xyz);
 			handItemLightFactor = 1.0 - handItemLightFactor / 25.0;
 			handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor) * 0.5;
 		
 			handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor), true);
 			
-			handItemLightFactor *= pow(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), normalize(handItemLightFactor)), 0.0, 1.0), 2.0) * 1.6;
+			handItemLightFactor *= pow(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), handItemLightFactor), 0.0, 1.0), 2.0) * 1.6;
 			handItemLightFactor *= 1.0 - emissive; //Temp fix for emissive blocks getting lit up while you hold a lightsource.
 		
 		return handItemLightFactor * handLightMult;
@@ -368,7 +368,7 @@ vec3 getShading(vec3 color){
 				#if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
 					float shadow0 = shadowStep(shadowtex0, vec3(worldposition.rg, worldposition.b + diffthresh ));
 					float shadow1 = shadowStep(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh ));
-					float caustics = length(texture2D(shadowcolor0, worldposition.rg).rgb * 10.0);
+					float caustics = fLength(texture2D(shadowcolor0, worldposition.rg).rgb * 10.0);
 
 				rSD.x += mix(shadow0, shadow1, caustics);
 				#else
@@ -515,13 +515,13 @@ vec4 getVolumetricClouds(vec3 color){
 	farPlane += dither * increment;
 
 	vec3 fixedWorldPosition = mix(worldPosition2, worldPosition, iswater * (1.0 - isEyeInWater));
-	float worldPositionDistance = length(fixedWorldPosition);
+	float worldPositionDistance = fLength(fixedWorldPosition);
 
 	while (farPlane > nearPlane){
 
 		vec3 wpos = getVolumetricCloudPosition(farPlane);
 
-		float volumetricDistance = length(wpos - cameraPosition.xyz);
+		float volumetricDistance = fLength(wpos - cameraPosition.xyz);
 
 		if (worldPositionDistance < volumetricDistance){
 			clouds.a = 0.0;
@@ -530,7 +530,7 @@ vec4 getVolumetricClouds(vec3 color){
 			vec4 result = getVolumetricCloudsColor(wpos);
 				result.a = clamp(result.a * VOLUMETRIC_CLOUDS_DENSITY, 0.0, 1.0);
 
-			if (length(worldPosition) < volumetricDistance){
+			if (fLength(worldPosition) < volumetricDistance){
 				result.rgb = renderGaux2(result.rgb, compositeNormals);
 			}
 

@@ -1,4 +1,5 @@
 #version 120
+#include "lib/util/fastMath.glsl"
 
 #include "lib/options/options.glsl"
 

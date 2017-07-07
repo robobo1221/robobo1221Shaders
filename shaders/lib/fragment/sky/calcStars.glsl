@@ -5,18 +5,17 @@
 #ifdef STARS
 	vec3 getStars(vec3 color, vec3 fpos, float land){
 		if (land < 0.9) {
-			vec3 fposition = normalize(fpos);
-			vec3 tPos = toWorldSpace(fposition);
-			vec3 wVec = normalize(tPos);
+			vec3 uVec = normalize(fpos);
+			vec3 tPos = toWorldSpace(fpos);
 			
 			const float moonAngularDiameterCos = 0.99833194915;
 
-			float cosViewSunAngle = dot(normalize(fposition.rgb), moonVec);
+			float cosViewSunAngle = dot(uVec, moonVec);
 			float moondisk = smoothstep(moonAngularDiameterCos,moonAngularDiameterCos+0.001,cosViewSunAngle);
 
-			float cosT = max(dot(fposition.rgb,upVec),0.0);
+			float cosT = max(dot(uVec,upVec),0.0);
 
-			vec3 starCoord = wVec*(50.0 / wVec.y);
+			vec3 starCoord = tPos * (50.0 / tPos.y);
 			
 			//Curve the fragposition so that the stars and the galaxy doesnt look weird
 			starCoord *= mix(1.0, cosT, 1.0 - cosT);
@@ -30,7 +29,7 @@
 				
 			#ifdef DRAW_GALAXY
 				
-			float galaxyMask = length((starCoord.z + 50.0) * 0.01 + 0.25);
+			float galaxyMask = fLength((starCoord.z + 50.0) * 0.01 + 0.25);
 			
 			float galaxyMask0 = texture2D(noisetex, fract(starCoord * 0.0002).xz).x * 0.125;
 				  galaxyMask0 += texture2D(noisetex, fract(starCoord * 0.0004).xz).x * 0.0675;

@@ -1,4 +1,5 @@
 #version 120
+#include "lib/util/fastMath.glsl"
 
 varying vec4 texcoord;
 uniform sampler2D texture;

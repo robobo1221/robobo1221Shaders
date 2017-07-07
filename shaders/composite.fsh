@@ -1,4 +1,5 @@
 #version 120
+#include "lib/util/fastMath.glsl"
 
 /* DRAWBUFFERS:7 */	
 
@@ -94,11 +95,11 @@ vec3 getGi(){
 	float rotateMult = dither * pi * 2.0;	//Make sure the offset rotates 360 degrees.
 	mat2 rotationMatrix	= rotate(rotateMult);
 
-	vec4 shadowSpaceNormal = normalize(shadowModelView * vec4(toWorldSpace(normal), 0.0));
+	vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * normal;
 
 	vec3 shadowPosition = toShadowSpace(fragpos);
 
-	float blockDistance = sqrt(dot(fragpos, fragpos));
+	float blockDistance = fLength(fragpos);
 	float diffTresh = 0.0025 * pow(smoothstep(0.0, 255.0, blockDistance), 0.75) + 0.0001;
 
 	float giDistanceMask = clamp(1.0 - (blockDistance * 0.003125), 0.0, 1.0);
@@ -110,7 +111,7 @@ vec3 getGi(){
 	for (float i = 1.0; i < 2.0; i += giSteps){
 		
 			vec2 offset = circleDistribution * i;
-				 offset *= sqrt(dot(offset, offset)) * GI_RADIUS;
+				 offset *= fLength(offset) * GI_RADIUS;
 
 			vec2 offsetPosition = vec2(shadowPosition.rg + offset);
 			vec2 biasedPosition = biasedShadows(vec3(offsetPosition, 0.0)).xy;
@@ -121,9 +122,9 @@ vec3 getGi(){
 			vec3 samplePos = vec3(offsetPosition, shadow) - shadowPosition.xyz;
 			
 			vec3 lPos = normalize(samplePos);
-			float distFromX = sqrt(dot(samplePos, samplePos));
+			float distFromX = fLength(samplePos);
 
-			float nDotL = clamp(dot(vec3(lPos.xy, -lPos.z), shadowSpaceNormal.xyz), 0.0, 1.0);
+			float nDotL = clamp(dot(vec3(lPos.xy, -lPos.z), shadowSpaceNormal), 0.0, 1.0);
 
 			if (nDotL > 0.0) {
 

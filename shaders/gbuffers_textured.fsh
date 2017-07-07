@@ -1,5 +1,7 @@
 #version 120
 
+#include "lib/util/fastMath.glsl"
+
 varying vec4 texcoord;
 varying vec4 lmcoord;
 varying vec4 color;

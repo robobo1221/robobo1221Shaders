@@ -1,4 +1,6 @@
 #version 120
+#include "lib/util/fastMath.glsl"
+
 vec4 waterColor = vec4(1.0,1.0,1.0,0.11);
 
 #define PRALLAX_WATER //Makes waves on water look 3D

@@ -1,4 +1,5 @@
 #version 120
+#include "lib/util/fastMath.glsl"
 
 #define ENTITY_LEAVES        18.0
 #define ENTITY_VINES        106.0

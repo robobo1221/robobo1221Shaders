@@ -48,28 +48,27 @@
 			//Cloud Generation Constants.
 			const float cloudHeight = 600.0;
 
-			vec3 fposition = normalize(fpos);
-			vec3 tPos = toWorldSpace(fposition);
-			vec3 wVec = normalize(tPos);
+			vec3 uVec = normalize(fpos);
+			vec3 tPos = toWorldSpace(fpos);
 
-			float height = cloudHeight / wVec.y;
-			vec3 cloudPosition = wVec * height;
+			float height = cloudHeight / tPos.y;
+			vec3 cloudPosition = tPos * height;
 
 			vec2 coord = (cloudPosition.xz + cameraPosition.xz * 2.5) * 0.000005;
 				 coord += wind;
 
 			float totalcloud = cloudNoise(coord, wind);
 			
-			float cosT = clamp(dot(fposition.rgb,upVec),0.0,1.0);
+			float cosT = clamp(dot(uVec.rgb,upVec),0.0,1.0);
 
 			float sunUpCos = clamp(dot(sunVec, upVec) * 0.95 + 0.15, 0.0, 1.0);
 			float MoonUpCos = clamp(dot(moonVec, upVec) * 0.95 + 0.15, 0.0, 1.0);
 
 			vec3 dayTimeColor = sunlight * sunUpCos;
-				 dayTimeColor *= subSurfaceScattering(sunVec, fposition.rgb, 5.0) * 10.0 * pow(1.0 - totalcloud, 5.0) + 1.0;
+				 dayTimeColor *= subSurfaceScattering(sunVec, uVec.rgb, 5.0) * 10.0 * pow(1.0 - totalcloud, 5.0) + 1.0;
 
 			vec3 nightTimeColor = moonlight * MoonUpCos * 3.0;
-				 nightTimeColor *= subSurfaceScattering(moonVec, fposition.rgb, 5.0) * 10.0 * pow(1.0 - totalcloud, 5.0) + 1.0;
+				 nightTimeColor *= subSurfaceScattering(moonVec, uVec.rgb, 5.0) * 10.0 * pow(1.0 - totalcloud, 5.0) + 1.0;
 
 			vec3 cloudCol = dayTimeColor + nightTimeColor;
 				 cloudCol = mix(cloudCol, ambientlight, rainStrength);
