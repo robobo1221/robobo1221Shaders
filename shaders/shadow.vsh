@@ -51,13 +51,13 @@ uniform int worldTime;
 float timefract = worldTime;
 
 mat2 time = mat2(vec2(
-				((clamp(timefract, 23000.0f, 25000.0f) - 23000.0f) / 1000.0f) + (1.0f - (clamp(timefract, 0.0f, 2000.0f)/2000.0f)),
-				((clamp(timefract, 0.0f, 2000.0f)) / 2000.0f) - ((clamp(timefract, 9000.0f, 12000.0f) - 9000.0f) / 3000.0f)),
+				((clamp(timefract, 23000.0f, 25000.0f) - 23000.0f) * 0.001f) + (1.0f - (clamp(timefract, 0.0f, 2000.0f) * 0.0005)),
+				((clamp(timefract, 0.0f, 2000.0f)) * 0.0005) - ((clamp(timefract, 9000.0f, 12000.0f) - 9000.0f) * 0.000333333333333)),
 				
 				vec2(
 				
-				((clamp(timefract, 9000.0f, 12000.0f) - 9000.0f) / 3000.0f) - ((clamp(timefract, 12000.0f, 12750.0f) - 12000.0f) / 750.0f),
-				((clamp(timefract, 12000.0f, 12750.0f) - 12000.0f) / 750.0f) - ((clamp(timefract, 23000.0f, 24000.0f) - 23000.0f) / 1000.0f))
+				((clamp(timefract, 9000.0f, 12000.0f) - 9000.0f) * 0.000333333333333) - ((clamp(timefract, 12000.0f, 12750.0f) - 12000.0f) * 0.00133333333333),
+				((clamp(timefract, 12000.0f, 12750.0f) - 12000.0f) * 0.00133333333333) - ((clamp(timefract, 23000.0f, 24000.0f) - 23000.0f) * 0.001))
 );	//time[0].xy = sunrise and noon. time[1].xy = sunset and mindight.
 
 const float PI = 3.1415927;
@@ -87,10 +87,10 @@ vec3 calcMove(in vec3 pos, in float f0, in float f1, in float f2, in float f3, i
 vec4 BiasShadowProjection(vec4 position) {
 
 	vec2 pos = abs(position.xy * 1.2);
-	float dist = pow(pow(pos.x, 8.) + pow(pos.y, 8.), 1.0 / 8.0);
+	float dist = pow(pow(pos.x, 8.) + pow(pos.y, 8.), 0.125);
 
 	position.xy /= mix(1.0, dist, SHADOW_DISTORTION);
-	position.z /= 2.5;
+	position.z *= 0.4;
 
 	
 	return position;

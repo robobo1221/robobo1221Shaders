@@ -18,14 +18,6 @@ uniform mat4 gbufferModelViewInverse;
 
 uniform float frameTimeCounter;
 
-vec3 nvec3(vec4 pos) {
-    return pos.xyz/pos.w;
-}
-
-vec4 nvec4(vec3 pos) {
-    return vec4(pos.xyz, 1.0);
-}
-
 #include "lib/util/noise.glsl"
 #include "lib/displacement/normalDisplacement/waterBump.glsl"
 #include "lib/options/options.glsl"

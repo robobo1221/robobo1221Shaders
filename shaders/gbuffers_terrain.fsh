@@ -3,7 +3,7 @@
 
 #include "lib/options/options.glsl"
 
-const vec3 intervalMult = vec3(1.0, 1.0, 0.5/(POM_DEPTH / 8.0))/POM_MAP_RES * 64.0 / OCCLUSION_POINTS;
+const vec3 intervalMult = vec3(1.0, 1.0, 0.5/(POM_DEPTH * 0.125))/POM_MAP_RES * 64.0 / OCCLUSION_POINTS;
 const float MAX_OCCLUSION_DISTANCE = 22.0;
 const float MIX_OCCLUSION_DISTANCE = 18.0;
 const int   MAX_OCCLUSION_POINTS   = OCCLUSION_POINTS;
