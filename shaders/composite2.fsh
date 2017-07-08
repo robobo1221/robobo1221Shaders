@@ -311,7 +311,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 		dynamicCloudCoverage = sqrt(dynamicCloudCoverage);
 
-		float fog = 1.0 - exp(-pow(fLength(fragpos)
+		float fog = 1.0 - exp(-pow(sqrt(dot(fragpos, fragpos))
 		* mix(
 		mix(1.0 / 1000.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
 		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption,2.0));
@@ -467,7 +467,7 @@ vec3 renderGaux4(vec3 color){
 
 			float err = distance(fragpos.xyz, spos.xyz);
 			
-			if(err < pow(sqrt(dot(vector, vector))*sqrt(dot(vector, vector)),0.11),1.1) * 1.1){
+			if(err < pow(sqrt(dot(vector, vector))*pow(sqrt(dot(vector, vector)),0.11),1.1) * 1.1){
 
 				sr++;
 				
@@ -489,7 +489,7 @@ vec3 renderGaux4(vec3 color){
 
 		float border = clamp(1.0 - pow(cdist(pos.st), 10.0), 0.0, 1.0);
 
-		color.rgb = texture2D(gcolor, pos.st).rgb * MAX_COLOR_RANGE;
+		color.rgb = texture2DLod(gcolor, pos.st, 0).rgb * MAX_COLOR_RANGE;
 		color.rgb = pow(color.rgb, vec3(2.2));
 
 		land = fragdepth < comp;
