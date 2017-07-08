@@ -49,7 +49,7 @@
 			const float cloudHeight = 600.0;
 
 			vec3 uVec = normalize(fpos);
-			vec3 tPos = toWorldSpace(fpos);
+			vec3 tPos = toWorldSpaceNoMAD(fpos);
 
 			float height = cloudHeight / tPos.y;
 			vec3 cloudPosition = tPos * height;

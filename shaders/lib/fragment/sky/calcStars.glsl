@@ -6,7 +6,7 @@
 	vec3 getStars(vec3 color, vec3 fpos, float land){
 		if (land < 0.9) {
 			vec3 uVec = normalize(fpos);
-			vec3 tPos = toWorldSpace(fpos);
+			vec3 tPos = toWorldSpaceNoMAD(fpos);
 			
 			const float moonAngularDiameterCos = 0.99833194915;
 

@@ -95,7 +95,7 @@ vec3 getGi(){
 	float rotateMult = dither * pi * 2.0;	//Make sure the offset rotates 360 degrees.
 	mat2 rotationMatrix	= rotate(rotateMult);
 
-	vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * normal;
+	vec3 shadowSpaceNormal = mat3(shadowModelView) * toWorldSpaceNoMAD(normal);
 
 	vec3 shadowPosition = toShadowSpace(fragpos);
 

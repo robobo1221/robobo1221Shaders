@@ -273,11 +273,11 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 		getRefractionCoord(wpos, texPosition, refraction, refractCoord0, refractCoord1, refractCoord2, refractMask);
 
 		vec3 rA;
-			rA.x = texture2D(gcolor, (refractCoord0)).x * MAX_COLOR_RANGE;
-			rA.y = texture2D(gcolor, (refractCoord1)).y * MAX_COLOR_RANGE;
-			rA.z = texture2D(gcolor, (refractCoord2)).z * MAX_COLOR_RANGE;
+			rA.x = texture2DLod(gcolor, (refractCoord0), 0).x;
+			rA.y = texture2DLod(gcolor, (refractCoord1), 0).y;
+			rA.z = texture2DLod(gcolor, (refractCoord2), 0).z;
 
-		rA = pow(rA, vec3(2.2));
+		rA = pow(rA * MAX_COLOR_RANGE, vec3(2.2));
 
 		refraction.r = mix(color.r, rA.r, refractMask.x);
 		refraction.g = mix(color.g, rA.g, refractMask.y);
@@ -466,8 +466,10 @@ vec3 renderGaux4(vec3 color){
 			     spos = toScreenSpace(spos);
 
 			float err = distance(fragpos.xyz, spos.xyz);
+
+			float vectorLength = sqrt(dot(vector, vector));
 			
-			if(err < pow(sqrt(dot(vector, vector))*pow(sqrt(dot(vector, vector)),0.11),1.1) * 1.1){
+			if(err < pow(vectorLength * pow(vectorLength, 0.11), 1.1) * 1.1){
 
 				sr++;
 				
