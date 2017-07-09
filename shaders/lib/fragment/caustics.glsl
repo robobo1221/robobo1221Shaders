@@ -16,7 +16,7 @@
 	#else
 
 	vec3 waterCaustics(vec3 color, vec3 fpos){
-		vec3 wpos = toWorldSpace(fpos) + cameraPosition;
+		vec3 wpos = toWorldSpace(gbufferModelViewInverse, fpos) + cameraPosition;
 
 		float caustics = dot(getWaveHeight(wpos.xz - wpos.y, 1.0).xyz * 2.0 - 1.0, vec3(1.88888));
 			  caustics = caustics * 0.1 + 0.9;

@@ -206,13 +206,13 @@ float getSkyLightmap(float l){
 	return pow(l, skyLightAtten);
 }
 
-vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
+vec3 fragpos = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
 vec3 uPos = normalize(fragpos);
 
-vec3 fragpos2 = toScreenSpace(vec3(texcoord.st, pixeldepth2));
+vec3 fragpos2 = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth2));
 
-vec3 worldPosition = toWorldSpace(fragpos).rgb;
-vec3 worldPosition2 = toWorldSpace(fragpos2).rgb;
+vec3 worldPosition = toWorldSpace(gbufferModelViewInverse, fragpos).rgb;
+vec3 worldPosition2 = toWorldSpace(gbufferModelViewInverse, fragpos2).rgb;
 
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
@@ -359,7 +359,7 @@ vec3 getShading(vec3 color){
 				}
 
 				//Getting worldpositon
-				worldposition = toShadowSpace(toScreenSpace(vec3(texcoord.st, expDepth(minDist))));
+				worldposition = toShadowSpace(toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, expDepth(minDist))));
 
 				//Rescaling ShadowMaps
 				worldposition = biasedShadows(worldposition);
@@ -441,8 +441,8 @@ float getVolumetricCloudNoise(vec3 p){
 
 vec3 getVolumetricCloudPosition(float depth)
 {
-	vec3 position = toScreenSpace(vec3(texcoord.st, expDepth(depth)));
-	     position = toWorldSpace(position);
+	vec3 position = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, expDepth(depth)));
+	     position = toWorldSpace(gbufferModelViewInverse, position);
 
 	return position + cameraPosition;
 }

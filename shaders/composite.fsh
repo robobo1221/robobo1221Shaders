@@ -90,12 +90,12 @@ vec3 getGi(){
 	float weight = 0.0;
 	vec3 indirectLight = vec3(0.0);
 
-	vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
+	vec3 fragpos = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
 
 	float rotateMult = dither * pi * 2.0;	//Make sure the offset rotates 360 degrees.
 	mat2 rotationMatrix	= rotate(rotateMult);
 
-	vec3 shadowSpaceNormal = mat3(shadowModelView) * toWorldSpaceNoMAD(normal);
+	vec3 shadowSpaceNormal = mat3(shadowModelView) * toWorldSpaceNoMAD(gbufferModelViewInverse, normal);
 
 	vec3 shadowPosition = toShadowSpace(fragpos);
 

@@ -16,7 +16,7 @@ float shadowStep(sampler2D shadow, vec3 sPos) {
 
 vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor, bool isClamped){
 
-	vec3 shadowPosition = toShadowSpace(toScreenSpace(vec3(texcoord.st, shadowDepth)));
+	vec3 shadowPosition = toShadowSpace(toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, shadowDepth)));
 		 shadowPosition = biasedShadows(shadowPosition);
 
 	float NdotL = clamp(dot(normal, lightVector),0.0,1.0);

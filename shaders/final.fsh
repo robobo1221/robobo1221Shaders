@@ -1,5 +1,6 @@
 #version 120
 #include "lib/util/fastMath.glsl"
+#include "lib/util/spaceConversions.glsl"
 
 #include "lib/util/colorRange.glsl"
 
@@ -300,16 +301,6 @@ const vec2 dofOffset[49] = vec2[49] (
 	}
 #endif
 
-
-vec3 toClipSpace(vec3 p)
-{
-	vec4 clipSpace = projMAD4(gbufferProjection, p);
-		 clipSpace /= clipSpace.w;
-		 clipSpace = 0.5 * clipSpace + 0.5;
-
-	return clipSpace.rgb;
-}
-
 #ifdef LENS_FLARE
 
 vec3 getflare(vec2 uv, vec2 lPos, vec3 col, float d, float r, float h, bool ring){
@@ -338,7 +329,7 @@ vec3 getLensFlare(vec2 uv){
 	vec2 screenCorrection = vec2(1.0,aspectRatio);
 	uv /= screenCorrection;
 
-	vec3 clipSpaceSunPosition = toClipSpace(sunPosition);
+	vec3 clipSpaceSunPosition = toClipSpace(gbufferProjection, sunPosition);
 	vec2 lPos = clipSpaceSunPosition.xy / clipSpaceSunPosition.z;
 
 	float lensFlareMask = 1.0 - float(texture2D(depthtex1, lPos).x < 1.0);

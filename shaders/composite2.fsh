@@ -134,12 +134,12 @@ vec4 nvec4(vec3 pos) {
 
 #include "lib/util/spaceConversions.glsl"
 
-vec3 fragpos = toScreenSpace(vec3(texcoord.st, pixeldepth));
+vec3 fragpos = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
 vec3 uPos = normalize(fragpos.rgb);
 
-vec3 fragpos2 = toScreenSpace(vec3(texcoord.st, pixeldepth));
+vec3 fragpos2 = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
 
-vec3 worldPosition = toWorldSpace(fragpos).rgb;
+vec3 worldPosition = toWorldSpace(gbufferModelViewInverse, fragpos).rgb;
 
 float cdist(vec2 coord) {
 	return max(abs(coord.x-0.5),abs(coord.y-0.5))*2.0;
@@ -297,8 +297,8 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 		color = pow(color, vec3(2.2));
 
-		vec3 fragpos = toScreenSpace(vec3(uv, texture2D(gdepthtex, uv).x));
-		vec3 wpos = toWorldSpace(fragpos);
+		vec3 fragpos = toScreenSpace(gbufferProjectionInverse, vec3(uv, texture2D(gdepthtex, uv).x));
+		vec3 wpos = toWorldSpace(gbufferModelViewInverse, fragpos);
 		
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.9 + 0.1; //Has a lower offset making it scatter when sun is below the horizon.
 		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
@@ -458,12 +458,12 @@ vec3 renderGaux4(vec3 color){
 
 
 			for(int i=0;i<18;i++){
-			pos = nvec3(gbufferProjection * nvec4(fragpos)) * 0.5 + 0.5;
+			pos = toClipSpace(gbufferProjection, fragpos);
 
 			if(pos.x < 0 || pos.x > 1 || pos.y < 0 || pos.y > 1 || pos.z < 0 || pos.z > 1.0) break;
 
 			vec3 spos = vec3(pos.st, fragdepth);
-			     spos = toScreenSpace(spos);
+			     spos = toScreenSpace(gbufferProjectionInverse, spos);
 
 			float err = distance(fragpos.xyz, spos.xyz);
 
