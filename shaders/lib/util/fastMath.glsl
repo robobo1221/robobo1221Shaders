@@ -1,3 +1,5 @@
+#define inversesqrt(x) (1.0 / sqrt(x))
+
 #define rcpln2 1.44269504089
 
 #define fLengthSource(x) sqrt(dotX(x))

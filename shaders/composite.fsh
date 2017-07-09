@@ -40,10 +40,9 @@ float pixeldepth = texture2D(depthtex1, texcoord.st).r;
 float aux = 		texture2D(gaux1, texcoord.st).b;
 
 mat2 rotate(float rad) {
-	return mat2(
-	vec2(cos(rad), -sin(rad)),
-	vec2(sin(rad), cos(rad))
-	);
+    float c = cos(rad);
+    float s = sin(rad);
+    return mat2( c, -s, s, c );
 }
 
 /* #define g(a) abs(dot(mod(floor(a),2.),vec2(3,-2)))
@@ -110,8 +109,8 @@ vec3 getGi(){
 
 	for (float i = 1.0; i < 2.0; i += giSteps){
 		
-			vec2 offset = circleDistribution * i;
-				 offset *= fLength(offset) * GI_RADIUS;
+			vec2 offset = circleDistribution;
+				 offset *= 0.0441942 * i * i * GI_RADIUS;
 
 			vec2 offsetPosition = vec2(shadowPosition.rg + offset);
 			vec2 biasedPosition = biasedShadows(vec3(offsetPosition, 0.0)).xy;
@@ -121,8 +120,8 @@ vec3 getGi(){
 
 			vec3 samplePos = vec3(offsetPosition, shadow) - shadowPosition.xyz;
 			
-			vec3 lPos = normalize(samplePos);
-			float distFromX = fLength(samplePos);
+			float distFromX2 = dot(samplePos,samplePos);
+			vec3 lPos = samplePos * inversesqrt(distFromX2);
 
 			float nDotL = clamp(dot(vec3(lPos.xy, -lPos.z), shadowSpaceNormal), 0.0, 1.0);
 
@@ -134,7 +133,7 @@ vec3 getGi(){
 
 				float sampleWeight = clamp(dot(lPos, normalSample.rgb), 0.0, 1.0);
 
-				float distanceWeight = 1.0 / (pow(distFromX * 6200.0, 2.0) + 5000.0);
+				float distanceWeight = 0.0002 / (7688. * distFromX2 + 1.);
 					
 				float skyLightWeight = normalSample.a - aux;
 					  skyLightWeight = 1.0 / (max(0.0, skyLightWeight * skyLightWeight) * 50.0 + 1.0);

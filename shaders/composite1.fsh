@@ -113,7 +113,13 @@ mat2 time = mat2(vec2(
 				((clamp(timefract, 12000.0f, 12750.0f) - 12000.0f) / 750.0f) - ((clamp(timefract, 23000.0f, 24000.0f) - 23000.0f) / 1000.0f))
 );	//time[0].xy = sunrise and noon. time[1].xy = sunset and mindight.
 
-float transition_fading = 1.0-(clamp((timefract-12000.0)/300.0,0.0,1.0)-clamp((timefract-13000.0)/300.0,0.0,1.0) + clamp((timefract-22000.0)/200.0,0.0,1.0)-clamp((timefract-23400.0)/200.0,0.0,1.0));
+float transition_fading = 1.0-(
+    clamp(0.00333333*timefract - 40.,0.0,1.0)-
+    clamp(0.00333333*timefract - 43.3333,0.0,1.0)+
+    clamp(0.005*timefract - 110.,0.0,1.0)-
+    clamp(0.005*timefract - 117.,0.0,1.0)
+);
+
 float getEyeBrightnessSmooth = 1.0 - pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
 
 //Unpack textures.

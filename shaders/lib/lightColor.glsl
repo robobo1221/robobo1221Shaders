@@ -2,7 +2,7 @@ vec3 getSunlight(){
 
 	vec3 sunlight = vec3(1.0, 0.55, 0.22) * time[0].x;
 		 sunlight = mix(sunlight, vec3(1.0, 1.0, 1.0), sqrt(time[0].y));
-		 sunlight = mix(sunlight, vec3(1.0, 0.55, 0.22), pow(time[1].x, 2.0));
+		 sunlight = mix(sunlight, vec3(1.0, 0.55, 0.22), time[1].x * time[1].x);
 		 sunlight = mix(sunlight, vec3(1.0, 0.3, 0.01), time[1].y);
 
 	return clamp(sunlight, 0.0, 1.0);
