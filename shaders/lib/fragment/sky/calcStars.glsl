@@ -29,7 +29,7 @@
 				
 			#ifdef DRAW_GALAXY
 				
-			float galaxyMask = fLength((starCoord.z + 50.0) * 0.01 + 0.25);
+			float galaxyMask = (starCoord.z + 50.0) * 0.01 + 0.25;
 			
 			float galaxyMask0 = texture2D(noisetex, fract(starCoord * 0.0002).xz).x * 0.125;
 				  galaxyMask0 += texture2D(noisetex, fract(starCoord * 0.0004).xz).x * 0.0675;
