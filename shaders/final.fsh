@@ -116,10 +116,10 @@ vec3 burgress(vec3 x){
 	
 	x = mix(x, vec3(0.33333), 1.0 - c);
 
-	x = pow(x, vec3(2.2)) * a;
+	x *= a;
 
 	x = max(vec3(0.0),x - e) + d;
-	x = pow((x * (6.2 * x + 0.03)) / (x * (6.2 * x + 0.8)), b);
+	x = pow((x * (6.2 * x + 0.03)) / (x * (6.2 * x + 0.8)), b * 2.2);
 	return x;
 }
 
@@ -393,7 +393,7 @@ void main(){
 	color.g *= GREEN_MULT;
 	color.b *= BLUE_MULT;
 	
-	color.rgb = pow(burgress(pow(color.rgb, vec3(0.454545))), vec3(2.2));
+	color.rgb = burgress(color);
 
 	#ifdef VIGNETTE
 		color = pow(getVignette(pow(color, vec3(0.4545)), texcoord.st), vec3(2.2));

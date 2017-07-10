@@ -319,7 +319,7 @@ vec3 getShading(vec3 color){
 	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
 
 	vec3 sunlightDirect = (lightCol * sunlightAmount);
-	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.3, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
+	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.5, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.2 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 	
 	vec3 globalIllumination = vec3(0.0);
 
@@ -400,31 +400,6 @@ float getVolumetricRays(){
 #endif
 
 #ifdef VOLUMETRIC_CLOUDS
-
-vec4 mod289(vec4 x){return x - floor(x * 0.003460) * 289.0;}
-vec4 perm(vec4 x){return mod289(((x * 34.0) + 1.0) * x);}
-
-float noise3D(vec3 p){
-    vec3 a = floor(p);
-    vec3 d = p - a;
-    d = d * d * (3.0 - 2.0 * d);
-
-    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
-    vec4 k1 = perm(b.xyxy);
-    vec4 k2 = perm(k1.xyxy + b.zzww);
-
-    vec4 c = k2 + a.z;
-    vec4 k3 = perm(c);
-    vec4 k4 = perm(c + 1.0);
-
-    vec4 o1 = fract(k3 * 0.02439024390243902439024390243902);
-    vec4 o2 = fract(k4 * 0.02439024390243902439024390243902);
-
-    vec4 o3 = (o2 * d.z) + (o1 * (1.0 - d.z));
-    vec2 o4 = (o3.yw * d.x) + (o3.xz * (1.0 - d.x));
-
-    return (o4.y * d.y) + (o4.x * (1.0 - d.y));
-}
 
 float getVolumetricCloudNoise(vec3 p){
 

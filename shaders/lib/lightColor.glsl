@@ -18,9 +18,9 @@ vec3 getMoonLight(){
 
 vec3 getAmbienLight(){
 	
-	vec3 ambientColor = vec3(0.0643302716096, 0.125492581616, 0.280039153702) * 0.5 * time[0].x;
+	vec3 ambientColor = vec3(0.0643302716096, 0.125492581616, 0.280039153702) * time[0].x;
 		 ambientColor = mix(ambientColor, vec3(0.0643302716096, 0.125492581616, 0.280039153702), time[0].y);
-		 ambientColor = mix(ambientColor, vec3(0.0643302716096, 0.125492581616, 0.280039153702) * 0.5, time[1].x);
+		 ambientColor = mix(ambientColor, vec3(0.0643302716096, 0.125492581616, 0.280039153702), time[1].x);
 
 		 ambientColor *= 3.57092923179;
 
