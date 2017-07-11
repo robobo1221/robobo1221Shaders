@@ -10,7 +10,6 @@ vec3 toClipSpace(mat4 matrix, vec3 p) {
         return clipPosition.xyz * 0.5 + 0.5;
 }
 
-
 vec3 toWorldSpace(mat4 matrix, vec3 fragpos){
 	return transMAD(matrix, fragpos);
 }

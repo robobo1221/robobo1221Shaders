@@ -8,6 +8,8 @@ vec3 getSunlight(){
 	return clamp(sunlight, 0.0, 1.0);
 }
 
+vec3 sunlight = getSunlight();
+
 vec3 getMoonLight(){
 
 	vec3 moonlight = vec3(0.3, 0.55, 1.0) * 0.075;
@@ -15,6 +17,8 @@ vec3 getMoonLight(){
 
 	return clamp(moonlight, 0.0, 1.0);
 }
+
+vec3 moonlight = getMoonLight();
 
 vec3 getAmbienLight(){
 	
@@ -24,7 +28,7 @@ vec3 getAmbienLight(){
 
 		 ambientColor *= 3.57092923179;
 
-		 ambientColor = mix(ambientColor, vec3(0.3, 0.55, 1.0) * 0.1, time[1].y);
+		 ambientColor = mix(ambientColor, moonlight, time[1].y);
 
 		 ambientColor = mix(ambientColor, vec3(dot(ambientColor, vec3(0.3333))), 0.2 * time[1].y);
 		 ambientColor = mix(ambientColor, vec3(0.2) * (1.0 - time[1].y * 0.99), rainStrength + (clamp(1.0 - max(dynamicCloudCoverage * 2.4 - 1.4, 0.0), 0.0, 1.0) * (1.0 - rainStrength) * (1.0 - time[1].y * 0.25)));
@@ -32,6 +36,4 @@ vec3 getAmbienLight(){
 	return clamp(ambientColor, 0.0, 1.0);
 }
 
-vec3 sunlight = getSunlight();
-vec3 moonlight = getMoonLight();
 vec3 ambientlight = getAmbienLight();

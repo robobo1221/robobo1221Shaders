@@ -1,9 +1,9 @@
-mat4 screenToShadowMat = shadowProjection * shadowModelView * gbufferModelViewInverse;
-
 vec3 toShadowSpace(vec3 p3){
 	p3.xy *= 1.0 - 0.183 * isEyeInWater;
 
-    p3 = mat3(screenToShadowMat) * p3 + screenToShadowMat[3].xyz;
+    p3 = toWorldSpace(gbufferModelViewInverse, p3);
+	p3 = toWorldSpace(shadowModelView, p3);
+	p3 = projMAD3(shadowProjection, p3);
 
     return p3;
 }

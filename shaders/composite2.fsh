@@ -17,13 +17,6 @@
 #define WATER_REFLECTION
 #define RAIN_REFLECTION
 
-#define FOG
-	#define FOG_DENSITY_DAY		1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
-	#define FOG_DENSITY_NIGHT	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
-	#define FOG_DENSITY_STORM	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
-	#define NO_UNDERGROUND_FOG
-
-
 const bool gcolorMipmapEnabled = true;
 const bool gaux2MipmapEnabled = true;
 
@@ -206,7 +199,7 @@ float refractmask(vec2 coord){
 		vec2 refractionMult = vec2(0.0); //.x = dispersionMult and ,y = the actual refractionMult
 
 		float normalDotEye = dot(normal, uPos.rgb);
-		refractionMult.x = clamp(1.0 + normalDotEye, 0.0, 1.0);
+		refractionMult.x = clamp(normalDotEye + 1.0, 0.0, 1.0);
 		refractionMult.x *= refractionMult.x;
 
 		#ifdef WATER_REFRACT_DISPERSION
@@ -217,9 +210,10 @@ float refractmask(vec2 coord){
 
 		refraction = getWaveHeight(posxz.xz - posxz.y, iswater);
 		refraction = mix(refraction, vec3(0.0), (1.0 - (iswater + istransparent)));
+
 			vec2 depth = vec2(0.0);
-			depth.x = getDepth(pixeldepth2);
-			depth.y = getDepth(pixeldepth);
+				 depth.x = getDepth(pixeldepth2);
+				 depth.y = getDepth(pixeldepth);
 
 			refractionMult.y = clamp(depth.x - depth.y,0.0,1.0);
 			refractionMult.y /= depth.y;

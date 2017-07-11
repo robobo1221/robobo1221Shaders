@@ -32,4 +32,7 @@ float fLength(vec2 x) {
 #define transMAD(mat, v) (mat3(mat) * (v) + (mat)[3].xyz)
 
 #define diagonal4(mat) vec4((mat)[0].x, (mat)[1].y, (mat)[2].zw)
+#define diagonal3(mat) vec3((mat)[0].x, (mat)[1].y, (mat)[2].z)
+
 #define projMAD4(mat, v) (diagonal4(mat) * (v.xyzz) + (mat)[3].xyzw)
+#define projMAD3(mat, v) (diagonal3(mat) * (v.xyz) + (mat)[3].xyz)
