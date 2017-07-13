@@ -119,7 +119,7 @@ vec3 burgress(vec3 x){
 	x *= a;
 
 	x = max(vec3(0.0),x - e) + d;
-	x = pow((x * (6.2 * x + 0.03)) / (x * (6.2 * x + 0.8)), b * 2.2);
+	x = pow((x*(6.2*x+.5))/(x*(6.2*x+1.7)+0.06), b);
 	return x;
 }
 
@@ -209,7 +209,7 @@ vec3 reinhardTonemap(vec3 color)
 	vec3 getVignette(vec3 color, vec2 pos){
 		float factor = distance(pos, vec2(0.5));
 
-		factor *= factor*factor*factor * 2.0;
+		factor *= factor*factor*factor;
 		factor *= VIGNETTE_MULT;
 
 		factor = clamp(1.0 - factor, 0.0, 1.0);
@@ -398,8 +398,6 @@ void main(){
 	#ifdef VIGNETTE
 		color = pow(getVignette(pow(color, vec3(0.4545)), texcoord.st), vec3(2.2));
 	#endif
-
-	color = pow(color, vec3(0.4545));
 
 	#ifdef LENS_FLARE
 		color += getLensFlare(newTexcoord);
