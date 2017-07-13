@@ -29,12 +29,11 @@ attribute vec4 at_tangent;
 void main(){
 	mat = 1.0;
 	
-	gl_Position = gl_ModelViewMatrix * gl_Vertex;
-	
 	texcoord = gl_MultiTexCoord0;
 	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
 
-	vec4 viewpos = gbufferModelViewInverse * gl_Position;
+	vec3 viewpos = transMAD(gl_ModelViewMatrix, gl_Vertex.rgb);
+		 viewpos = transMAD(gbufferModelViewInverse, viewpos);
 
 	vec3 worldpos = viewpos.xyz + cameraPosition;
 	wpos = worldpos;
@@ -50,8 +49,8 @@ void main(){
 	}
 	#endif
 
-	viewpos = gbufferModelView * viewpos;
-	gl_Position = gl_ProjectionMatrix * viewpos;
+	viewpos = transMAD(gbufferModelView, viewpos);
+	gl_Position = projMAD4(gl_ProjectionMatrix, viewpos);
 	
 	color = gl_Color;
 	

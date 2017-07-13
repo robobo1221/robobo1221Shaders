@@ -4,7 +4,7 @@
 varying vec4 texcoord;
 varying vec4 color;
 
-varying vec2 lmcoord;
+varying vec4 lmcoord;
 
 varying float iswater;
 varying float translucentBlocks;

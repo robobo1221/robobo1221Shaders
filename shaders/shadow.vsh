@@ -24,7 +24,7 @@
 varying vec4 texcoord;
 varying vec4 color;
 
-varying vec2 lmcoord;
+varying vec4 lmcoord;
 
 varying float iswater;
 varying float translucentBlocks;
@@ -65,27 +65,9 @@ const float PI = 3.1415927;
 
 float pi2wt = PI*2*(frameTimeCounter*24);
 
-vec3 calcWave(in vec3 pos, in float fm, in float mm, in float ma, in float f0, in float f1, in float f2, in float f3, in float f4, in float f5) {
-    vec3 ret;
-    float magnitude,d0,d1,d2,d3;
-    magnitude = sin(pi2wt*fm + pos.x*0.5 + pos.z*0.5 + pos.y*0.5) * mm + ma;
-    d0 = sin(pi2wt*f0);
-    d1 = sin(pi2wt*f1);
-    d2 = sin(pi2wt*f2);
-    ret.x = sin(pi2wt*f3 + d0 + d1 - pos.x + pos.z + pos.y) * magnitude;
-    ret.z = sin(pi2wt*f4 + d1 + d2 + pos.x - pos.z + pos.y) * magnitude;
-	ret.y = sin(pi2wt*f5 + d2 + d0 + pos.z + pos.y - pos.y) * magnitude;
-    return ret;
-}
+#include "lib/displacement/vertexDisplacement.glsl"
 
-vec3 calcMove(in vec3 pos, in float f0, in float f1, in float f2, in float f3, in float f4, in float f5, in vec3 amp1, in vec3 amp2) {
-    vec3 move1 = calcWave(pos      , 0.0027, 0.0400, 0.0400, 0.0127, 0.0089, 0.0114, 0.0063, 0.0224, 0.0015) * amp1;
-	vec3 move2 = calcWave(pos+move1, 0.0348, 0.0400, 0.0400, f0, f1, f2, f3, f4, f5) * amp2;
-    return move1+move2;
-}
-
-
-vec4 BiasShadowProjection(vec4 position) {
+vec3 BiasShadowProjection(vec3 position) {
 
 	vec2 pos = abs(position.xy * 1.2);
 	float dist = pow(pow(pos.x, 8.) + pow(pos.y, 8.), 0.125);
@@ -101,22 +83,20 @@ void main(){
 	float bockID = mc_Entity.x;
 	
 	texcoord = gl_MultiTexCoord0;
-	lmcoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
 	
-	vec4 viewpos = ftransform();
+	vec3 viewpos = ftransform().rgb;
 	
-	viewpos = shadowProjectionInverse * viewpos;
-
-	viewpos = shadowModelViewInverse * viewpos;
+	viewpos = projMAD3(shadowProjectionInverse, viewpos);
+	viewpos = transMAD(shadowModelViewInverse, viewpos);
 	
-	worldpos = viewpos.xyz + cameraPosition;
+	worldpos = viewpos + cameraPosition;
+	viewpos = doVertexDisplacement(viewpos, worldpos, lmcoord);
 	
-	#include "lib/displacement/vertexDisplacement.glsl"
+	viewpos = transMAD(shadowModelView, viewpos);
+	viewpos = projMAD3(shadowProjection, viewpos);
 	
-	viewpos = shadowModelView * viewpos;
-	viewpos = shadowProjection * viewpos;
-	
-	gl_Position = BiasShadowProjection(viewpos);
+	gl_Position = vec4(BiasShadowProjection(viewpos), 1.0);
 
 	normal = normalize(gl_NormalMatrix * gl_Normal);
 	
