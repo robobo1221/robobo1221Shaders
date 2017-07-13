@@ -289,7 +289,7 @@ const vec2 dofOffset[49] = vec2[49] (
 				vec2 bcoord = vec2(0.0);
 
 				for ( int i = 0; i < 49; i++) {
-					sample = texture2D(gcolor, newTexcoord.xy + dofOffset[i]*pcoc*vec2(1.0,aspectRatio), abs(pcoc * 100.0));
+					sample = texture2DLod(gcolor, newTexcoord.xy + dofOffset[i]*pcoc*vec2(1.0,aspectRatio), abs(pcoc * 100.0));
 
 					sample.rgb *= MAX_COLOR_RANGE;
 

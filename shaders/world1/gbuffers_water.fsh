@@ -1,7 +1,7 @@
 #version 120
 vec4 waterColor = vec4(1.0,1.0,1.0,0.11);
 
-#define PRALLAX_WATER //Makes waves on water look 3D
+#define PARALLAX_WATER //Makes waves on water look 3D
 	#define PW_DEPTH 1.0 //[0.5 1.0 1.5 2.0 2.5 3.0]
 	#define PW_POINTS 4 //[2 4 6 8 16 32]
 
@@ -24,7 +24,7 @@ uniform float frameTimeCounter;
 #include "lib/noise.glsl"
 #include "lib/waterBump.glsl"
 
-#ifdef PRALLAX_WATER
+#ifdef PARALLAX_WATER
 vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 
 	float waveZ = mix(2.0,0.25,iswater);
@@ -42,7 +42,7 @@ void main(){
 	
 	vec3 posxz = wpos.xyz;
 	
-	#ifdef PRALLAX_WATER	
+	#ifdef PARALLAX_WATER	
 		posxz = getParallaxDisplacement(posxz, iswater);
 	#endif
 
