@@ -1,39 +1,45 @@
 float shadowStep(sampler2D shadow, vec3 sPos) {
-	return clamp(1.0 - max(sPos.z - texture2D(shadow, sPos.xy).x, 0.0) * float(shadowMapResolution), 0.0, 1.0);
+	return clamp(1.0 - max(sPos.z - texture2D(shadow, sPos.xy).x, 0.0) * shadowMapResolution, 0.0, 1.0);
 }
 
 vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor, bool isClamped){
 
-	const int filterItterations = 4;
+	float weight = 0.0;
+	vec3 shading = vec3(0.0);
+	vec3 shading2 = vec3(0.0);
+	vec3 colorShading = vec3(0.0);
+
+	const vec2 offsets[4] = vec2[4](
+		vec2(1.0, 0.0),
+		vec2(0.0, 1.0),
+		vec2(-1.0, 0.0),
+		vec2(0.0, -1.0)
+	);
 
 	vec3 shadowPosition = toShadowSpace(toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, shadowDepth)));
 		 shadowPosition = biasedShadows(shadowPosition);
 
+	if (max(abs(1.0-shadowPosition.x),abs(shadowPosition.y)) < 0.99 && max(abs(shadowPosition.x),abs(1.0 - shadowPosition.y)) < 0.99) {
+
 	float NdotL = clamp(dot(normal, lightVector),0.0,1.0);
 		  NdotL = mix(NdotL, 1.0, translucent);
 
-	float step = (1.0 / shadowMapResolution) * (stepSize / filterItterations);
-
-	float weight = 0.0;
+	float step = (.5 / shadowMapResolution) * stepSize;
 
 	float distortFactor = getDistordFactor(shadowPosition);
 	float diffthresh = distortFactor*distortFactor*distortFactor*distortFactor * 0.0002 * sqrt(1.0 - NdotL*NdotL)/NdotL + clamp(pow(dot(fragpos,fragpos),.125),0.0,1.0) * 0.000244140625;
 		  diffthresh = mix(advDisFactor ? diffthresh : 0.0003 , 0.0003, translucent);
 
-	vec3 shading = vec3(0.0);
-	vec3 shading2 = vec3(0.0);
-	vec3 colorShading = vec3(0.0);
+	float rotationMult = noise(texcoord.st * 1024.0) * pi * 2.0;
 
-	float rotationMult = dither * pi * 2.0;
-	mat2 rotationMat = mat2(cos(rotationMult), -sin(rotationMult),
-					   sin(rotationMult), cos(rotationMult));
-
-	if (max(abs(shadowPosition.x),abs(shadowPosition.y)) < 0.99) {
+	float c = cos(rotationMult);
+	float s = sin(rotationMult);
+	mat2 rotationMat = mat2(c, -s, s, c);
 
 	#ifdef SHADOW_FILTER
-	for (int i = 0; i < filterItterations; i++) {
+	for (int i = 0; i < 4; i++) {
 
-		vec2 offset = (rotationMat * vec2(float(i) + 1.0)) * step;
+		vec2 offset = rotationMat * offsets[i] * step;
 
 		shading += shadowStep(shadowtex1, vec3(shadowPosition.xy + offset, shadowPosition.z - diffthresh));
 
@@ -72,7 +78,7 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 		shading = mix(shading2, colorShading, max(shading - shading2, 0.0));
 	#endif
 
-	}
+	} else shading = vec3(1.0);
 
 	return isClamped ? vec3(clamp(shading,0.0, 1.0)) : shading;
 }

@@ -37,3 +37,11 @@ float noise3D(vec3 p){
 
     return (o4.y * d.y) + (o4.x * (1.0 - d.y));
 }
+
+float rand1D(float n){return fract(sin(n) * 43758.5453123);}
+
+float noise1D(float p){
+    float fl = floor(p);
+  float fc = fract(p);
+    return mix(rand1D(fl), rand1D(fl + 1.0), fc);
+}
