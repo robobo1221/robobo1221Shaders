@@ -70,7 +70,7 @@ float pi2wt = PI*2*(frameTimeCounter*24);
 vec3 BiasShadowProjection(vec3 position) {
 
 	vec2 pos = abs(position.xy * 1.2);
-	float dist = pow(pow(pos.x, 8.) + pow(pos.y, 8.), 0.125);
+	float dist = pow(pow8(pos.x) + pow8(pos.y), 0.125);
 
 	position.xy /= mix(1.0, dist, SHADOW_DISTORTION);
 	position.z *= 0.4;
