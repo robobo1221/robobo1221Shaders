@@ -120,7 +120,7 @@ float land2 = 			float(pixeldepth2 < comp);
 
 vec3 normal = 			mix(normals, compositeNormals, iswater + istransparent + hand);
 
-float getEyeBrightnessSmooth = 1.0 - pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
+float getEyeBrightnessSmooth = 1.0 - pow3(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0));
 
 vec3 nvec3(vec4 pos) {
     return pos.xyz/pos.w;
@@ -300,7 +300,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		vec3 wpos = toWorldSpace(gbufferModelViewInverse, fragpos);
 		
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.9 + 0.1; //Has a lower offset making it scatter when sun is below the horizon.
-		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
+		float cosMoonUpAngle = clamp(pow35(1.0-cosSunUpAngle),0.0,1.0);
 		
 		#ifdef NO_UNDERGROUND_FOG
 			float fogAdaption =  clamp(1.0 - getEyeBrightnessSmooth, 0.0,1.0);
@@ -310,16 +310,16 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 		dynamicCloudCoverage = sqrt(dynamicCloudCoverage);
 
-		float fog = 1.0 - exp(-pow(sqrt(dot(fragpos, fragpos))
+		float fog = 1.0 - exp(-pow2(sqrt(dot(fragpos, fragpos))
 		* mix(
 		mix(1.0 / 1000.0 * FOG_DENSITY_DAY, 1.0 / 190.0 * FOG_DENSITY_NIGHT,1.0 * cosMoonUpAngle),
-		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption,2.0));
+		1.0 / 200.0 * FOG_DENSITY_STORM, rainStrength + (1.0 - dynamicCloudCoverage)) * fogAdaption));
 		
 		fog = clamp(fog, 0.0, 1.0);
 
 		vec3 lightCol = mix(sunlight, moonlight, time[1].y * transition_fading);
 
-		float sunMoonScatter = pow(clamp(dot(uPos, lightVector),0.0,1.0),2.0) * transition_fading;
+		float sunMoonScatter = pow2(clamp(dot(uPos, lightVector),0.0,1.0)) * transition_fading;
 
 		fogColor *= mix(1.0, 0.5, (1.0 - min(time[1].y + rainStrength + time[0].y, 1.0)));
 		fogColor = fogColor * mix(mix(0.5, 1.0, rainStrength), 1.0, cosMoonUpAngle);
@@ -328,16 +328,16 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		
 		fogColor = fogColor * mix((1.0 - (1.0 - transition_fading) * (1.0 - rainStrength) * 0.97), 1.0, time[1].y);
 		fogColor = pow(fogColor, vec3(2.2));
-		fogColor = mix(mix(fogColor * 0.25, fogColor, rainStrength), fogColor, pow(cosMoonUpAngle, 5.0) * time[1].y);
+		fogColor = mix(mix(fogColor * 0.25, fogColor, rainStrength), fogColor, pow5(cosMoonUpAngle) * time[1].y);
 		
 		float rawHeight = wpos.y + cameraPosition.y;
 
-		float getHeight = clamp(pow(1.0 - (rawHeight - 90.0) * 0.01, 4.4),0.0,1.0) * 3.0 + 0.05;
+		float getHeight = clamp(pow4(1.0 - (rawHeight - 90.0) * 0.01),0.0,1.0) * 3.0 + 0.05;
 
 		color = mix(color, fogColor, clamp(fog * land * rainStrength * (1.0 - isEyeInWater), 0.0, 1.0));
 		color = mix(color, fogColor, clamp(fog * land * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * (1.0 - time[1].y), 0.0, 1.0));
 
-		getHeight = clamp(pow(1.0 - ((rawHeight - 70.0) * 0.01), 4.4),0.0,1.0) + 0.05;
+		getHeight = clamp(pow4(1.0 - ((rawHeight - 70.0) * 0.01)),0.0,1.0) + 0.05;
 
 		color = mix(color, fogColor * 0.25, clamp(fog * land * (1.0 - rainStrength) * getHeight * (1.0 - isEyeInWater) * time[1].y * 0.9, 0.0, 1.0));
 
@@ -365,7 +365,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 
 				float depth2 = ld(texture2D(gdepthtex, pos.st + offset * 8.0).x);
 
-				float weight = pow(1.0 - abs(depth - depth2) * 10.0, 32.0);
+				float weight = pow32(1.0 - abs(depth - depth2) * 10.0);
 					weight = max(0.1e-8, weight);
 
 				volumetricLightSample += texture2DLod(gcolor, pos.xy + offset * 2.0, 1.5).a * weight;
@@ -384,7 +384,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 			  mieFactor /= 1.0 + mieFactor; 
 
 		float cosSunUpAngle = dot(sunVec, upVec) * 0.85 + 0.15; //Has a lower offset making it scatter when sun is below the horizon.
-		float cosMoonUpAngle = clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0);
+		float cosMoonUpAngle = clamp(pow35(1.0-cosSunUpAngle),0.0,1.0);
 
 		float vlMult = 1.0;
 			vlMult = vlMult + getEyeBrightnessSmooth * 4.0;
@@ -488,7 +488,7 @@ vec3 renderGaux4(vec3 color){
 			fragpos = start + tvector;
 		}
 
-		float border = clamp(1.0 - pow(cdist(pos.st), 10.0), 0.0, 1.0);
+		float border = clamp(1.0 - pow10(cdist(pos.st)), 0.0, 1.0);
 
 		color.rgb = texture2DLod(gcolor, pos.st, 0).rgb * MAX_COLOR_RANGE;
 		color.rgb = pow(color.rgb, vec3(2.2));
@@ -554,7 +554,7 @@ vec3 renderGaux4(vec3 color){
 
 		vec3 halfVector = normalize(reflectedVector + normalize(-fragpos.rgb));
 		float LdotH	= clamp(dot(reflectedVector, halfVector),0.0,1.0);
-		float fresnel = F0 + (1.0 - F0) * pow(1.0 - LdotH, 5.0);
+		float fresnel = F0 + (1.0 - F0) * pow5(1.0 - LdotH);
 
 		vec3 sunMult = vec3(0.0);
 		vec3 moonMult = vec3(0.0);
@@ -578,11 +578,11 @@ vec3 renderGaux4(vec3 color){
 		#endif
 		
 		#if defined RAIN_REFLECTION && defined RAIN_PUDDLES
-			color.rgb *= mix(1.0,clamp(max(1.0 - puddles * 2.0,0.0) + 0.4,0.0,1.0), iswet * pow(fresnel, 0.3) * (1.0 - specular.r) * wetness * (1.0 - hand));
+			color.rgb *= mix(1.0,clamp(max(1.0 - puddles * 2.0,0.0) + 0.4,0.0,1.0), iswet * sqrt(sqrt(fresnel)) * (1.0 - specular.r) * wetness * (1.0 - hand));
 		#endif
 
 		#ifdef RAIN_REFLECTION
-			color = mix(color, reflection.rgb, (1.0 - reflectionMask) * (wetness * 0.75) * (iswet * min(pow(puddles, 3.0),1.0)) * fresnel);
+			color = mix(color, reflection.rgb, (1.0 - reflectionMask) * (wetness * 0.75) * (iswet * min(pow3(puddles),1.0)) * fresnel);
 		#endif
 
 		return color;

@@ -37,7 +37,7 @@
 		float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
 		
 		float underCover = lmcoord.t;
-			underCover = clamp(pow(underCover, 15.0) * 2.0,0.0,1.0);
+			underCover = clamp(pow15(underCover) * 2.0,0.0,1.0);
 		
 		float wavyMult = 1.0 - time[1].y * 0.5;
 			wavyMult *= 1.0 + rainStrength;

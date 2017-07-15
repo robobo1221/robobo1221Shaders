@@ -26,8 +26,8 @@ float getWaterBump(vec2 posxz, float waveM, float waveZ, float iswater){
 	
 	wave += 1.0 - noise(coord0) * 10.0;
 	wave += 1.0 - noise(coord1) * 10.0;
-	wave += pow(noise(coord2 * 4.0) * 6.5, 0.5) * 1.7;
-	wave += pow(noise(coord2 * 8.0) * 6.5, 0.5) * 0.7;
+	wave += sqrt(noise(coord2 * 4.0) * 6.5) * 1.7;
+	wave += sqrt(noise(coord2 * 8.0) * 6.5) * 0.7;
 	
 	wave *= mix(0.3,1.0,iswater);
 	wave *= 0.0157;
@@ -54,7 +54,7 @@ vec3 getWaveHeight(vec2 posxz, float iswater){
 	float xDelta = ((h1-h0)+(h0-h2)) * 4.0;
 	float yDelta = ((h3-h0)+(h0-h4)) * 4.0;
 
-	vec3 wave = normalize(vec3(xDelta,yDelta,1.0-pow(abs(xDelta+yDelta),2.0)));
+	vec3 wave = normalize(vec3(xDelta,yDelta,1.0-pow2(abs(xDelta+yDelta))));
 
 	return wave;
 }

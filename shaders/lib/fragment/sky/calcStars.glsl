@@ -29,7 +29,7 @@
 				
 			#ifdef DRAW_GALAXY
 				
-			float galaxyMask = (starCoord.z + 50.0) * 0.01 + 0.25;
+			float galaxyMask = 0.01 * starCoord.z + 0.75;
 			
 			float galaxyMask0 = texture2D(noisetex, fract(starCoord * 0.0002).xz).x * 0.125;
 				  galaxyMask0 += texture2D(noisetex, fract(starCoord * 0.0004).xz).x * 0.0675;
@@ -41,9 +41,8 @@
 			galaxyMask *= 0.45;
 			galaxyMask *= galaxyMask * 0.8;
 		
-			vec3 galaxy = galaxyMask * mix(vec3(1.0, 1.0, 2.0), vec3(100.0, 75.0, 50.0), pow(galaxyMask0 * 0.75 + 0.25, 3.0));
-				 galaxy = mix(galaxy, vec3(50.0), pow(vec3(dot(galaxy * 0.14, vec3(0.33333))), vec3(7.0))) * 2.0;
-				 galaxy += 1.0;
+			vec3 galaxy = galaxyMask * mix(vec3(1.0, 1.0, 2.0), vec3(100.0, 75.0, 50.0), pow3(galaxyMask0 * 0.75 + 0.25));
+				 galaxy = mix(galaxy, vec3(50.0), pow7(vec3(dot(galaxy * 0.14, vec3(0.33333))))) * 2.0 + 1.0;
 				 galaxy *= time[1].y;
 
 				return mix(color, mix(vec3(1.0), galaxy, transition_fading),(star * (2.0 * galaxy) + (galaxy * 0.001) * transition_fading) * cosT * time[1].y * (1.0 - rainStrength) * (1.0 - moondisk));

@@ -116,29 +116,29 @@ vec3 getGi(){
 			vec2 biasedPosition = biasedShadows(vec3(offsetPosition, 0.0)).xy;
 
 			float shadow = texture2D(shadowtex1, biasedPosition).x + diffTresh;
-			      shadow = 5.0 * (shadow - 0.5);
+			      shadow = 5.0 * shadow - 2.5;
 
-			vec3 samplePos = vec3(offsetPosition, shadow) - shadowPosition.xyz;
+			vec3 sampleVector = vec3(offsetPosition, shadow) - shadowPosition.xyz;
 			
-			float distFromX2 = dot(samplePos,samplePos);
-			vec3 lPos = samplePos * inversesqrt(distFromX2);
+			float distFromX2 = dot(sampleVector,sampleVector);
+			vec3 lPos = sampleVector * inversesqrt(distFromX2);
 
-			float nDotL = clamp(dot(vec3(lPos.xy, -lPos.z), shadowSpaceNormal), 0.0, 1.0);
+			float diffuse = clamp(dot(vec3(lPos.xy, -lPos.z), shadowSpaceNormal), 0.0, 1.0);
 
-			if (nDotL > 0.0) {
+			if (diffuse > 0.0) {
 
 				vec4 normalSample = texture2D(shadowcolor1, biasedPosition);
 					 normalSample.rgb = normalSample.rgb * 2.0 - 1.0;
 					 normalSample.xy = -normalSample.xy;
 
-				float sampleWeight = clamp(dot(lPos, normalSample.rgb), 0.0, 1.0);
+				float sDir = clamp(dot(lPos, normalSample.rgb), 0.0, 1.0);
 
-				float distanceWeight = 0.0002 / (7688. * distFromX2 + 1.);
+				float giFalloff = 0.0000000260146 / (distFromX2 + 0.000130073);
 					
-				float skyLightWeight = normalSample.a - aux;
-					  skyLightWeight = 1.0 / (max(0.0, skyLightWeight * skyLightWeight) * 50.0 + 1.0);
+				float skyLM = normalSample.a - aux;
+					  skyLM = 0.02 / (max(0.0, skyLM * skyLM) + 0.02);
 
-				indirectLight += pow(texture2D(shadowcolor, biasedPosition).rgb, vec3(2.2)) * (sampleWeight * nDotL) * (distanceWeight * skyLightWeight);
+				indirectLight += pow(texture2D(shadowcolor, biasedPosition).rgb, vec3(2.2)) * (sDir * diffuse) * (giFalloff * skyLM);
 			}
 
 			weight++;

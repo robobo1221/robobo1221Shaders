@@ -102,19 +102,19 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	vec3 scattering = sunE * (lightFromXtoEye / totalLightAtX);
 
 	vec3 sky = scattering * (1.0 - absorption);
-		 sky *= mix(vec3(1.0),sqrt(scattering * absorption),clamp(pow(1.0-cosSunUpAngle,5.0),0.0,1.0));
+		 sky *= mix(vec3(1.0),sqrt(scattering * absorption),clamp(pow5(1.0-cosSunUpAngle),0.0,1.0));
 
 	vec3 sun = calcSun(uPos, sunVec);
 	vec3 moon = pow(moonlight, vec3(0.4545)) * calcMoon(uPos, moonVec);
 
-	sunMax = sunE * pow(mix(Fex2, absorption, clamp(pow(1.0-cosUpViewAngle,4.0),0.0,1.0)), vec3(0.4545))
-	* mix(0.000005, 0.00003, clamp(pow(1.0-cosSunUpAngle,3.0),0.0,1.0));
+	sunMax = sunE * pow(mix(Fex2, absorption, clamp(pow4(1.0-cosUpViewAngle),0.0,1.0)), vec3(0.4545))
+	* (0.000025 * clamp(pow(1.0-cosSunUpAngle,3.0),0.0,1.0) + 5.0e-6);
 
-	moonMax += pow(clamp(cosUpViewAngle,0.0,1.0), 0.8);
+	moonMax += clamp(cosUpViewAngle,0.0,1.0);
 
 	sky = max(ToneMap(sky), 0.0) + (sun * sunMax + moon * moonMax) * sunMoonMult * (1.0 - rainStrength);
 
-	float nightLightScattering = pow(max(1.0 - max(cosUpViewAngle, 0.0 ),0.0), 2.0);
+	float nightLightScattering = pow2(max(1.0 - max(cosUpViewAngle, 0.0 ),0.0));
 
 	sky += pow(fogColor * 0.5, vec3(0.4545)) * ((nightLightScattering + 0.5 * (1.0 - nightLightScattering)) * clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0));
 	sky = mix(sky, pow(fogColor, vec3(0.4545)), rainStrength);

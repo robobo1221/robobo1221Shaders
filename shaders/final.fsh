@@ -65,15 +65,15 @@ uniform int worldTime;
 
 const float pi = 3.141592653589793238462643383279502884197169;
 
-float dynamicExposure = mix(1.0,0.0,(pow(eyeBrightnessSmooth.y / 240.0f, 3.0f)));
+float dynamicExposure = mix(1.0,0.0,(pow3(eyeBrightnessSmooth.y * 0.00416666666667)));
 
 float getRainDrops(){
 
-	float noiseTexture = texture2D(noisetex, vec2(texcoord.s, texcoord.t / 5.5) * 0.015 + vec2(0.0,frameTimeCounter) * 0.0005).x;
-	noiseTexture += texture2D(noisetex, vec2(texcoord.s, texcoord.t / 5.5) * 0.03 + vec2(0.0,frameTimeCounter) * 0.002).x * 0.5;
+	float noiseTexture = texture2D(noisetex, vec2(texcoord.s, texcoord.t * 0.181818) * 0.015 + vec2(0.0,frameTimeCounter) * 0.0005).x;
+	noiseTexture += texture2D(noisetex, vec2(texcoord.s, texcoord.t * 0.181818) * 0.03 + vec2(0.0,frameTimeCounter) * 0.002).x * 0.5;
 
 	noiseTexture = min(max(noiseTexture - 1.1,0.0) * 10.0, 1.0);
-	noiseTexture *= clamp((eyeBrightnessSmooth.y-220)/15.0,0.0,1.0);
+	noiseTexture *= clamp(0.04 * eyeBrightnessSmooth.y - 8.8,0.0,1.0);
 
 	return noiseTexture;
 }
@@ -186,7 +186,7 @@ vec3 reinhardTonemap(vec3 color)
 		vec3 blur = vec3(0.0);
 		
 		#ifdef DIRTY_LENS
-		float dirt = (1.0 + generateDirtyLens(bCoord) * 3.0 * DIRTY_LENS_MULT);
+		float dirt = 3.0 * (generateDirtyLens(bCoord) * DIRTY_LENS_MULT) + 1.0;
 		#else
 		const float dirt = 1.0;
 		#endif

@@ -22,7 +22,7 @@ vec3 getTerrainHeight(vec2 posxz){
 		float xDelta = (h0 - h1) * 10.0;
 		float yDelta = (h0 - h2) * 10.0;
 
-		vec3 wave = normalize(vec3(xDelta,yDelta,1.0-pow(abs(xDelta+yDelta),2.0)));
+		vec3 wave = normalize(vec3(xDelta,yDelta,1.0-pow2(abs(xDelta+yDelta))));
 
 		return wave;
 }

@@ -120,7 +120,7 @@ float transition_fading = 1.0-(
     clamp(0.005*timefract - 117.,0.0,1.0)
 );
 
-float getEyeBrightnessSmooth = 1.0 - pow(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0), 3.0f);
+float getEyeBrightnessSmooth = 1.0 - pow3(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0));
 
 //Unpack textures.
 vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
@@ -175,10 +175,10 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 		vec2 coord = offset[i] * offsetMult + position;
 
 		vec3 offsetNormal = texture2D(gnormal, coord, lod).rgb * 2.0 - 1.0;
-		float normalWeight = pow(abs(dot(offsetNormal, normal)), 32.0);
+		float normalWeight = pow32(abs(dot(offsetNormal, normal)));
 
 		float offsetDepth = ld(texture2D(depthtex1, coord).r);
-		float depthWeight = 1.0 / (1e-8 + abs(linearDepth - offsetDepth));
+		float depthWeight = 1.0 / (abs(linearDepth - offsetDepth) + 1e-8);
 
 		float weight = normalWeight * depthWeight;
 
@@ -235,7 +235,7 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 		
 			handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor), true);
 			
-			handItemLightFactor *= pow(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), handItemLightFactor), 0.0, 1.0), 2.0) * 1.6;
+			handItemLightFactor *= pow2(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), handItemLightFactor), 0.0, 1.0)) * 1.6;
 			handItemLightFactor *= 1.0 - emissive; //Temp fix for emissive blocks getting lit up while you hold a lightsource.
 		
 		return handItemLightFactor * handLightMult;
@@ -283,7 +283,7 @@ float OrenNayar(vec3 v, vec3 l, vec3 n, float r) {
 #include "lib/fragment/waterFog.glsl"
 
 float getSubSurfaceScattering(){
-	float cosV = pow(clamp(dot(uPos.xyz, lightVector), 0.0, 1.0), 10.0) * 4.0;
+	float cosV = pow10(clamp(dot(uPos.xyz, lightVector), 0.0, 1.0)) * 4.0;
 		  cosV /= cosV * 0.01 + 1.0;
 
 	return clamp(cosV, 0.0, 90.0);
@@ -415,7 +415,7 @@ float getVolumetricCloudNoise(vec3 p){
 		  noise += abs(noise3D(p * 12.25) * 2.0 - 1.0) * 0.08163265306122448979591836734694;
 
 		  noise = noise * (1.0 - rainStrength * 0.5);
-		  noise = pow(max(1.0 - noise * 1.5 * dynamicCloudCoverageMult,0.),2.0) * 0.0303030;
+		  noise = pow2(max(1.0 - noise * 1.5 * dynamicCloudCoverageMult,0.)) * 0.0303030;
 
 	return clamp(noise * 10.0, 0.0, 1.0);
 }
@@ -458,19 +458,19 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		float MoonUpCos = clamp(dot(moonVec, upVec) * 0.9 + 0.1, 0.0, 1.0);
 
 		float cloudAlpha = getVolumetricCloudNoise(wpos);
-		float cloudTreshHold = pow(1.0f - clamp(distance(wpos.y, height) / (distRatio / 2.0f), 0.0f, 1.0f), 12.0);
+		float cloudTreshHold = pow12(1.0f - clamp(distance(wpos.y, height) / (distRatio / 2.0f), 0.0f, 1.0f));
 
 		cloudAlpha *= cloudTreshHold;
 
 		float absorption = clamp((-(minHeight - wpos.y) / distRatio), 0.0f, 1.0f);
 
-		float sunLightAbsorption = pow(absorption, 3.25) * dynamicCloudCoverage;
+		float sunLightAbsorption = pow3(absorption) * dynamicCloudCoverage;
 
-		vec3 dayTimeColor = sunlight * 16.0 * sunUpCos;
-			 dayTimeColor += sunlight*sunlight * sunViewCos * 64.0 * sqrt(sunLightAbsorption) * sunUpCos;
+		vec3 dayTimeColor = (sunlight * 16.0) * sunUpCos;
+			 dayTimeColor += sunlight * (sunlight * sunViewCos) * (64.0 * sqrt(sunLightAbsorption) * sunUpCos);
 
-		vec3 nightTimeColor = moonlight * 16.0 * MoonUpCos;
-			 nightTimeColor += moonlight * moonViewCos * 8.0 * sqrt(sunLightAbsorption) * MoonUpCos;
+		vec3 nightTimeColor = (moonlight * 16.0) * MoonUpCos;
+			 nightTimeColor += (moonlight * moonViewCos) * (8.0 * sqrt(sunLightAbsorption) * MoonUpCos);
 
 		vec3 rainColor = ambientlight;
 			 rainColor += (ambientlight * 64.0) * (sunLightAbsorption * (sqrt(sunUpCos) * 0.9 + 0.1));
@@ -478,7 +478,7 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		vec3 totalCloudColor = (dayTimeColor + nightTimeColor) * sunLightAbsorption;
 			 totalCloudColor = mix(totalCloudColor, rainColor, rainStrength);
 
-		vec3 cloudColor = mix(totalCloudColor, ambientlight * (0.25 + rainStrength) * dynamicCloudCoverage, pow(1.0 - absorption / 2.8, 4.0f)) * 0.5;
+		vec3 cloudColor = mix(totalCloudColor, ambientlight * (0.25 + rainStrength) * dynamicCloudCoverage, pow4(1.0 - absorption / 2.8)) * 0.5;
 
 		return vec4(cloudColor, cloudAlpha);
 	}

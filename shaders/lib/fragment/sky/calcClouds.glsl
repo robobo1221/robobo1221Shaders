@@ -34,7 +34,7 @@
 		coord.x *= 2.0;
 		noise += (texture2D(noisetex, coord * 4.0).x) * 0.05;
 
-		float cl = max(pow(noise, 4.0), 0.0) * 5.0;
+		float cl = max(pow4(noise), 0.0) * 5.0;
 		cl *= (1.0 - rainStrength * 0.5);
 
 		return cl;
@@ -65,10 +65,10 @@
 			float MoonUpCos = clamp(dot(moonVec, upVec) * 0.95 + 0.15, 0.0, 1.0);
 
 			vec3 dayTimeColor = sunlight * sunUpCos;
-				 dayTimeColor *= subSurfaceScattering(sunVec, uVec.rgb, 5.0) * 10.0 * pow(1.0 - totalcloud, 5.0) + 1.0;
+				 dayTimeColor *= subSurfaceScattering(sunVec, uVec.rgb, 5.0) * 10.0 * pow5(1.0 - totalcloud) + 1.0;
 
 			vec3 nightTimeColor = moonlight * MoonUpCos * 3.0;
-				 nightTimeColor *= subSurfaceScattering(moonVec, uVec.rgb, 5.0) * 10.0 * pow(1.0 - totalcloud, 5.0) + 1.0;
+				 nightTimeColor *= subSurfaceScattering(moonVec, uVec.rgb, 5.0) * 10.0 * pow5(1.0 - totalcloud) + 1.0;
 
 			vec3 cloudCol = dayTimeColor + nightTimeColor;
 				 cloudCol = mix(cloudCol, ambientlight, rainStrength);

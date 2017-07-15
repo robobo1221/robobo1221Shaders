@@ -8,7 +8,7 @@
 		const float wrap = 0.1;
 		const float scatterWidth = 0.5;
 		
-		float NdotLWrap = (NdotL + wrap) / (1.0 + wrap);
+		float NdotLWrap = (NdotL + wrap) / (wrap + 1.0);
 		return smoothstep(0.0, scatterWidth, NdotLWrap) * smoothstep(scatterWidth * 2.0, scatterWidth, NdotLWrap);
 	}
 
