@@ -133,7 +133,7 @@ vec4 nvec4(vec3 pos) {
 #include "lib/util/spaceConversions.glsl"
 
 vec3 fragpos = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
-vec3 uPos = normalize(fragpos.rgb);
+vec3 uPos = fNormalize(fragpos.rgb);
 
 vec3 fragpos2 = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
 
@@ -552,7 +552,7 @@ vec3 renderGaux4(vec3 color){
 
 		const float F0 = 0.02; //Default minimum frensel for water.
 
-		vec3 halfVector = normalize(reflectedVector + normalize(-fragpos.rgb));
+		vec3 halfVector = fNormalize(reflectedVector + fNormalize(-fragpos.rgb));
 		float LdotH	= clamp(dot(reflectedVector, halfVector),0.0,1.0);
 		float fresnel = F0 + (1.0 - F0) * pow5(1.0 - LdotH);
 

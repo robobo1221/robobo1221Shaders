@@ -29,6 +29,18 @@ float fLength(vec2 x) {
     return fLengthSource(x);
 }
 
+vec2 fNormalize(vec2 x) {
+    return x * inversesqrt(dotX(x));
+}
+
+vec3 fNormalize(vec3 x) {
+    return x * inversesqrt(dotX(x));
+}
+
+vec4 fNormalize(vec4 x) {
+    return x * inversesqrt(dotX(x));
+}
+
 float pow2(float x){return x*x;}
 float pow3(float x){return pow2(x)*x;}
 float pow4(float x){return pow2(pow2(x));}

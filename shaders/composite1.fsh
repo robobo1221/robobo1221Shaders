@@ -213,7 +213,7 @@ float getSkyLightmap(float l){
 }
 
 vec3 fragpos = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
-vec3 uPos = normalize(fragpos);
+vec3 uPos = fNormalize(fragpos);
 
 vec3 fragpos2 = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth2));
 

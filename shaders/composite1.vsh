@@ -22,9 +22,9 @@ float timefract = worldTime;
 void main()
 {
 
-	sunVec = normalize(sunPosition);
-	moonVec = normalize(-sunPosition);
-	upVec = normalize(upPosition);
+	sunVec = sunPosition * 0.01;
+	moonVec = -sunPosition * 0.01;
+	upVec = upPosition * 0.01;
 	
 	if (worldTime < 12700 || worldTime > 23250) {
 		lightVector = sunVec;

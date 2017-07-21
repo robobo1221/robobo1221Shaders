@@ -145,7 +145,7 @@ vec3 reinhardTonemap(vec3 color)
 		for (float i = 0; i < points; i++){
 			refPos = rotationMatrix * refPos;
 
-			result = max(result, dot(p - cp, normalize(refPos)));
+			result = max(result, dot(p - cp, fNormalize(refPos)));
 		}
 
 		result = 1.0 - result;
@@ -323,7 +323,7 @@ vec3 getLensFlare(vec2 uv){
 
 	float nightTime = 1.0 - float(worldTime < 12700 || worldTime > 23250);
 
-	vec3 lVecVP = mix(normalize(sunPosition), normalize(-sunPosition), nightTime);
+	vec3 lVecVP = mix(fNormalize(sunPosition), fNormalize(-sunPosition), nightTime);
 	float positionTreshHold = 1.0 - clamp(lVecVP.z/abs(lVecVP.z),0.0,1.0);
 
 	vec2 screenCorrection = vec2(1.0,aspectRatio);
@@ -377,6 +377,24 @@ vec3 getLensFlare(vec2 uv){
 
 #endif
 
+vec3 roboboTonemap(vec3 x){
+	vec3 a = vec3(BRIGHTNESS);
+	vec3 b = vec3(GAMMA);
+	vec3 c = vec3(CONTRAST);
+	vec3 d = vec3(LIFT);
+	vec3 e = vec3(INVERSE_LIFT);
+
+	x = pow(x, vec3(0.45454545));
+	x = mix(x, vec3(0.33333), 1.0 - c);
+	x *= a;
+	x = max(vec3(0.0),x*e-e+x) + d;
+
+	x = sqrt((x * inversesqrt(x*x + 1.0)) * (x / (x + 0.2)));
+	x = x*x*(3.0 - 2.0 * x);
+
+	return pow(x, b);
+}
+
 void main(){
 
 	vec3 color = pow(texture2D(gcolor, newTexcoord.st).rgb * MAX_COLOR_RANGE, vec3(2.2));
@@ -393,7 +411,7 @@ void main(){
 	color.g *= GREEN_MULT;
 	color.b *= BLUE_MULT;
 	
-	color.rgb = burgress(color);
+	color.rgb = roboboTonemap(color);
 
 	#ifdef VIGNETTE
 		color = pow(getVignette(pow(color, vec3(0.4545)), texcoord.st), vec3(2.2));
