@@ -116,7 +116,7 @@ void main(){
 
 	gl_FragData[0] = albedo;
 	gl_FragData[1] = normalTangentSpace;
-	gl_FragData[2] = vec4(lightmaps.x, mat, lightmaps.y, 0.0);
+	gl_FragData[2] = vec4(lightmaps.x, mat, lightmaps.y, 1.0);
 	#ifdef SPECULAR_MAPPING
 		gl_FragData[3] = vec4(specularity, 1.0);
 	#endif
