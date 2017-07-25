@@ -316,10 +316,10 @@ vec3 getShading(vec3 color){
 
 	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));
 
-	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
+	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0) * sunlightAmount;
+	vec3 sunlightDirect = lightCol * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent));
 
-	vec3 sunlightDirect = (lightCol * sunlightAmount);
-	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.15, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.25 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
+	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.15, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.14 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 	
 	vec3 globalIllumination = vec3(0.0);
 
@@ -328,10 +328,10 @@ vec3 getShading(vec3 color){
 	#endif
 	
 	#ifdef GLOBAL_ILLUMINATION
-		globalIllumination = getGlobalIllumination(texcoord.st) * (GI_MULT * 2.0) * (lightCol * transition_fading) * (1.0 - rainStrength);
+		globalIllumination = getGlobalIllumination(texcoord.st) * (lightCol * transition_fading) * (1.0 - rainStrength);
 	#endif
 
-	return (((sunlightDirect * (shadows * diffuse) * (1.0 + (getSubSurfaceScattering() * translucent))) + indirectLight) + globalIllumination + emissiveLightmap) * color;
+	return ((sunlightDirect + indirectLight) + globalIllumination + emissiveLightmap) * color;
 }
 
 #ifdef VOLUMETRIC_LIGHT

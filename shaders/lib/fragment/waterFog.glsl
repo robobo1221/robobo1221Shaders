@@ -25,7 +25,7 @@
 		float NdotL = dot(compositeNormals, lightVector);
 		float SSS = pow(getWaterScattering(NdotL), 2.0);
 
-		vec3 fogColor = (ambientlight * lightCol) * 0.0333;
+		vec3 fogColor = ambientlight * 0.0333;
 			 if (isEyeInWater < 0.9){
 				fogColor = (fogColor * (pow(aux2.b, skyLightAtten) + 0.25)) * 0.75;
 				fogColor = mix(fogColor, (fogColor * lightCol) * 3.75, SSS * (1.0 - rainStrength) * shadowsForward);

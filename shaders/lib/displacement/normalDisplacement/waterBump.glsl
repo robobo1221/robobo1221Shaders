@@ -4,11 +4,9 @@ float getWaterBump(vec2 posxz, float waveM, float waveZ, float iswater){
 
 	mat2 rotationMatrix = mat2(vec2(cos(radiance), -sin(radiance)),
 						vec2(sin(radiance), cos(radiance)));
-						
-	radiance = -0.5;
 
-	mat2 rotationMatrix2 = mat2(vec2(cos(radiance), -sin(radiance)),
-						vec2(sin(radiance), cos(radiance)));
+	mat2 rotationMatrix2 = mat2(vec2(cos(-radiance), -sin(-radiance)),
+						vec2(sin(-radiance), cos(-radiance)));
 	
 	float wave = 0.0;
 	vec2 movement = abs(vec2(0.0, -frameTimeCounter * 0.0003));
@@ -18,7 +16,7 @@ float getWaterBump(vec2 posxz, float waveM, float waveZ, float iswater){
 	
 	vec2 coord0 = (wavePosition * rotationMatrix) + waveMovement;
 	vec2 coord1 = (wavePosition * rotationMatrix2) + waveMovement;
-	vec2 coord2 = wavePosition + (waveMovement * 0.5);
+	vec2 coord2 = (waveMovement * 0.5) + wavePosition;
 	
 	coord0.y *= 3.0;
 	coord1.y *= 3.0;
@@ -29,8 +27,7 @@ float getWaterBump(vec2 posxz, float waveM, float waveZ, float iswater){
 	wave += sqrt(noise(coord2 * 4.0) * 6.5) * 1.7;
 	wave += sqrt(noise(coord2 * 8.0) * 6.5) * 0.7;
 	
-	wave *= mix(0.3,1.0,iswater);
-	wave *= 0.0157;
+	wave *= mix(0.3,1.0,iswater) * 0.0157;
 	
 	return wave;
 	

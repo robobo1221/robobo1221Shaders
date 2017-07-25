@@ -14,15 +14,15 @@ vec3 getShadingForward(vec3 normal, vec3 color){
 	float diffuse = OrenNayar(fragpos.rgb, lightVector, normal, 0.0) * ((1.0 - rainStrength) * transition_fading);
 	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));
 
-	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y);
+	vec3 lightCol = mix(sunlight * lightAbsorption, moonlight, time[1].y) * sunlightAmount;
 	vec3 emissiveLightmap = forwardEmissive * emissiveLightColor;
 	
 	#ifdef DYNAMIC_HANDLIGHT
 		emissiveLightmap = getEmessiveGlow(color, handLightMult * emissiveLightColor, emissiveLightmap, hand);
 	#endif
 
-	vec3 sunlightDirect = (lightCol * sunlightAmount) * (shadowsForward * diffuse) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
-	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.15, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.25 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
+	vec3 sunlightDirect = lightCol * (shadowsForward * diffuse) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
+	vec3 indirectLight = mix(ambientlight, lightCol * lightAbsorption, mix(mix(mix(0.15, 0.0, rainStrength),0.0,time[1].y), 0.0, 1.0 - skyLightMap)) * (0.14 * skyLightMap * shadowDarkness) + (minLight * (1.0 - skyLightMap));
 
 	return (sunlightDirect + indirectLight) + emissiveLightmap;
 }

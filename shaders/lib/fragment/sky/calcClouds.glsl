@@ -54,7 +54,7 @@
 			float height = cloudHeight / tPos.y;
 			vec3 cloudPosition = tPos * height;
 
-			vec2 coord = (cloudPosition.xz + cameraPosition.xz * 2.5) * 0.000005;
+			vec2 coord = (2.5 * cameraPosition.xz + cloudPosition.xz) * 0.000005;
 				 coord += wind;
 
 			float totalcloud = cloudNoise(coord, wind);

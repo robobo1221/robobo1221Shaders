@@ -396,7 +396,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		#endif
 
 		vec3 lightCol = mix(sunlight, moonlight * 0.75, time[1].y);
-			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol * 0.75, mieFactor), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
+			 lightCol = mix(mix(mix(mix(lightCol, ambientlight, 0.7) * 0.5, lightCol, mieFactor), lightCol, clamp(time[1].y,0.0,1.0)), lightCol, getEyeBrightnessSmooth);
 			 lightCol *= 1.0 + mieFactor * mix(4.0, 2.0, time[1].y);
 			 lightCol *= (1.0 + clamp(time[1].y * transition_fading * 0.5 + mix(0.0,1.0 - transition_fading, time[0].x),0.0,1.0)) * 0.5;
 			 lightCol = mix(lightCol, vec3(0.1, 0.5, 0.8) * lightCol, isEyeInWater);
@@ -409,7 +409,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 			 lightCol *= max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
 			
 		volumetricLightSample *= vlMult;
-		volumetricLightSample *= mix(0.02, 0.5 * cosMoonUpAngle, clamp(time[1].y,0.0,1.0));
+		volumetricLightSample *= mix(0.005, 0.125 * cosMoonUpAngle, clamp(time[1].y,0.0,1.0));
 
 		return pow(mix(pow(color, vec3(2.2)), pow(lightCol, vec3(2.2)), (volumetricLightSample * transition_fading) * (1.0 - rainStrength)), vec3(0.4545));
 	}
