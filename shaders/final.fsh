@@ -405,7 +405,7 @@ void main(){
 	#endif
 
 	#ifdef BLOOM
-		color = (getBloom(newTexcoord.st) * MAX_COLOR_RANGE) * (0.4 * BLOOM_MULT) + color;
+		color = (getBloom(newTexcoord.st) * MAX_COLOR_RANGE) * (0.2 * BLOOM_MULT) + color;
 	#endif
 	
 	color.r *= RED_MULT;
