@@ -138,7 +138,7 @@ vec3 getGi(){
 				float skyLM = normalSample.a - aux;
 					  skyLM = 0.02 / (max(0.0, skyLM * skyLM) + 0.02);
 
-				indirectLight += pow(texture2D(shadowcolor, biasedPosition).rgb, vec3(2.2)) * (sDir * diffuse) * (giFalloff * skyLM);
+				indirectLight = pow(texture2D(shadowcolor, biasedPosition).rgb, vec3(2.2)) * (sDir * diffuse) * (giFalloff * skyLM) + indirectLight;
 			}
 
 			weight++;

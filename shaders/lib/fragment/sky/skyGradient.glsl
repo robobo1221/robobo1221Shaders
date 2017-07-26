@@ -21,7 +21,7 @@ vec3 calcSun(vec3 fragpos, vec3 sunVec){
 	float cosViewSunAngle = dot(normalize(fragpos.rgb), sunVec);
 	float sundisk = smoothstep(sunAngularDiameterCos, sunAngularDiameterCos + 0.0001, cosViewSunAngle);
 
-	return 14000.0 * sundisk * (1.0 - rainStrength) * K;
+	return 10000.0 * sundisk * (1.0 - rainStrength) * K;
 
 }
 
@@ -116,7 +116,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 
 	float nightLightScattering = pow2(max(1.0 - max(cosUpViewAngle, 0.0 ),0.0));
 
-	sky += pow(fogColor * 0.5, vec3(0.4545)) * ((nightLightScattering + 0.5 * (1.0 - nightLightScattering)) * clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0));
+	sky = pow(fogColor * 0.5, vec3(0.4545)) * ((nightLightScattering + 0.5 * (1.0 - nightLightScattering)) * clamp(pow(1.0-cosSunUpAngle,35.0),0.0,1.0)) + sky;
 	sky = mix(sky, pow(fogColor, vec3(0.4545)), rainStrength);
 
 	return mix(color, vec3(1.0), sky);

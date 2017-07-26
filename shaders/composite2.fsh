@@ -368,7 +368,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 				float weight = pow32(1.0 - abs(depth - depth2) * 10.0);
 					weight = max(0.1e-8, weight);
 
-				volumetricLightSample += texture2DLod(gcolor, pos.xy + offset * 2.0, 1.5).a * weight;
+				volumetricLightSample = texture2DLod(gcolor, pos.xy + offset * 2.0, 1.5).a * weight + volumetricLightSample;
 
 				vlWeight += weight;
 			}
@@ -435,7 +435,7 @@ vec3 renderGaux4(vec3 color){
 
 	vec3 getSpec(vec3 rvector, vec3 sunMult, vec3 moonMult){
 		vec3 spec = calcSun(rvector, sunVec) * sunMult * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
-			spec += (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545)) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0);
+			spec = (calcMoon(rvector, moonVec) * moonMult) * pow(moonlight, vec3(0.4545)) * max(dynamicCloudCoverage * 2.4 - 1.4, 0.0) + spec;
 
 		return spec * shadowsForward;
 	}
@@ -562,7 +562,7 @@ vec3 renderGaux4(vec3 color){
 		float reflectionMask = clamp(iswater + istransparent, 0.0 ,1.0);
 
 		vec3 sky = getSkyReflection(reflectedVector, sunMult, moonMult);
-		 	 sky += pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2));
+		 	 sky = pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2)) + sky;
 
 		vec4 reflection = raytrace(fragpos.rgb, reflectedVector, fresnel, sky);
 			 reflection.rgb = mix(sky * smoothstep(0.5,0.9,mix(aux.b, aux2.b, clamp(iswater + istransparent + hand, 0.0 ,1.0))), reflection.rgb, reflection.a);

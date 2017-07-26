@@ -108,7 +108,7 @@ void main(){
 
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 	
-	bump += getTerrainHeight(posxz) * 0.05 * rainpuddles;
+	bump = getTerrainHeight(posxz) * (0.05 * rainpuddles) + bump;
 						  
 	vec4 normalTangentSpace = vec4(normalize(bump * tbnMatrix) * 0.5 + 0.5, 1.0);
 	

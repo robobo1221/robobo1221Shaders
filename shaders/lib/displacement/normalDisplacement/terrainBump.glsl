@@ -1,11 +1,13 @@
 float getTerrainBump(vec2 posxz){
-	vec2 coord0 = (posxz + frameTimeCounter * 0.5) * 0.01;
-	vec2 coord1 = (posxz - frameTimeCounter * 0.5) * 0.01;
+	float time = frameTimeCounter * 0.5;
+
+	vec2 coord0 = (posxz + time) * 0.01;
+	vec2 coord1 = (posxz - time) * 0.01;
 	
 	float noise = texture2D(noisetex, coord0).x;
 		  noise += texture2D(noisetex, coord1).x;
 	
-	return noise * 0.05 * wetness;
+	return (noise * 0.05) * wetness;
 	
 }
 

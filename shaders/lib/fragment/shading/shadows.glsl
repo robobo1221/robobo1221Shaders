@@ -45,7 +45,7 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 
 		#ifdef COLOURED_SHADOWS
 			shading2 += shadowStep(shadowtex0, vec3(shadowPosition.xy + offset, shadowPosition.z - diffthresh));
-			colorShading += texture2D(shadowcolor0, shadowPosition.xy + offset).rgb * 10.0;
+			colorShading = 10.0 * texture2D(shadowcolor0, shadowPosition.xy + offset).rgb + colorShading;
 		#endif
 
 		weight++;
@@ -57,7 +57,7 @@ vec3 getShadow(float shadowDepth, vec3 normal, float stepSize, bool advDisFactor
 
 		#ifdef COLOURED_SHADOWS
 			shading2 += shadowStep(shadowtex0, vec3(shadowPosition.xy, shadowPosition.z - diffthresh));
-			colorShading += texture2D(shadowcolor0, shadowPosition.xy).rgb * 10.0;
+			colorShading = 10.0 * texture2D(shadowcolor0, shadowPosition.xy).rgb + colorShading;
 		#endif
 
 	#endif

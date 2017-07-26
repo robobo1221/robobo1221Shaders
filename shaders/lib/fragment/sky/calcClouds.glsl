@@ -17,7 +17,7 @@
 		noise -= 0.3;
 		noise = max(noise, 0.0);
 
-		coord += wind * 0.8;
+		coord = wind * 0.8 + coord;
 
 		float deg0 = 90.0 - noise * 4.0;
 		float rad0 = radians(deg0);
@@ -28,11 +28,11 @@
 		rCoord0.y *= 3.0;
 		rCoord0.x = 0.0;
 
-		noise += texture2D(noisetex, (rCoord0 + wind * 0.5) * 8.0).x * 0.025;
-		noise += texture2D(noisetex, rCoord0 * 16.0).x * 0.0125;
+		noise = 0.025 * texture2D(noisetex, (rCoord0 + wind * 0.5) * 8.0).x + noise;
+		noise = 0.0125 * texture2D(noisetex, rCoord0 * 16.0).x + noise;
 
 		coord.x *= 2.0;
-		noise += (texture2D(noisetex, coord * 4.0).x) * 0.05;
+		noise = 0.05 * texture2D(noisetex, coord * 4.0).x + noise;
 
 		float cl = max(pow4(noise), 0.0) * 5.0;
 		cl *= (1.0 - rainStrength * 0.5);
@@ -54,8 +54,7 @@
 			float height = cloudHeight / tPos.y;
 			vec3 cloudPosition = tPos * height;
 
-			vec2 coord = (2.5 * cameraPosition.xz + cloudPosition.xz) * 0.000005;
-				 coord += wind;
+			vec2 coord = (2.5 * cameraPosition.xz + cloudPosition.xz) * 0.000005 + wind;
 
 			float totalcloud = cloudNoise(coord, wind);
 			

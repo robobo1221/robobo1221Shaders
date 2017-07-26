@@ -36,7 +36,7 @@ vec3 getParallaxDisplacement(vec3 posxz, float iswater) {
 	vec2 offset = viewVector.xy * (12.5 * PW_DEPTH) / dist / float(PW_POINTS);
 	
 	for(int i = 0; i < PW_POINTS; i++){
-		posxz.xz += getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * offset;
+		posxz.xz = getWaterBump(posxz.xz - posxz.y, waveM, waveZ, iswater) * offset + posxz.xz;
 	}
 	return posxz;
 }

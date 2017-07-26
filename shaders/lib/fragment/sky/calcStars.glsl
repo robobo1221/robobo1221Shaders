@@ -23,7 +23,7 @@
 			vec2 coord = starCoord.xz * 0.005;
 
 				float starNoise = texture2D(noisetex,fract(coord.xy * 0.5)).x;
-				starNoise += texture2D(noisetex,fract(coord.xy)).x * 0.5;
+					  starNoise = 0.5 * texture2D(noisetex,fract(coord.xy)).x + starNoise;
 				
 				float star = max(starNoise - 1.3,0.0);
 				
@@ -31,14 +31,13 @@
 				
 			float galaxyMask = 0.01 * starCoord.z + 0.75;
 			
-			float galaxyMask0 = texture2D(noisetex, fract(starCoord * 0.0002).xz).x * 0.125;
-				  galaxyMask0 += texture2D(noisetex, fract(starCoord * 0.0004).xz).x * 0.0675;
-				  galaxyMask0 += texture2D(noisetex, fract(starCoord * 0.0016).xz).x * 0.0335;
+			float galaxyMask0 = 0.125 * texture2D(noisetex, fract(starCoord * 0.0002).xz).x;
+				  galaxyMask0 = 0.0675 * texture2D(noisetex, fract(starCoord * 0.0004).xz).x + galaxyMask0;
+				  galaxyMask0 = 0.0335 * texture2D(noisetex, fract(starCoord * 0.0016).xz).x + galaxyMask0;
 			
 			galaxyMask += galaxyMask0;
 			galaxyMask = min(galaxyMask, 1.0 - galaxyMask);
-			galaxyMask = max(galaxyMask * 8.0 - 1.5,0.0);
-			galaxyMask *= 0.45;
+			galaxyMask = max(galaxyMask * 8.0 - 1.5,0.0) * 0.45;
 			galaxyMask *= galaxyMask * 0.8;
 		
 			vec3 galaxy = galaxyMask * mix(vec3(1.0, 1.0, 2.0), vec3(100.0, 75.0, 50.0), pow3(galaxyMask0 * 0.75 + 0.25));

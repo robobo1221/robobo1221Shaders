@@ -182,7 +182,7 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 
 		float weight = normalWeight * depthWeight;
 
-		result += texture2D(sample, coord, lod) * weight;
+		result = texture2D(sample, coord, lod) * weight + result;
 
 		totalWeight += weight;
 	}
@@ -222,7 +222,7 @@ vec3 worldPosition2 = toWorldSpace(gbufferModelViewInverse, fragpos2).rgb;
 
 vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float emissive){
 
-	emissiveMap += (emissivetColor * 20.0) * (sqrt(dot(color, color)) * emissive);
+	emissiveMap = (emissivetColor * 20.0) * (sqrt(dot(color, color)) * emissive) + emissiveMap;
 
 	return emissiveMap;
 }
@@ -410,9 +410,9 @@ float getVolumetricCloudNoise(vec3 p){
 	p *= 0.02;
 
 	float noise = noise3D(vec3(p.x - wind * 0.01, p.y, p.z - wind * 0.015));
-		  noise += noise3D(p * 3.5) * 0.28571428571428571428571428571429;
-		  noise += abs(noise3D(p * 6.125) * 2.0 - 1.0) * 0.16326530612244897959183673469388;
-		  noise += abs(noise3D(p * 12.25) * 2.0 - 1.0) * 0.08163265306122448979591836734694;
+		  noise = 0.28571428571428571428571428571429 * noise3D(p * 3.5) + noise;
+		  noise = 0.16326530612244897959183673469388 * abs(noise3D(p * 6.125) * 2.0 - 1.0) + noise;
+		  noise = 0.08163265306122448979591836734694 * abs(noise3D(p * 12.25) * 2.0 - 1.0) + noise;
 
 		  noise = noise * (1.0 - rainStrength * 0.5);
 		  noise = pow2(max(1.0 - noise * 1.5 * dynamicCloudCoverageMult,0.)) * 0.0303030;
@@ -467,13 +467,13 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 		float sunLightAbsorption = pow3(absorption * 0.86) * dynamicCloudCoverage;
 
 		vec3 dayTimeColor = (sunlight * 16.0) * sunUpCos;
-			 dayTimeColor += sunlight * (sunlight * sunViewCos) * (64.0 * sqrt(sunLightAbsorption) * sunUpCos);
+			 dayTimeColor = sunlight * (sunlight * sunViewCos) * (64.0 * sqrt(sunLightAbsorption) * sunUpCos) + dayTimeColor;
 
 		vec3 nightTimeColor = (moonlight * 16.0) * MoonUpCos;
-			 nightTimeColor += (moonlight * moonViewCos) * (8.0 * sqrt(sunLightAbsorption) * MoonUpCos);
+			 nightTimeColor = (moonlight * moonViewCos) * (8.0 * sqrt(sunLightAbsorption) * MoonUpCos) + nightTimeColor;
 
 		vec3 rainColor = ambientlight;
-			 rainColor += (ambientlight * 64.0) * (sunLightAbsorption * (sqrt(sunUpCos) * 0.9 + 0.1));
+			 rainColor = (ambientlight * 64.0) * (sunLightAbsorption * (sqrt(sunUpCos) * 0.9 + 0.1)) + rainColor;
 
 		vec3 totalCloudColor = (dayTimeColor + nightTimeColor) * sunLightAbsorption;
 			 totalCloudColor = mix(totalCloudColor, rainColor, rainStrength);
@@ -493,7 +493,7 @@ vec4 getVolumetricClouds(vec3 color){
 
     float increment = far / (13.0 * max(VOLUMETRIC_CLOUDS_QUALITY, 0.000001));		//Max the quality to prevent deviding by 0
 
-	farPlane += dither * increment;
+	farPlane = dither * increment + farPlane;
 
 	vec3 fixedWorldPosition = mix(worldPosition2, worldPosition, iswater * (1.0 - isEyeInWater));
 	float worldPositionDistance = sqrt(dot(fixedWorldPosition, fixedWorldPosition));
@@ -516,7 +516,7 @@ vec4 getVolumetricClouds(vec3 color){
 			}
 
 			clouds.rgb = mix(clouds.rgb, result.rgb, min(result.a * VOLUMETRIC_CLOUDS_DENSITY, 1.0));
-			clouds.a += result.a * VOLUMETRIC_CLOUDS_DENSITY;
+			clouds.a = result.a * VOLUMETRIC_CLOUDS_DENSITY + clouds.a;
 		}
 
 		farPlane -= increment;

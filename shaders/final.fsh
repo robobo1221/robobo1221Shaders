@@ -70,7 +70,7 @@ float dynamicExposure = mix(1.0,0.0,(pow3(eyeBrightnessSmooth.y * 0.004166666666
 float getRainDrops(){
 
 	float noiseTexture = texture2D(noisetex, vec2(texcoord.s, texcoord.t * 0.181818) * 0.015 + vec2(0.0,frameTimeCounter) * 0.0005).x;
-	noiseTexture += texture2D(noisetex, vec2(texcoord.s, texcoord.t * 0.181818) * 0.03 + vec2(0.0,frameTimeCounter) * 0.002).x * 0.5;
+	noiseTexture = texture2D(noisetex, vec2(texcoord.s, texcoord.t * 0.181818) * 0.03 + vec2(0.0,frameTimeCounter) * 0.002).x * 0.5 + noiseTexture;
 
 	noiseTexture = min(max(noiseTexture - 1.1,0.0) * 10.0, 1.0);
 	noiseTexture *= clamp(0.04 * eyeBrightnessSmooth.y - 8.8,0.0,1.0);
@@ -171,7 +171,7 @@ vec3 reinhardTonemap(vec3 color)
 
 		if (p.x > 0.0 && p.y > 0.0 && p.x < 1.0 && p.y < 1.0){
 			for (int i = 0; i < itter; i++){
-				lens += shape(p * scale, vec2(float(i) * 1.8, -noise1D(float(i)) * float(itter) + 5.0) * increment) * 0.5;
+				lens = shape(p * scale, vec2(float(i) * 1.8, -noise1D(float(i)) * float(itter) + 5.0) * increment) * 0.5 + lens;
 			}
 		}
 
@@ -194,11 +194,11 @@ vec3 reinhardTonemap(vec3 color)
 		float bloomPowMult = 1.0 - 0.2 * float(isEyeInWater);
 			  bloomPowMult *= 1.0 - 0.2 * rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure);
 
-		blur += pow(texture2D(composite,bCoord * 0.25).rgb,vec3(2.2) * bloomPowMult) * 1.75;
-		blur += pow(texture2D(composite,bCoord * 0.125 + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult) * 1.5;
-		blur += pow(texture2D(composite,bCoord * 0.0625 + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult) * 1.25;
-		blur += pow(texture2D(composite,bCoord * 0.03125 + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult) * dirt;
-		blur += pow(texture2D(composite,bCoord * 0.015625 + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult) * 0.75;
+		blur = pow(texture2D(composite,bCoord * 0.25).rgb,vec3(2.2) * bloomPowMult) + blur;
+		blur = pow(texture2D(composite,bCoord * 0.125 + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult) 			+ blur;
+		blur = pow(texture2D(composite,bCoord * 0.0625 + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult) 			+ blur;
+		blur = pow(texture2D(composite,bCoord * 0.03125 + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult) * dirt 	+ blur;
+		blur = pow(texture2D(composite,bCoord * 0.015625 + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult) 		+ blur;
 
 		return blur;
 	}
@@ -293,7 +293,7 @@ const vec2 dofOffset[49] = vec2[49] (
 
 					sample.rgb *= MAX_COLOR_RANGE;
 
-					bcolor += pow(sample.rgb, vec3(4.4));
+					bcolor = pow(sample.rgb, vec3(4.4)) + bcolor;
 				}
 		color.rgb = pow(bcolor * 0.0204081632653, vec3(0.227272727273));
 
@@ -365,7 +365,8 @@ vec3 getLensFlare(vec2 uv){
 		vec3 ring = getflare(uv, lPos, vec3(1.0, 0.0, 0.0), 0.0, 2.5, 1.0, true);
 			ring += getflare(uv, lPos, vec3(0.0, 1.0, 0.0), 0.0, 2.5 * 0.866025403784, 1.0, true);
 			ring += getflare(uv, lPos, vec3(0.0, 0.0, 1.0), 0.0, 2.5 * 0.707106781187, 1.0, true);
-		lens += ring * 4.0;
+
+		lens = ring * 4.0 + lens;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -404,7 +405,7 @@ void main(){
 	#endif
 
 	#ifdef BLOOM
-		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.055 * BLOOM_MULT, vec3(2.2)) * 3.0;
+		color = (getBloom(newTexcoord.st) * MAX_COLOR_RANGE) * (0.4 * BLOOM_MULT) + color;
 	#endif
 	
 	color.r *= RED_MULT;
