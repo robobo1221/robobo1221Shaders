@@ -1,5 +1,4 @@
 #version 120
-#include "lib/util/colorRange.glsl"
 #include "lib/util/fastMath.glsl"
 
 #define BLOOM									//Makes glow effect on bright stuffs.

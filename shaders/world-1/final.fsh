@@ -124,13 +124,13 @@ float getFog(vec2 pos){
 
 		float bloomPowMult = mix(1.0, 0.8, fog);
 
-		blur += pow(texture2D(composite,bCoord/pow(2.0,2.0) + vec2(0.0,0.0)).rgb,vec3(2.2) * bloomPowMult)*pow(7.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,3.0) + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult)*pow(6.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,4.0) + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(5.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,5.0) + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(4.0,1.0);
-		blur += pow(texture2D(composite,bCoord/pow(2.0,6.0) + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult)*pow(3.0,1.0);
+		blur = pow(texture2D(composite,bCoord * 0.25).rgb,vec3(2.2) * bloomPowMult) + blur;
+		blur = pow(texture2D(composite,bCoord * 0.125 + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult) 			+ blur;
+		blur = pow(texture2D(composite,bCoord * 0.0625 + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult) 			+ blur;
+		blur = pow(texture2D(composite,bCoord * 0.03125 + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult)		 	+ blur;
+		blur = pow(texture2D(composite,bCoord * 0.015625 + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult) 		+ blur;
 
-		return blur * 0.25 * (1.0 + fog);
+		return blur * (1.0 + fog);
 	}
 
 #endif
@@ -243,7 +243,7 @@ void main(){
 	#endif
 
 	#ifdef BLOOM
-		color += pow(reinhardTonemap(getBloom(newTexcoord.st)) * MAX_COLOR_RANGE * 0.025 * BLOOM_MULT / reinhardTonemap(vec3(1.0)), vec3(2.2)) * 3.0;
+		color = (getBloom(newTexcoord.st) * MAX_COLOR_RANGE) * (0.2 * BLOOM_MULT) + color;
 	#endif
 	
 	color.r *= RED_MULT;
