@@ -181,24 +181,29 @@ vec3 reinhardTonemap(vec3 color)
 
 #ifdef BLOOM
 
-	vec3 getBloom(vec2 bCoord){
+	vec3 bloomTile(const float lod, const vec2 offset){
+		return texture2D(composite, newTexcoord.st / exp2(lod) + offset).rgb;
+	}
+
+	vec3 getBloom(){
 
 		vec3 blur = vec3(0.0);
 		
 		#ifdef DIRTY_LENS
-		float dirt = 3.0 * (generateDirtyLens(bCoord) * DIRTY_LENS_MULT) + 1.0;
+		float dirt = 3.0 * (generateDirtyLens(bCoord) * DIRTY_LENS_MULT) + 2.2;
 		#else
-		const float dirt = 1.0;
+		const float dirt = 2.2;
 		#endif
 
 		float bloomPowMult = 1.0 - 0.2 * float(isEyeInWater);
 			  bloomPowMult *= 1.0 - 0.2 * rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure);
 
-		blur = pow(texture2D(composite,bCoord * 0.25).rgb,vec3(2.2) * bloomPowMult) + blur;
-		blur = pow(texture2D(composite,bCoord * 0.125 + vec2(0.3,0.0)).rgb,vec3(2.2) * bloomPowMult) 			+ blur;
-		blur = pow(texture2D(composite,bCoord * 0.0625 + vec2(0.0,0.3)).rgb,vec3(2.2) * bloomPowMult) 			+ blur;
-		blur = pow(texture2D(composite,bCoord * 0.03125 + vec2(0.1,0.3)).rgb,vec3(2.2) * bloomPowMult) * dirt 	+ blur;
-		blur = pow(texture2D(composite,bCoord * 0.015625 + vec2(0.2,0.3)).rgb,vec3(2.2) * bloomPowMult) 		+ blur;
+		blur = pow(bloomTile(2., vec2(0.0,0.0)),vec3(2.2) * bloomPowMult)       	   + blur;
+		blur = pow(bloomTile(3., vec2(0.3,0.0)),vec3(2.2) * bloomPowMult) * 1.3        + blur;
+		blur = pow(bloomTile(4., vec2(0.0,0.3)),vec3(2.2) * bloomPowMult) * 1.6        + blur;
+		blur = pow(bloomTile(5., vec2(0.1,0.3)),vec3(2.2) * bloomPowMult) * 1.9 	   + blur;
+		blur = pow(bloomTile(6., vec2(0.2,0.3)),vec3(2.2) * bloomPowMult) * dirt 	   + blur;
+		blur = pow(bloomTile(7., vec2(0.3,0.3)),vec3(2.2) * bloomPowMult) * 2.5        + blur;
 
 		return blur;
 	}
@@ -405,7 +410,7 @@ void main(){
 	#endif
 
 	#ifdef BLOOM
-		color = (getBloom(newTexcoord.st) * MAX_COLOR_RANGE) * (0.2 * BLOOM_MULT) + color;
+		color = (getBloom() * MAX_COLOR_RANGE) * (0.1 * BLOOM_MULT) + color;
 	#endif
 	
 	color.r *= RED_MULT;

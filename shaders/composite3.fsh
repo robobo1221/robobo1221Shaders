@@ -11,28 +11,36 @@ uniform sampler2D gcolor;
 
 uniform float aspectRatio;
 uniform float viewWidth;
+uniform float viewHeight;
+
+vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 
 #ifdef BLOOM
 	vec3 makeBloom(const float lod,const vec2 offset){
 
+		const float lodFactor = exp2(lod);
+
 		vec3 bloom = vec3(0.0);
-		float scale = pow(2.0,lod);
-		vec2 coord = (texcoord.xy-offset)*scale;
+		vec2 scale = lodFactor * pixelSize;
+
+		vec2 coord = (texcoord.xy-offset)*lodFactor;
 		float totalWeight = 0.0;
 
-		if (coord.x > -0.1 && coord.y > -0.1 && coord.x < 1.1 && coord.y < 1.1){
-			for (int i = -5; i < 5; i++) {
-				for (int j = -5; j < 5; j++) {
-				
-					float wg = pow(1.0-fLength(vec2(i,j)) * 0.125,12.0);
-					vec2 bcoord = (texcoord.xy - offset + vec2(i,j) / viewWidth * vec2(1.0,aspectRatio))*scale;
+		if (any(greaterThanEqual(abs(coord - 0.5), scale + 0.5)))
+			return vec3(0.0);
 
-					if (wg > 0) bloom = pow(texture2D(gcolor,bcoord).rgb,vec3(4.4))*wg + bloom;
-					totalWeight += wg;
-				}
+		for (int i = -5; i < 5; i++) {
+			for (int j = -5; j < 5; j++) {
+				
+				float wg = pow(1.0-fLength(vec2(i,j)) * 0.125,12.0);
+
+				bloom = pow(texture2DLod(gcolor,coord + vec2(i,j) * scale + lodFactor * pixelSize, lod).rgb,vec3(4.4))*wg + bloom;
+				totalWeight += wg;
+
 			}
-			bloom /= totalWeight;
 		}
+
+		bloom /= totalWeight;
 
 		return bloom;
 	}
@@ -41,11 +49,12 @@ uniform float viewWidth;
 void main() {
 vec3 blur = vec3(0);
 	#ifdef BLOOM
-		blur += makeBloom(2.,vec2(0,0));
-		blur += makeBloom(3.,vec2(0.3,0));
-		blur += makeBloom(4.,vec2(0,0.3));
-		blur += makeBloom(5.,vec2(0.1,0.3));
-		blur += makeBloom(6.,vec2(0.2,0.3));
+		blur += makeBloom(2.,vec2(0.0,0.0) + pixelSize * 0.5);
+		blur += makeBloom(3.,vec2(0.3,0.0) + pixelSize * 0.5);
+		blur += makeBloom(4.,vec2(0.0,0.3) + pixelSize * 0.5);
+		blur += makeBloom(5.,vec2(0.1,0.3) + pixelSize * 0.5);
+		blur += makeBloom(6.,vec2(0.2,0.3) + pixelSize * 0.5);
+		blur += makeBloom(7.,vec2(0.3,0.3) + pixelSize * 0.5);
 	#endif
 /* DRAWBUFFERS:3 */
 	gl_FragData[0] = vec4(pow(blur, vec3(1.0 / 4.4)),1.0);
