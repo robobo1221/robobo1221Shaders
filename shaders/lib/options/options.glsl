@@ -43,7 +43,7 @@ const float 	shadowDistance 				= 130.0;
 	#define POM_DEPTH 3.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 	#define OCCLUSION_POINTS 16 //[8 16 32 64 128]
 	#define POM_DISTANCE 20.0 //[10.0 20.0 30.0 40.0 50.0 60.0 80.0 100.0 140.0 180.0 220.0 260.0 300.0]
-	#define POM_DISTANCE_MIX_FACTOR 0.2 //[0.01 0.025 0.05 0.1 0.15 0.2 0.3 0.4 0.5]
+	#define POM_DISTANCE_MIX_FACTOR 0.2 //[0.01 0.025 0.05 0.1 0.15 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 
 #define VOLUMETRIC_CLOUDS
@@ -71,7 +71,7 @@ const float 	shadowDistance 				= 130.0;
 	#define FOG_DENSITY_NIGHT	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 	#define FOG_DENSITY_STORM	1.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 	#define NO_UNDERGROUND_FOG
-	
+
 
 const float emissiveLightAtten = EMISSIVE_LIGHT_ATTEN;
 const float emissiveLightMult = EMISSIVE_LIGHT_MULT;
