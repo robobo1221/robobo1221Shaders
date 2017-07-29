@@ -5,7 +5,6 @@
 
 #include "lib/util/colorRange.glsl"
 #include "lib/options/options.glsl"
-#include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 
 #define WATER_REFRACT
 	#define WATER_REFRACT_MULT 1.0 //[0.5 1.0 1.5 2.0]

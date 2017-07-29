@@ -9,7 +9,6 @@
 
 //-------------------------------------------------//
 
-#include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 #include "lib/options/options.glsl"
 
 /*

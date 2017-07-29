@@ -5,7 +5,6 @@
 
 #define SHADOW_DISTORTION 0.85
 
-#include "lib/options/directLightOptions.glsl" //Go here for shadowResolution, distance etc.
 #include "lib/options/options.glsl"
 
 varying vec4 texcoord;
