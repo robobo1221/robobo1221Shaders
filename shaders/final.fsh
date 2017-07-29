@@ -182,7 +182,7 @@ vec3 reinhardTonemap(vec3 color)
 #ifdef BLOOM
 
 	vec3 bloomTile(const float lod, const vec2 offset){
-		return texture2D(composite, newTexcoord.st / exp2(lod) + offset).rgb;
+		return texture2D(composite, newTexcoord / exp2(lod) + offset).rgb;
 	}
 
 	vec3 getBloom(){
@@ -190,7 +190,7 @@ vec3 reinhardTonemap(vec3 color)
 		vec3 blur = vec3(0.0);
 		
 		#ifdef DIRTY_LENS
-		float dirt = 3.0 * (generateDirtyLens(bCoord) * DIRTY_LENS_MULT) + 2.2;
+		float dirt = 3.0 * (generateDirtyLens(newTexcoord) * DIRTY_LENS_MULT) + 2.2;
 		#else
 		const float dirt = 2.2;
 		#endif
