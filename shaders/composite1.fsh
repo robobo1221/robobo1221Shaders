@@ -29,6 +29,7 @@ const float 	ambientOcclusionLevel 		= 1.0; //[0.0 0.25 0.5 0.75 1.0]
 const float		eyeBrightnessHalflife		= 16.0; //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 16.0 18.0 20.0 24.0 28.0 32.0 ]
 
 const bool 		gcolorMipmapEnabled			= true;
+const bool 		gaux2MipmapEnabled			= true;
 const bool 		gaux4MipmapEnabled			= true;
 const bool 		gnormalMipmapEnabled		= true;
 
@@ -122,12 +123,12 @@ float transition_fading = 1.0-(
 float getEyeBrightnessSmooth = 1.0 - pow3(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0));
 
 //Unpack textures.
-vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
+vec3 color = 			texture2DLod(gcolor, texcoord.st, 0).rgb;
 vec3 normal = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
 vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);
 vec4 aux2 = 			texture2D(gdepth, texcoord.st);
-vec4 forWardAlbedo = 	texture2D(gaux2, texcoord.st);
+vec4 forWardAlbedo = 	texture2DLod(gaux2, texcoord.st, 0);
 float pixeldepth = 		texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = 	texture2D(depthtex1, texcoord.st).x;
 
@@ -201,8 +202,8 @@ float getEmissiveLightmap(vec4 lightmaps, bool isSolid){
 	
 	lightmap 		*= 0.08 * (1.0 + mix(getEyeBrightnessSmooth,1.0,time[1].y) / 0.08) * 0.03;
 	
-	lightmap		= isSolid ? lightmap * (1.0 - emissive) + emissive : lightmap; //Prevent glowstone and all emissive stuff to clip with the lightmap
-	lightmap		= isSolid ? lightmap * (1.0 - handLightMult * hand) + handLightMult * hand : lightmap; //Also do this to the hand
+	lightmap		= mix(lightmap, 1.0, float(isSolid) * emissive); //Prevent glowstone and all emissive stuff to clip with the lightmap
+	lightmap		= mix(lightmap, 1.0, float(isSolid) * handLightMult * hand);
 
 	return lightmap * EMISSIVE_LIGHT_MULT;
 }
@@ -230,13 +231,11 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 	float getHandItemLightFactor(vec3 fragpos, vec3 normal){
 		float handItemLightFactor = sqrt(dot(fragpos, fragpos));
 
-			  handItemLightFactor = 1.0 - (handItemLightFactor * 0.04);
-			  handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor) * 0.5;
+			  handItemLightFactor = (1.0 - smoothstep(0.0, 12.0, handItemLightFactor)) * 0.46;
+			  handItemLightFactor *= pow2(clamp(mix(1.0, max(dot(-normalize(fragpos),normal),0.0), handItemLightFactor), 0.0, 1.0));
 		
 			  handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor), true);
-			 
-			  handItemLightFactor *= pow2(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), handItemLightFactor), 0.0, 1.0)) * 1.6;
-			  handItemLightFactor *= 1.0 - emissive; //Temp fix for emissive blocks getting lit up while you hold a lightsource.
+	
 		
 		return handItemLightFactor * handLightMult;
 	}

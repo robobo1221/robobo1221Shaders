@@ -18,6 +18,7 @@
 
 const bool gcolorMipmapEnabled = true;
 const bool gaux2MipmapEnabled = true;
+const bool gaux3MipmapEnabled = true;
 
 //don't touch these lines if you don't know what you do!
 const int maxf = 3;				//number of refinements
@@ -98,7 +99,7 @@ vec3 specular = 		texture2D(gaux3, texcoord.st).rgb;
 vec3 specular = 		vec3(0.0);
 #endif
 
-vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
+vec3 color = 			texture2DLod(gcolor, texcoord.st, 0).rgb;
 vec3 normals = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
 vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);
@@ -177,7 +178,7 @@ float refractmask(vec2 coord){
 
 	float sample = texture2D(gdepth, coord.st).g;
 
-	return bool(iswater) ? float(sample > 0.12 && sample < 0.28) : float(sample > 0.28 && sample < 0.32);;
+	return mix(float(sample > 0.28 && sample < 0.32), float(sample > 0.12 && sample < 0.28), iswater);
 
 }
 
@@ -300,7 +301,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 		float cosMoonUpAngle = clamp(pow35(1.0-cosSunUpAngle),0.0,1.0);
 		
 		#ifdef NO_UNDERGROUND_FOG
-			float fogAdaption =  clamp(1.0 - getEyeBrightnessSmooth, 0.0,1.0);
+			float fogAdaption = clamp(1.0 - getEyeBrightnessSmooth, 0.0,1.0);
 		#else
 			float fogAdaption = 1.0;
 		#endif
@@ -422,7 +423,7 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
 #endif
 
 vec3 renderGaux4(vec3 color){
-	float albedo = texture2D(gaux4, texcoord.st).a;
+	float albedo = texture2DLod(gaux4, texcoord.st, 0).a;
 	vec3 rainColor = vec3(2.0);
 
 	return mix(color, rainColor * color, albedo * rainStrength);
@@ -439,8 +440,6 @@ vec3 renderGaux4(vec3 color){
 	
 	vec4 raytrace(vec3 fragpos, vec3 rvector, float fresnel, vec3 fogColor) {
 		#define fragdepth texture2D(depthtex1, pos.st).r
-
-		bool land = false;
 		vec3 pos = vec3(0.0);
 	
 		vec4 color = vec4(0.0);
@@ -490,13 +489,13 @@ vec3 renderGaux4(vec3 color){
 		color.rgb = texture2DLod(gcolor, pos.st, 0).rgb * MAX_COLOR_RANGE;
 		color.rgb = pow(color.rgb, vec3(2.2));
 
-		land = fragdepth < comp;
+		float land = float(fragdepth < comp);
 
 		#ifdef FOG
 			color.rgb = getFog(ambientlight, color.rgb, pos.st);
 		#endif
 		
-		color.rgb = land ? color.rgb : fogColor;
+		color.rgb = mix(fogColor, color.rgb, land);
 
 		#ifdef VOLUMETRIC_CLOUDS
 			color.rgb = getVolumetricClouds(color.rgb, pos.st);
