@@ -20,6 +20,8 @@
 	#define POM_MAP_RES 128 //[8 16 32 128 256 512 1024 2048 4096 9192]
 	#define POM_DEPTH 3.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0]
 	#define OCCLUSION_POINTS 16 //[8 16 32 64 128]
+	#define POM_DISTANCE 20.0 //[10.0 20.0 30.0 40.0 50.0 60.0 80.0 100.0 140.0 180.0 220.0 260.0 300.0]
+	#define POM_DISTANCE_MIX_FACTOR 0.2 //[0.01 0.025 0.05 0.1 0.15 0.2 0.3 0.4 0.5]
 
 #define VOLUMETRIC_CLOUDS
 	//#define DYNAMIC_WEATHER 																						//Makes volumetric cloud's coverage different over time. Also effects other shaders such as lighting, fog, etc.

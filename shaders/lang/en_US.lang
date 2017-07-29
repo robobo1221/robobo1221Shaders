@@ -55,6 +55,8 @@ option.POM=Parallax Occlusion Mapping
 option.POM_MAP_RES=Resolution
 option.POM_DEPTH=Depth
 option.OCCLUSION_POINTS=Quality
+option.POM_DISTANCE=Drawdistance
+option.POM_DISTANCE_MIX_FACTOR=Drawdistance Transition
 
 option.PARALLAX_WATER=Parallax Water
 option.PW_DEPTH=Depth
