@@ -222,8 +222,6 @@ float refractmask(vec2 coord){
 
 		dispersion *= refractionMult.y;
 
-		texPosition = (texPosition * 2.0 - 1.0) * 0.5 + 0.5;
-
 		refractCoord0 = texPosition + (refraction.xy * refractionMult.y);
 		refractCoord1 = texPosition + (refraction.xy * (refractionMult.y + dispersion));
 		refractCoord2 = texPosition + (refraction.xy * (refractionMult.y + dispersion * 2.0));

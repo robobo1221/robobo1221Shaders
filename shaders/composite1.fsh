@@ -194,7 +194,7 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 
 float getEmissiveLightmap(vec4 lightmaps, bool isSolid){
 
-	float lightmap = lightmaps.r * 2.05;
+	float lightmap = lightmaps.r * 2.03;
 	
 	lightmap		= pow(lightmap, 0.5 * EMISSIVE_LIGHT_ATTEN);
 	lightmap 		= 1.0 / (1.0 - lightmap) - 1.0;
@@ -230,13 +230,14 @@ vec3 getEmessiveGlow(vec3 color, vec3 emissivetColor, vec3 emissiveMap, float em
 #ifdef DYNAMIC_HANDLIGHT
 	float getHandItemLightFactor(vec3 fragpos, vec3 normal){
 		float handItemLightFactor = sqrt(dot(fragpos, fragpos));
-			handItemLightFactor = 1.0 - handItemLightFactor / 25.0;
-			handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor) * 0.5;
+
+			  handItemLightFactor = 1.0 - (handItemLightFactor * 0.04);
+			  handItemLightFactor = smoothstep(0.5, 1.1, handItemLightFactor) * 0.5;
 		
-			handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor), true);
-			
-			handItemLightFactor *= pow2(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), handItemLightFactor), 0.0, 1.0)) * 1.6;
-			handItemLightFactor *= 1.0 - emissive; //Temp fix for emissive blocks getting lit up while you hold a lightsource.
+			  handItemLightFactor = getEmissiveLightmap(vec4(handItemLightFactor), true);
+			 
+			  handItemLightFactor *= pow2(clamp(mix(1.0, max(dot(-fragpos.xyz,normal),0.0), handItemLightFactor), 0.0, 1.0)) * 1.6;
+			  handItemLightFactor *= 1.0 - emissive; //Temp fix for emissive blocks getting lit up while you hold a lightsource.
 		
 		return handItemLightFactor * handLightMult;
 	}
@@ -312,7 +313,7 @@ vec3 getShading(vec3 color){
 		  diffuse = clamp(diffuse*1.01-0.01, 0.0, 1.0);
 
 	vec3 emissiveLightmap = emissiveLM * mix(emissiveLightColor, vec3(1.0), emissiveLM * 0.05);
-		emissiveLightmap = getEmessiveGlow(color,emissiveLightmap, emissiveLightmap, emissive);
+		 emissiveLightmap = getEmessiveGlow(color,emissiveLightmap, emissiveLightmap, emissive);
 
 	float lightAbsorption = smoothstep(-0.1, 0.5, dot(upVec, sunVec));
 
