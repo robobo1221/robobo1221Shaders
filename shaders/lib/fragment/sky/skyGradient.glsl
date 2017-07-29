@@ -110,7 +110,7 @@ vec3 getAtmosphericScattering(vec3 color, vec3 fragpos, float sunMoonMult, vec3 
 	sunMax = sunE * pow(mix(Fex2, absorption, clamp(pow4(1.0-cosUpViewAngle),0.0,1.0)), vec3(0.4545))
 	* (0.000025 * clamp(pow(1.0-cosSunUpAngle,3.0),0.0,1.0) + 5.0e-6);
 
-	moonMax += clamp(cosUpViewAngle,0.0,1.0);
+	moonMax = vec3(clamp(cosUpViewAngle,0.0,1.0));
 
 	sky = max(ToneMap(sky), 0.0) + (sun * sunMax + moon * moonMax) * sunMoonMult * (1.0 - rainStrength);
 
