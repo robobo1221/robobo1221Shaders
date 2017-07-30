@@ -178,7 +178,7 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 		float normalWeight = pow32(abs(dot(offsetNormal, normal)));
 
 		float offsetDepth = ld(texture2D(depthtex1, coord).r);
-		float depthWeight = 1.0 / (abs(linearDepth - offsetDepth) + 1.0);
+		float depthWeight = 1.0 / (abs(linearDepth - offsetDepth) + 1e-8);
 
 		float weight = normalWeight * depthWeight;
 

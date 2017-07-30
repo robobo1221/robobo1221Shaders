@@ -30,11 +30,12 @@ uniform float frameTimeCounter;
 void main() {
 
 	vec4 fragcolor = texture2D(tex,texcoord.xy) * color;
+	     fragcolor.rgb = mix(fragcolor.rgb, vec3(1.0), iswater);
 	
 	#if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
 		vec3 caustics = waterCaustics(worldpos);
 	
-		fragcolor.rgb = bool(iswater) ? caustics : fragcolor.rgb;
+		fragcolor.rgb = mix(fragcolor.rgb, caustics, iswater);
 	#endif
 
 	fragcolor.rgb *= mix(1.0, fragcolor.a, translucentBlocks);
