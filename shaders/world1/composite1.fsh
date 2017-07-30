@@ -55,7 +55,7 @@ uniform mat4 gbufferProjection;
 uniform vec3 cameraPosition;
 
 uniform float frameTimeCounter;
-uniform float isEyeInWater;
+uniform int isEyeInWater;
 
 uniform float viewWidth;
 uniform float viewHeight;

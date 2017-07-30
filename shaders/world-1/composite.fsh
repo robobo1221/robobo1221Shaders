@@ -206,7 +206,7 @@ vec3 getShading(vec3 color){
 	vec3 emissiveLightmap = emissiveLM * emissiveLightColor;
 		emissiveLightmap = getEmessiveGlow(color,emissiveLightmap, emissiveLightmap, emissive);
 
-	return MIN_LIGHT * ambientlight + emissiveLightmap;
+	return MIN_LIGHT * 4.0 * emissiveLightColor + emissiveLightmap;
 }
 
 
