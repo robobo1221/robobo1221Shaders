@@ -465,14 +465,13 @@ vec4 getVolumetricCloudsColor(vec3 wpos){
 
 		float sunLightAbsorption = pow3(absorption * 0.86) * dynamicCloudCoverage;
 
-		vec3 dayTimeColor = (sunlight * 16.0) * sunUpCos;
+		vec3 dayTimeColor = (sunlight * 20.0) * sunUpCos;
 			 dayTimeColor = sunlight * (sunlight * sunViewCos) * (64.0 * sqrt(sunLightAbsorption) * sunUpCos) + dayTimeColor;
 
-		vec3 nightTimeColor = (moonlight * 16.0) * MoonUpCos;
+		vec3 nightTimeColor = (moonlight * 20.0) * MoonUpCos;
 			 nightTimeColor = (moonlight * moonViewCos) * (8.0 * sqrt(sunLightAbsorption) * MoonUpCos) + nightTimeColor;
 
-		vec3 rainColor = ambientlight;
-			 rainColor = (ambientlight * 64.0) * (sunLightAbsorption * (sqrt(sunUpCos) * 0.9 + 0.1)) + rainColor;
+		vec3 rainColor = (ambientlight * 64.0) * (sunLightAbsorption * (sqrt(sunUpCos) * 0.9 + 0.1)) + ambientlight;
 
 		vec3 totalCloudColor = (dayTimeColor + nightTimeColor) * sunLightAbsorption;
 			 totalCloudColor = mix(totalCloudColor, rainColor, rainStrength);
