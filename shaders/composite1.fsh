@@ -209,7 +209,7 @@ float getEmissiveLightmap(vec4 lightmaps, bool isSolid){
 }
 
 float getSkyLightmap(float l){
-	return pow(l, skyLightAtten);
+	return pow(l, 0.5 * skyLightAtten);
 }
 
 vec3 fragpos = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, pixeldepth));
