@@ -21,7 +21,7 @@ vec3 calcSun(vec3 fragpos, vec3 sunVec){
 	float cosViewSunAngle = dot(normalize(fragpos.rgb), sunVec);
 	float sundisk = smoothstep(sunAngularDiameterCos, sunAngularDiameterCos + 0.0001, cosViewSunAngle);
 
-	return 10000.0 * sundisk * (1.0 - rainStrength) * K;
+	return 15000.0 * sundisk * (1.0 - rainStrength) * K;
 
 }
 
