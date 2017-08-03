@@ -195,8 +195,8 @@ vec3 reinhardTonemap(vec3 color)
 		const float dirt = 2.2;
 		#endif
 
-		float bloomPowMult = 1.0 - 0.2 * float(isEyeInWater);
-			  bloomPowMult *= 1.0 - 0.2 * rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure);
+		float bloomPowMult = 1.0 - 0.15 * float(isEyeInWater);
+			  bloomPowMult *= 1.0 - 0.15 * rainStrength * (1.0 - float(isEyeInWater)) * (1.0 - dynamicExposure);
 
 		blur = pow(bloomTile(2., vec2(0.0,0.0)),vec3(2.2) * bloomPowMult)       	   + blur;
 		blur = pow(bloomTile(3., vec2(0.3,0.0)),vec3(2.2) * bloomPowMult) * 1.3        + blur;
