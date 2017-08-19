@@ -3,8 +3,6 @@
 
 #include "lib/util/colorRange.glsl"
 
-#define SHADOW_DISTORTION 0.85
-
 #define DYNAMIC_HANDLIGHT
 
 //-------------------------------------------------//
@@ -178,7 +176,7 @@ vec4 bilateralTexture(sampler2D sample, vec2 position, float lod){
 		float normalWeight = pow32(abs(dot(offsetNormal, normal)));
 
 		float offsetDepth = ld(texture2D(depthtex1, coord).r);
-		float depthWeight = 1.0 / (abs(linearDepth - offsetDepth) + 1e-8);
+		float depthWeight = 1.0 / max(1e-32, linearDepth - offsetDepth);
 
 		float weight = normalWeight * depthWeight;
 
@@ -335,59 +333,40 @@ vec3 getShading(vec3 color){
 
 #ifdef VOLUMETRIC_LIGHT
 
-	float getVolumetricRays() {
+float getVolumetricRays(){
+	const float increment = 4.0 / VL_QUALITY;
+	float startRay = 0.2;
+	const float endRay = VL_DISTANCE;
 
-		///////////////////////Setting up functions///////////////////////
-			
-			vec3 rSD = vec3(0.0);
-				rSD.x = 0.0;
-				rSD.y = 4.0 / VL_QUALITY;
-				rSD.z = dither;
-			
-			rSD.z *= rSD.y;
+	startRay += dither * increment;
 
-			const int maxDist = int(VL_DISTANCE);
-			float minDist = 0.01f;
-				minDist += rSD.z;
+	float weight = -increment / (startRay - 128.0);
+	float ray = 0.0;
 
-			float weight = 128.0 / rSD.y;
+	while (startRay < endRay){
+		if (startRay > getDepth(pixeldepth)) break;
 
-			const float diffthresh = 0.0005;	// Fixes light leakage from walls
-			
-			vec3 worldposition = vec3(0.0);
+		vec3 rayMarchedPosition = toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, expDepth(startRay)));
+	         rayMarchedPosition = toShadowSpace(rayMarchedPosition);
+		     rayMarchedPosition = biasedShadows(rayMarchedPosition);
+			 rayMarchedPosition.b += 0.0005;
 
-			for (minDist; minDist < maxDist; ) {
+		float shadowSampleBack = shadowStep(shadowtex1, rayMarchedPosition);
 
-				//MAKING VL NOT GO THROUGH WALLS
-				if (getDepth(pixeldepth) < minDist){
-					break;
-				}
+		#if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
+			float shadowSampleFront = shadowStep(shadowtex0, rayMarchedPosition);
+			float colorSample = length(texture2D(shadowcolor0, rayMarchedPosition).rgb * 10.0);
 
-				//Getting worldpositon
-				worldposition = toShadowSpace(toScreenSpace(gbufferProjectionInverse, vec3(texcoord.st, expDepth(minDist))));
+			ray += mix(shadowSampleFront, shadowSampleBack, colorSample);
+		#else
+			ray += shadowSampleBack;
+		#endif
 
-				//Rescaling ShadowMaps
-				worldposition = biasedShadows(worldposition);
-
-				//Projecting shadowmaps on a linear depth plane
-				#if defined PROJECTED_CAUSTICS && defined WATER_CAUSTICS
-					float shadow0 = shadowStep(shadowtex0, vec3(worldposition.rg, worldposition.b + diffthresh ));
-					float shadow1 = shadowStep(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh ));
-					float caustics = length(texture2D(shadowcolor0, worldposition.rg).rgb * 10.0);
-
-				rSD.x += mix(shadow0, shadow1, caustics);
-				#else
-					rSD.x += shadowStep(shadowtex1, vec3(worldposition.rg, worldposition.b + diffthresh ));
-				#endif
-				
-				minDist += rSD.y;
-		}
-
-			rSD.x /= weight;
-			rSD.x *= 1.0 - isEyeInWater * 0.5;
-			
-			return rSD.x;
+		startRay += increment;
 	}
+
+	return ray * weight * (1.0 - isEyeInWater * 0.5);
+}
 
 
 #else

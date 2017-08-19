@@ -19,8 +19,6 @@
 #define ENTITY_POTATO		142.0
 #define ENTITY_COBWEB		 30.0
 
-#define SHADOW_DISTORTION 0.85
-
 varying vec4 texcoord;
 varying vec4 color;
 

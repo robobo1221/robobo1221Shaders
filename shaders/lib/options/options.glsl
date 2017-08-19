@@ -7,6 +7,8 @@ const float 	shadowDistance 				= 130.0;
 #define shadowDarkness 2.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0] Intensity of ambient color on the shadows
 #define sunlightAmount 2.0 //[0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0] Intensity of the sunlight and the moonlight
 
+#define SHADOW_DISTORTION 0.85
+
 
 #define emissiveLightColor vec3(1.0, 0.4, 0.07)	//Torch color
 
