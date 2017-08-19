@@ -2,8 +2,6 @@
 
 float bayer16x16(vec2 p){
 
-	p *= vec2(viewWidth,viewHeight);
-
     vec2 m0 = vec2(mod(floor(p * 0.125), 2.));
     vec2 m1 = vec2(mod(floor(p * 0.25 ), 2.));
     vec2 m2 = vec2(mod(floor(p * 0.5  ), 2.));
@@ -13,4 +11,4 @@ float bayer16x16(vec2 p){
 }
 #undef g
 
-float dither = bayer16x16(texcoord.st);
+float dither = bayer16x16(gl_FragCoord.xy);

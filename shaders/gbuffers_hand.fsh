@@ -1,11 +1,10 @@
 #version 120
-#extension GL_ARB_shader_texture_lod : enable
 
 #include "lib/util/fastMath.glsl"
 
 #include "lib/options/options.glsl"
 
-const vec3 intervalMult = vec3(1.0, 1.0, 0.5/(POM_DEPTH * 0.125))/POM_MAP_RES * 64.0 / OCCLUSION_POINTS;
+const vec3 intervalMult = vec3(0.5, 0.5, 1.0)/POM_MAP_RES * 16.0 / OCCLUSION_POINTS * POM_DEPTH;
 const float MAX_OCCLUSION_DISTANCE = POM_DISTANCE;
 const float MIX_OCCLUSION_DISTANCE = POM_DISTANCE - POM_DISTANCE_MIX_FACTOR * POM_DISTANCE;
 const int   MAX_OCCLUSION_POINTS   = OCCLUSION_POINTS; //Halving max points for lower quality pom for hand.
@@ -36,17 +35,14 @@ uniform float frameTimeCounter;
 const float mincoord = 1.0/4096.0;
 const float maxcoord = 1.0-mincoord;
 
-vec2 dcdx = dFdx(vtexcoord.st*vtexcoordam.pq);
-vec2 dcdy = dFdy(vtexcoord.st*vtexcoordam.pq);
-
 vec4 readTexture(vec2 coord)
 {
-	return texture2DGradARB(texture,fract(coord)*vtexcoordam.pq+vtexcoordam.st,dcdx,dcdy);
+	return texture2D(texture,fract(coord)*vtexcoordam.pq+vtexcoordam.st);
 }
 
 vec4 readNormal(vec2 coord)
 {
-	return texture2DGradARB(normals,fract(coord)*vtexcoordam.pq+vtexcoordam.st,dcdx,dcdy);
+	return texture2D(normals,fract(coord)*vtexcoordam.pq+vtexcoordam.st);
 }
 
 void main(){
@@ -81,7 +77,7 @@ void main(){
 	#include "lib/fragment/position/lmCoord.glsl"
 	
 	#ifdef SPECULAR_MAPPING
-		vec3 specularity = texture2DGradARB(specular, adjustedTexCoord, dcdx, dcdy).rgb;
+		vec3 specularity = texture2D(specular, adjustedTexCoord).rgb;
 	#else 
 		vec3 specularity = vec3(0.0);
 	#endif

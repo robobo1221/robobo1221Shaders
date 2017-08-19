@@ -174,14 +174,6 @@ vec3 shadowsForward = vec3(aux2.a);
 	float puddles = 1.0;
 #endif
 
-float refractmask(vec2 coord){
-
-	float sample = texture2D(gdepth, coord.st).g;
-
-	return mix(float(sample > 0.28 && sample < 0.32), float(sample > 0.12 && sample < 0.28), iswater);
-
-}
-
 #ifdef WATER_REFRACT
 
 	vec2 clampScreen(vec2 coord) {
@@ -189,6 +181,14 @@ float refractmask(vec2 coord){
 		vec2 pixel = 1.0 / vec2(viewWidth, viewHeight);
 
 		return clamp(coord, pixel, 1.0 - pixel);
+	}
+
+	float refractmask(vec2 coord){
+
+		float sample = texture2D(gdepth, coord.st).g;
+
+		return mix(float(sample > 0.28 && sample < 0.32), float(sample > 0.12 && sample < 0.28), iswater);
+
 	}
 
 	void getRefractionCoord(vec3 wpos, vec2 texPosition, out vec3 refraction, out vec2 refractCoord0, out vec2 refractCoord1, out vec2 refractCoord2, out vec3 refractMask){
@@ -270,9 +270,9 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 		getRefractionCoord(wpos, texPosition, refraction, refractCoord0, refractCoord1, refractCoord2, refractMask);
 
 		vec3 rA;
-			rA.x = texture2DLod(gcolor, (refractCoord0), 0).x;
-			rA.y = texture2DLod(gcolor, (refractCoord1), 0).y;
-			rA.z = texture2DLod(gcolor, (refractCoord2), 0).z;
+			rA.x = texture2DLod(gcolor, refractCoord0, 0).x;
+			rA.y = texture2DLod(gcolor, refractCoord1, 0).y;
+			rA.z = texture2DLod(gcolor, refractCoord2, 0).z;
 
 		rA = pow(rA * MAX_COLOR_RANGE, vec3(2.2));
 
@@ -287,7 +287,7 @@ vec2 getRefractionTexcoord(vec3 wpos, vec2 texPosition){
 
 #endif
 
-vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st).st;
+vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st);
 
 #ifdef FOG
 	vec3 getFog(vec3 fogColor, vec3 color, vec2 uv){
@@ -546,11 +546,11 @@ vec3 renderGaux4(vec3 color){
 
 		float iswet = smoothstep(0.8,0.9,aux.b * (1.0 - clamp(iswater + istransparent, 0.0 ,1.0))) * clamp(dot(upVec, normal),0.0,1.0);
 
-		const float F0 = 0.02; //Default minimum frensel for water.
+		float F0 = 0.02 * (isEyeInWater * 25.0 + 1.0); //Default minimum frensel for water.
 
 		vec3 halfVector = fNormalize(reflectedVector + fNormalize(-fragpos.rgb));
 		float LdotH	= clamp(dot(reflectedVector, halfVector),0.0,1.0);
-		float fresnel = F0 + (1.0 - F0) * pow5(1.0 - LdotH);
+		float fresnel = F0 + (1.0 - F0) * pow4(1.0 - LdotH);
 
 		vec3 sunMult = vec3(0.0);
 		vec3 moonMult = vec3(0.0);
@@ -559,6 +559,7 @@ vec3 renderGaux4(vec3 color){
 
 		vec3 sky = getSkyReflection(reflectedVector, sunMult, moonMult);
 		 	 sky = pow(getSpec(reflectedVector, sunMult, moonMult), vec3(2.2)) + sky;
+			 sky = mix(sky, color, isEyeInWater);
 
 		vec4 reflection = raytrace(fragpos.rgb, reflectedVector, fresnel, sky);
 			 reflection.rgb = mix(sky * smoothstep(0.5,0.9,mix(aux.b, aux2.b, clamp(iswater + istransparent + hand, 0.0 ,1.0))), reflection.rgb, reflection.a);
@@ -570,7 +571,7 @@ vec3 renderGaux4(vec3 color){
 		reflection.rgb *= (1.0 - hand);
 		
 		#ifdef WATER_REFLECTION
-			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * (1.0 - isEyeInWater) * REFLECTION_STRENGTH);
+			color.rgb = mix(color, reflection.rgb, (fresnel * reflectionMask) * REFLECTION_STRENGTH);
 		#endif
 		
 		#if defined RAIN_REFLECTION && defined RAIN_PUDDLES
@@ -595,14 +596,13 @@ void main()
 		color = waterRefraction(color, worldPosition, texcoord.st);
 	#endif
 
-	#ifdef REFLECTIONS
-		if (land > 0.9) color = getReflection(color);
-	#endif
-
 	#ifdef VOLUMETRIC_CLOUDS
 		color = getVolumetricClouds(color, refTexC.st);
 	#endif
 
+	#ifdef REFLECTIONS
+		if (land > 0.9) color = getReflection(color);
+	#endif
 
 	#ifdef FOG
 		color = getFog(ambientlight, color, texcoord.st);
