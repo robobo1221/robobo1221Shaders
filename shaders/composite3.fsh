@@ -20,7 +20,7 @@ vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 
 		offset = 0.5 * pixelSize + offset;
 
-		const float lodFactor = exp2(lod);
+		float lodFactor = exp2(lod);
 
 		vec3 bloom = vec3(0.0);
 		vec2 scale = lodFactor * pixelSize;

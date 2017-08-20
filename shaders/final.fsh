@@ -93,9 +93,9 @@ vec2 customTexcoord(){
 	
 	vec2 texCoord = texcoord.st;
 
-	float noiseTexture = texture2D(noisetex, texcoord.st * 0.03 + frameTimeCounter * 0.001).x;
+	float noiseTexture = texture2D(noisetex, texcoord.st * 0.01 + frameTimeCounter * 0.001).x;
 
-	vec2 wavyness = (vec2(noiseTexture, noiseTexture) * 2.0 - 1.0) * mix(getRainDrops() * rainStrength * 2.0,1.0,isEyeInWater) * 0.0075;
+	vec2 wavyness = (vec2(noiseTexture, noiseTexture) * 2.0 - 1.0) * mix(getRainDrops() * rainStrength * 2.0,1.0,isEyeInWater) * 0.005;
 
 	#ifdef SCREEN_REFRACTION
 		return texCoord + wavyness * SCREEN_REFRACTION_MULT;

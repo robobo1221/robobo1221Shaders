@@ -121,12 +121,12 @@ float transition_fading = 1.0-(
 float getEyeBrightnessSmooth = 1.0 - pow3(clamp(eyeBrightnessSmooth.y / 220.0f,0.0,1.0));
 
 //Unpack textures.
-vec3 color = 			texture2DLod(gcolor, texcoord.st, 0).rgb;
+vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
 vec3 normal = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
 vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);
 vec4 aux2 = 			texture2D(gdepth, texcoord.st);
-vec4 forWardAlbedo = 	texture2DLod(gaux2, texcoord.st, 0);
+vec4 forWardAlbedo = 	texture2D(gaux2, texcoord.st);
 float pixeldepth = 		texture2D(gdepthtex, texcoord.st).x;
 float pixeldepth2 = 	texture2D(depthtex1, texcoord.st).x;
 
