@@ -351,19 +351,15 @@ vec2 refTexC = getRefractionTexcoord(worldPosition, texcoord.st);
 		float vlWeight = 0.0;
 
 		float depth = ld(pixeldepth);
-		
-		float noise = fract(sin(dot(texcoord.xy, vec2(18.9898f, 28.633f))) * 4378.5453f) * 4.0 / VL_QUALITY;
-		mat2 noiseM = mat2(cos(noise), -sin(noise),
-						   sin(noise), cos(noise));
 
 		for (float i = -1.0; i < 1.0; i++){
 			for (float j = -1.0; j < 1.0; j++){
 
-				vec2 offset = vec2(i,j) / vec2(viewWidth, viewHeight) * noiseM;
+				vec2 offset = vec2(i,j) / vec2(viewWidth, viewHeight);
 
 				float depth2 = ld(texture2D(gdepthtex, pos.st + offset * 8.0).x);
 
-				float weight = pow32(1.0 - abs(depth - depth2) * 10.0);
+				float weight = pow(1.0 - abs(depth - depth2) * 10.0, 32.0);
 					weight = max(0.1e-8, weight);
 
 				volumetricLightSample = texture2DLod(gcolor, pos.xy + offset * 2.0, 1.5).a * weight + volumetricLightSample;
