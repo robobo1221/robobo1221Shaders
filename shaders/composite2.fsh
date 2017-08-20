@@ -99,7 +99,7 @@ vec3 specular = 		texture2D(gaux3, texcoord.st).rgb;
 vec3 specular = 		vec3(0.0);
 #endif
 
-vec3 color = 			texture2DLod(gcolor, texcoord.st, 0).rgb;
+vec3 color = 			texture2D(gcolor, texcoord.st).rgb;
 vec3 normals = 			texture2D(gnormal, texcoord.st).rgb * 2.0 - 1.0;
 vec3 compositeNormals = texture2D(composite, texcoord.st).rgb * 2.0 - 1.0;
 vec4 aux = 				texture2D(gaux1, texcoord.st);

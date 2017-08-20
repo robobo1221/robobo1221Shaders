@@ -1,4 +1,5 @@
 #version 120
+#extension GL_ARB_shader_texture_lod : enable
 #include "lib/util/fastMath.glsl"
 
 #define BLOOM									//Makes glow effect on bright stuffs.
