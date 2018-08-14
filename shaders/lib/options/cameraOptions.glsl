@@ -3,4 +3,4 @@
 #define CAM_SHUTTER_SPEED 100.0
 #define CAM_EXPOFFSET 0.0
 
-//#define CAM_MANUAL
+#define CAM_MANUAL

@@ -2,7 +2,7 @@
 
 float calculateDistFactor(vec2 shadowPosition){
 	shadowPosition = shadowPosition * 2.0 - 1.0;
-	return length(shadowPosition * 1.69) * (length(shadowPosition * 1.69) * SHADOW_DISTORTION + (1.0 - SHADOW_DISTORTION)) + 1.0;
+	return length(shadowPosition) * (length(shadowPosition * 1.69) * SHADOW_DISTORTION + (1.0 - SHADOW_DISTORTION)) + 1.0;
 }
 
 vec2 distortShadowMap(vec2 shadowPosition){

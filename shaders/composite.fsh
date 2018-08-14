@@ -16,7 +16,7 @@ void main() {
 	vec3 colorSample2 = max0(decodeRGBE8(texture2D(colortex2, texcoord)));
 	vec3 color = colorSample2;
 
-	vec4 translucentAlbedo = texture2D(colortex2, texcoord);
+	vec4 translucentAlbedo = texture2D(colortex0, texcoord);
 	color = mix(color, translucentAlbedo.rgb, translucentAlbedo.a);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);

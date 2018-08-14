@@ -125,5 +125,5 @@ void main() {
 	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, lightmaps, 1.0);
 
 	gl_FragData[0] = encodeRGBE8(finalColor);
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
+	gl_FragData[1] = vec4(0.0);
 }
