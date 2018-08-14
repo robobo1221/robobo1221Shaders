@@ -110,7 +110,7 @@ float CalculateMoonSpot(float VdotL) {
 vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, const int iSteps) {
 	const int jSteps = 3;
 
-	const float phaseIsotropic = 0.25;
+	const float phaseIsotropic = 0.25 * rPI;
 
 	vec3 viewPosition = (atmosphere_planetRadius + eyeAltitude) * upVector;
 

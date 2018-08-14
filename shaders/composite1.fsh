@@ -21,11 +21,11 @@ float calculateAverageLuminance(){
 	return mix(lum, prevLum, clamp(1.0 - frameTime, 0.0, 0.99));
 }
 
-/* DRAWBUBBERS:25 */
+/* DRAWBUBBERS:2 */
 void main() {
 
 	vec3 color = texture2D(colortex5, texcoord).rgb;
 
 	gl_FragData[0] = encodeRGBE8(color);
-	gl_FragData[1] = vec4(color, calculateAverageLuminance());
+	//gl_FragData[1] = vec4(color, calculateAverageLuminance());
 }
