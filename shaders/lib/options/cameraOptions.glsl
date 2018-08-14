@@ -1,0 +1,6 @@
+#define CAM_ISO 100.0
+#define CAM_APERTURE 16.0
+#define CAM_SHUTTER_SPEED 100.0
+#define CAM_EXPOFFSET 0.0
+
+//#define CAM_MANUAL
