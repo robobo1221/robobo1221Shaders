@@ -1,6 +1,6 @@
 #version 120
 #define program_composite1
-#define FRAG
+#define FRAGMENT
 
 varying vec2 texcoord;
 

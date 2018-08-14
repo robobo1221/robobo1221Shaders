@@ -1,6 +1,6 @@
 #version 120
 #define program_composite2
-#define VERT
+#define VERTEX
 
 varying vec2 texcoord;
 

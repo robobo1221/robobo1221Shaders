@@ -1,6 +1,6 @@
 #version 120
 #define program_shadow
-#define FRAG
+#define FRAGMENT
 
 varying vec2 texcoord;
 varying vec4 color;

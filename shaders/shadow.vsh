@@ -1,6 +1,6 @@
 #version 120
 #define program_shadow
-#define VERT
+#define VERTEX
 
 varying vec2 texcoord;
 varying vec4 color;

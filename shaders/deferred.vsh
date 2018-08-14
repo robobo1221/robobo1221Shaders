@@ -1,6 +1,6 @@
 #version 120
 #define program_deferred
-#define VERT
+#define VERTEX
 
 varying vec2 texcoord;
 varying mat4 shadowMatrix;
