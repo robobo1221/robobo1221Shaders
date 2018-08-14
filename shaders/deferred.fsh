@@ -90,7 +90,7 @@ vec2 getLightmaps(float data)
 #include "/lib/fragment/directLighting.glsl"
 #include "/lib/fragment/sky.glsl"
 
-/* DRAWBUFFERS:2 */
+/* DRAWBUFFERS:20 */
 
 void main() {
 	float depth = texture2D(depthtex1, texcoord).x;
@@ -125,4 +125,5 @@ void main() {
 	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, lightmaps, 1.0);
 
 	gl_FragData[0] = encodeRGBE8(finalColor);
+	gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
 }

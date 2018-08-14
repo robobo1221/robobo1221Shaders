@@ -4,8 +4,8 @@
 
 varying vec2 texcoord;
 
-uniform sampler2D colortex5;
 uniform sampler2D colortex2;
+uniform sampler2D colortex5;
 
 #include "/lib/utilities.glsl"
 #include "/lib/fragment/camera.glsl"

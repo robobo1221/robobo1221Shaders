@@ -27,5 +27,5 @@ void main() {
 	vec3 color = texture2D(colortex5, texcoord).rgb;
 
 	gl_FragData[0] = encodeRGBE8(color);
-	gl_FragData[1] = vec4(0.0, 0.0, 0.0, calculateAverageLuminance());
+	gl_FragData[1] = vec4(color, calculateAverageLuminance());
 }
