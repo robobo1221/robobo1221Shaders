@@ -1,20 +1,4 @@
 #version 120
-#include "lib/util/fastMath.glsl"
-
-varying vec4 texcoord;
-varying vec4 lmcoord;
-varying vec4 color;
-
-varying vec3 normal;
-
-void main(){
-
-	gl_Position = ftransform();
-
-	texcoord = gl_MultiTexCoord0;
-	lmcoord = gl_TextureMatrix[1] * gl_MultiTexCoord1;
-
-	color = gl_Color;
-
-	normal = normalize(gl_NormalMatrix * gl_Normal);
-}
+#define program_gbuffers_entities
+#define VERT
+#include "/gbuffers_main.vsh"

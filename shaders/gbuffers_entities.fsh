@@ -1,32 +1,4 @@
 #version 120
-#include "lib/util/fastMath.glsl"
-
-#include "lib/options/options.glsl"
-
-varying vec4 texcoord;
-varying vec4 lmcoord;
-varying vec4 color;
-
-varying vec3 normal;
-
-uniform vec4 entityColor;
-
-uniform sampler2D texture;
-
-void main(){
-
-	vec4 albedo = texture2D(texture, texcoord.st) * color;
-	albedo.rgb = mix(albedo.rgb, entityColor.rgb, entityColor.a);
-	
-	#include "lib/fragment/position/lmCoord.glsl"
-
-/* DRAWBUFFERS:0246 */
-
-	gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(normal,1.0) * 0.5 + 0.5;
-	gl_FragData[2] = vec4(lightmaps.x, 1.0, lightmaps.y, 1.0);
-	#ifdef SPECULAR_MAPPING
-		gl_FragData[3] = vec4(vec3(0.0), 1.0);
-	#endif
-	
-}
+#define program_gbuffers_entities
+#define FRAG
+#include "/gbuffers_main.fsh"

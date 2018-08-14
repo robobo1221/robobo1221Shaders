@@ -1,35 +1,12 @@
 #version 120
-#include "lib/util/fastMath.glsl"
+#define program_composite2
+#define VERT
 
-varying vec4 texcoord;
+varying vec2 texcoord;
 
-varying vec3 upVec;
+#include "/lib/utilities.glsl"
 
-varying vec3 lightVector;
-varying vec3 sunVec;
-varying vec3 moonVec;
-
-uniform vec3 sunPosition;
-uniform vec3 upPosition;
-
-uniform int worldTime;
-
-float timefract = worldTime;
-
-void main()
-{
-	gl_Position = ftransform();
-	texcoord = gl_MultiTexCoord0;
-	
-	sunVec = sunPosition * 0.01;
-	moonVec = -sunPosition * 0.01;
-	upVec = upPosition * 0.01;
-	
-	if (worldTime < 12700 || worldTime > 23250) {
-		lightVector = sunVec;
-	}
-
-	else {
-		lightVector = moonVec;
-	}
+void main() {
+	gl_Position.xy = gl_Vertex.xy * 2.0 - 1.0;
+	texcoord = gl_MultiTexCoord0.xy;
 }
