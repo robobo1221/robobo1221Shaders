@@ -1,7 +1,0 @@
-#define pow2(x) (x * x)
-#define pow3(x) (pow2(x) * x)
-#define pow4(x) (pow2(pow2(x)))
-#define pow5(x) (pow2(pow2(x)) * x)
-#define pow6(x) (pow2(pow2(x) * x))
-#define pow7(x) (pow2(pow2(x) * x) * x)
-#define pow8(x) pow2(pow2(pow2(x)))
