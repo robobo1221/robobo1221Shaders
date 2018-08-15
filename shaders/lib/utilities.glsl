@@ -25,6 +25,8 @@ const float rLOG2	= 1.0 / log(2.0);
 #define encodeColor(x) (x * 0.001)
 #define decodeColor(x) (x * 1000.0)
 
+#define cubeSmooth(x) (x * x * (3.0 - 2.0 * x))
+
 #define lumCoeff vec3(0.2125, 0.7154, 0.0721)
 
 vec3 clampNormal(vec3 n, vec3 v){
@@ -71,8 +73,9 @@ vec3 linearToSRGB(vec3 linear){
     );
 }
 
-#include "/lib/options/lightingOptions.glsl"
+#include "/lib/options/skyOptions.glsl"
 #include "/lib/options/cameraOptions.glsl"
 
 #include "/lib/utilities/pow.glsl"
 #include "/lib/utilities/encoding.glsl"
+#include "/lib/utilities/noise.glsl"
