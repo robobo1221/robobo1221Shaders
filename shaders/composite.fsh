@@ -58,7 +58,6 @@ void main() {
 	vec3 color = colorSample2;
 
 	vec4 translucentAlbedo = texture2D(colortex0, texcoord);
-	color = mix(color, translucentAlbedo.rgb, translucentAlbedo.a);
 
 	mat2x3 position;
 		   position[0] = calculateViewSpacePosition(texcoord, depth);
@@ -74,6 +73,7 @@ void main() {
 	float dither = bayer64(gl_FragCoord.xy);
 
 	if (backDepth >= 1.0) color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], dither);
+	color = mix(color, translucentAlbedo.rgb, translucentAlbedo.a);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }

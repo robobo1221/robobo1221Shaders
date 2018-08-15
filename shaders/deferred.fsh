@@ -18,7 +18,7 @@ varying vec3 skyColor;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D depthtex1;
-uniform sampler2D shadowtex0;
+uniform sampler2D shadowtex1;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferProjectionInverse;
