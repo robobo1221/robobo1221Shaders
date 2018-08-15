@@ -10,7 +10,9 @@ varying vec3 upVector;
 varying vec3 wLightVector;
 
 varying vec3 sunColor;
+varying vec3 sunColorClouds;
 varying vec3 moonColor;
+varying vec3 moonColorClouds;
 varying vec3 skyColor;
 
 uniform sampler2D colortex0;
@@ -27,6 +29,8 @@ uniform mat4 gbufferModelViewInverse;
 
 uniform vec3 cameraPosition;
 uniform float eyeAltitude;
+
+uniform float frameTimeCounter;
 
 const int noiseTextureResolution = 64;
 const float rNoiseTexRes = 1.0 / noiseTextureResolution;

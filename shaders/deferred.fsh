@@ -27,7 +27,6 @@ uniform mat4 gbufferModelViewInverse;
 uniform vec3 shadowLightPosition;
 uniform vec3 cameraPosition;
 
-uniform float frameTimeCounter;
 uniform float eyeAltitude;
 
 #include "/lib/utilities.glsl"

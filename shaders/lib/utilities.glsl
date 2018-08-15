@@ -1,3 +1,6 @@
+#define TIME_MULT 1.0
+#define TIME (frameTimeCounter * TIME_MULT)
+
 const float PI 		= acos(-1.0);
 const float TAU 	= PI * 2.0;
 const float hPI 	= PI * 0.5;
