@@ -78,6 +78,7 @@ vec3 linearToSRGB(vec3 linear){
 
 #include "/lib/options/skyOptions.glsl"
 #include "/lib/options/cameraOptions.glsl"
+#include "/lib/options/lightingOptions.glsl"
 
 #include "/lib/utilities/pow.glsl"
 #include "/lib/utilities/encoding.glsl"
