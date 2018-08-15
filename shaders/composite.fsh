@@ -71,8 +71,10 @@ void main() {
 	vec3 worldVector = mat3(gbufferModelViewInverse) * viewVector;
 
 	float dither = bayer64(gl_FragCoord.xy);
-
-	if (backDepth >= 1.0) color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], dither);
+	#ifdef VOLUMETRIC_CLOUDS
+		if (backDepth >= 1.0) color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], dither);
+	#endif
+	
 	color = mix(color, translucentAlbedo.rgb, translucentAlbedo.a);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
