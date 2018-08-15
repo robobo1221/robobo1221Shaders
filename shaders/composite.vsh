@@ -40,8 +40,8 @@ void main() {
 
 	sunColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wSunVector, 3) * sunColorBase;
 	moonColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wMoonVector, 3) * moonColorBase;
-	sunColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudHeight, 0.0), wSunVector, 3) * sunColorBase;
-	moonColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudHeight, 0.0), wMoonVector, 3) * moonColorBase;
+	sunColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wSunVector, 3) * sunColorBase;
+	moonColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wMoonVector, 3) * moonColorBase;
 	
 	skyColor = calculateAtmosphere(vec3(0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), wSunVector, wMoonVector, 10);
 }
