@@ -86,6 +86,8 @@ vec3 calculateCloudLighting(vec3 position, vec3 wLightVector, float scatterCoeff
     return scatterCoeff * ( skyLighting + directLighting);
 }
 
+#define CLOUD_MULTI_SCATTER
+
 vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float dither){
     if (worldVector.y < 0.0) return backGround;
     const int steps = 32;
@@ -109,7 +111,7 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
 
     float phase = calculateCloudPhase(vDotL);
 
-    for (int i = 0; i < steps; i++, cloudPosition += increment){
+    for (int i = 0; i < steps; ++i, cloudPosition += increment){
         vec3 curvedPosition = vec3(cloudPosition.x, length(cloudPosition + vec3(0.0, sky_planetRadius, 0.0)) - sky_planetRadius, cloudPosition.z);
         float od = calculateCloudOD(curvedPosition, false) * rayLength;
         if (od <= 0.0) continue;

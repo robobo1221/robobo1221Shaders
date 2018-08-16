@@ -32,6 +32,10 @@ const float rLOG2	= 1.0 / log(2.0);
 
 #define lumCoeff vec3(0.2125, 0.7154, 0.0721)
 
+vec2 sincos(float x){
+    return vec2(sin(x), cos(x));
+}
+
 vec3 clampNormal(vec3 n, vec3 v){
     float NoV = clamp( dot(n, -v), 0., 1. );
     return normalize( NoV * v + n );
@@ -78,6 +82,11 @@ vec3 linearToSRGB(vec3 linear){
 
 float calculateHardShadows(sampler2D shadowMap, vec3 shadowPosition, float bias) {
     return 1.0 - fstep(texture2D(shadowMap, shadowPosition.xy).x, shadowPosition.z - bias);
+}
+
+vec3 genUnitVector(vec2 xy) {
+    xy.x *= TAU; xy.y = xy.y * 2.0 - 1.0;
+    return vec3(sincos(xy.x) * sqrt(1.0 - xy.y * xy.y), xy.y);
 }
 
 #include "/lib/options/skyOptions.glsl"
