@@ -6,17 +6,17 @@
 
 //Sky coefficients and heights
 
-#define airNumberDensity       2.5035422e25 // m^3
-#define ozoneConcentrationPeak 8e-6
+const float airNumberDensity = 2.5035422e25; // m^3
+const float ozoneConcentrationPeak = 8e-6;
 const float ozoneNumberDensity = airNumberDensity * ozoneConcentrationPeak;
-#define ozoneCrossSection      vec3(4.51103766177301E-21, 3.2854797958699E-21, 1.96774621921165E-22) // cm^2 | single-wavelength values.
+const vec3 ozoneCrossSection = vec3(4.51103766177301E-21, 3.2854797958699E-21, 1.96774621921165E-22); // cm^2 | single-wavelength values.
 
-#define sky_planetRadius 6731e3 // Should probably move this to somewhere else.
+const float sky_planetRadius = 6731e3; // Should probably move this to somewhere else.
 
-#define sky_atmosphereHeight 110e3
-#define sky_scaleHeights     vec2(8.0e3, 1.2e3)
+const float sky_atmosphereHeight = 110e3;
+const vec2 sky_scaleHeights = vec2(8.0e3, 1.2e3);
 
-#define sky_mieg 0.77
+const float sky_mieg = 0.77;
 
 const vec3 sky_coefficientRayleigh = vec3(5.8000e-6, 1.3500e-5, 3.3100e-5);
 const vec3 sky_coefficientOzone = (ozoneCrossSection * (ozoneNumberDensity * 1e-6)); // ozone cross section * (ozone number density * (cm ^ 3))

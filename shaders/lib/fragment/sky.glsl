@@ -86,7 +86,7 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 
 	const float phaseIsotropic = 0.25 * rPI;
 
-	vec3 viewPosition = (sky_planetRadius + eyeAltitude) * upVector + viewVector;
+	vec3 viewPosition = (sky_planetRadius + eyeAltitude) * upVector;
 
 	vec2 aid = rsi(viewPosition, viewVector, sky_atmosphereRadius);
 	if (aid.y < 0.0) return background;
