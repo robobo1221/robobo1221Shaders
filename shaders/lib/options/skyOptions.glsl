@@ -31,7 +31,7 @@ const mat2x3 sky_coefficientsScattering  = mat2x3(sky_coefficientRayleigh, sky_c
 const mat3   sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh, sky_coefficientMie * 1.11, sky_coefficientOzone); // commonly called the extinction coefficient
 
 const float volumetric_cloudHeight = 1600.0;
-const float volumetric_cloudThickness = 1000.0;
+const float volumetric_cloudThickness = 2000.0;
 const float volumetric_cloudMaxHeight = volumetric_cloudHeight + volumetric_cloudThickness;
 
 #define VOLUMETRIC_CLOUDS

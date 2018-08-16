@@ -11,10 +11,10 @@ float calculateCloudShape(vec3 position, bool isLowQ, float height, float wind){
     float lowDetailNoise = 0.0;
     float highDetailNoise = 0.0;
 
-    const float addedLowDetailNoise = (0.75 * inversesqrt(4.0));  //Total multipliers of highdetail noise devided by the squareroot of the total amount of noise
+    const float addedLowDetailNoise = (0.375 * inversesqrt(4.0));  //Total multipliers of highdetail noise devided by the squareroot of the total amount of noise
 
     lowDetailNoise += calculate3DNoise(position * 0.5) * 2.0;
-    lowDetailNoise += calculate3DNoise(position * 2.0 - vec3(wind, 0.0, wind));
+    lowDetailNoise += calculate3DNoise((position - vec3(wind, 0.0, wind) * 0.5) * 3.0) * 0.3;
 
     if (isLowQ)
     {
@@ -22,8 +22,8 @@ float calculateCloudShape(vec3 position, bool isLowQ, float height, float wind){
         return lowDetailNoise;
     }
 
-    highDetailNoise += calculate3DNoise(position * 8.0 - vec3(-wind, 0.0, wind)) * 0.5;
-    highDetailNoise += calculate3DNoise(position * 16.0 - vec3(wind, wind * 2.0, wind)) * 0.25;
+    highDetailNoise += calculate3DNoise((position - vec3(-wind, -wind, wind) * 0.25) * 7.0) * 0.25;
+    highDetailNoise += calculate3DNoise((position - vec3(0.0, wind * 0.25, 0.0) * 0.25) * 12.0) * 0.125;
     
     return lowDetailNoise + highDetailNoise;
 }
@@ -38,13 +38,13 @@ float calculateCloudOD(vec3 position, bool isLowQ){
     float worldHeight = position.y - volumetric_cloudHeight;
     float normalizedHeight = worldHeight * (1.0 / volumetric_cloudThickness);
 
-    float remappedHeight0 = remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0);
-    float remappedHeight1 = remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0);
+    float remappedHeight0 = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0));
+    float remappedHeight1 = clamp01(remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
     float heightAttenuation = remappedHeight0 * remappedHeight1;
 
     float clouds = calculateCloudShape(cloudPos, isLowQ, remappedHeight0, wind);
 
-    clouds = clamp01((clouds - 2.3) * heightAttenuation);
+    clouds = clamp01(clouds * heightAttenuation - (1.75 * remappedHeight1));
 
     return clouds * volumetric_cloudDensity;
 }
@@ -63,13 +63,27 @@ float calculateCloudTransmittance(vec3 position, vec3 direction, const int steps
     return exp2(-transmittance * 1.11 * rLOG2 * rSteps);
 }
 
+float calculateCloudTransmittanceSkyLight(vec3 position, vec3 direction, const int steps){
+    const float rSteps = volumetric_cloudThickness / steps;
+
+    vec3 increment = direction * rSteps;
+    position += 0.5 * increment;
+
+    float transmittance = 0.0;
+
+    for (int i = 0; i < steps; i++, position += increment){
+        transmittance += calculateCloudOD(position, true);
+    }
+    return exp2(-transmittance * 1.11 * rLOG2 * rSteps * 0.5);
+}
+
 vec3 calculateCloudLighting(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float phase, float vDotL){
 
     vec3 directLighting = (sunColorClouds + moonColorClouds) * calculateCloudTransmittance(position, wLightVector, 10) * 
                           phase * calculatePowderEffect(od, vDotL) * TAU;
-    vec3 skyLighting = skyColor * 0.25 * hPI;
+    vec3 skyLighting = skyColor * calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), 4) * 0.25 * PI;
 
-    return scatterCoeff * (directLighting + skyLighting);
+    return scatterCoeff * ( skyLighting + directLighting);
 }
 
 vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float dither){
