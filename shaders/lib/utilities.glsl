@@ -60,8 +60,7 @@ const vec3 blackbody(const float t){
          0.0556434,-0.2040259, 1.0572252
     );
 
-    const vec3 srgb = vec3(x/y,1.,z/y) * xyzToSrgb;
-    return max(srgb,0.);
+    return max0(vec3(x/y,1.,z/y) * xyzToSrgb);
 }
 
 vec3 srgbToLinear(vec3 srgb){
