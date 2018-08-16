@@ -1,9 +1,4 @@
 #include "/lib/utilities/lightingOperators.glsl"
-#include "/lib/uniform/shadowDistortion.glsl"
-
-float calculateHardShadows(sampler2D shadowMap, vec3 shadowPosition, float bias) {
-    return 1.0 - fstep(texture2D(shadowMap, shadowPosition.xy).x, shadowPosition.z - bias);
-}
 
 vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector) {
     vec3 shadowPosition = transMAD(shadowMatrix, worldPosition);

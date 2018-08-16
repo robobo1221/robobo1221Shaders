@@ -3,6 +3,7 @@
 #define FRAGMENT
 
 varying vec2 texcoord;
+varying mat4 shadowMatrix;
 
 varying vec3 sunVector;
 varying vec3 moonVector;
@@ -18,6 +19,7 @@ varying vec3 skyColor;
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex5;
+uniform sampler2D shadowtex0;
 
 uniform sampler2D noisetex;
 uniform sampler2D depthtex1;
@@ -36,8 +38,10 @@ const int noiseTextureResolution = 64;
 const float rNoiseTexRes = 1.0 / noiseTextureResolution;
 
 #include "/lib/utilities.glsl"
+#include "/lib/uniform/shadowDistortion.glsl"
 #include "/lib/fragment/sky.glsl"
 #include "/lib/fragment/volumetricClouds.glsl"
+#include "/lib/fragment/volumetricLighting.glsl"
 
 vec3 calculateViewSpacePosition(vec2 coord, float depth) {
 	vec3 viewCoord = vec3(coord, depth) * 2.0 - 1.0;
@@ -76,6 +80,7 @@ void main() {
 	#endif
 	
 	color = mix(color, translucentAlbedo.rgb, translucentAlbedo.a);
+	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }

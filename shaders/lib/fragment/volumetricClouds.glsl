@@ -2,28 +2,9 @@ float remap(float value, const float originalMin, const float originalMax, const
 	return (((value - originalMin) / (originalMax - originalMin)) * (newMax - newMin)) + newMin;
 }
 
-float calculateMieScatterIntergral(float currentTrans, float totalTrans){
-    return -totalTrans * currentTrans + totalTrans;
-}
-
 float calculatePowderEffect(float od, float vDotL){
     float powder = 1.0 - exp2(-od * 2.0);
     return mix(powder, 1.0, vDotL * 0.5 + 0.5);
-}
-
-float phaseG(float vDotL, const float g){
-    const float gg = g * g;
-    return 0.25 * (1.0 - gg) * pow(gg + 1.0 - 2.0 * g * vDotL, -1.5);
-}
-
-float calculateCloudPhase(float vDotL){
-    const float a = 0.7;
-    const float mixer = 0.8;
-
-    float g1 = phaseG(vDotL, 0.8 * a);
-    float g2 = phaseG(vDotL, -0.5 * a);
-
-    return mix(g2, g1, mixer);
 }
 
 float calculateCloudShape(vec3 position, bool isLowQ, float height, float wind){
@@ -121,7 +102,7 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
 
         float currentTransmittance = exp2(-od * 1.11 * rLOG2);
 
-        scattering += calculateCloudLighting(curvedPosition, wLightVector, od, phase, vDotL) * calculateMieScatterIntergral(currentTransmittance, transmittance);
+        scattering += calculateCloudLighting(curvedPosition, wLightVector, od, phase, vDotL) * calculateScatterIntergral(currentTransmittance, transmittance);
         transmittance *= currentTransmittance;
     }
 

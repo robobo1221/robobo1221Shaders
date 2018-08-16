@@ -86,6 +86,7 @@ vec2 getLightmaps(float data)
 	return vec2(lightmaps.x, lightmaps.y * lightmaps.y);
 }
 
+#include "/lib/uniform/shadowDistortion.glsl"
 #include "/lib/fragment/directLighting.glsl"
 #include "/lib/fragment/sky.glsl"
 

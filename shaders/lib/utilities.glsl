@@ -76,6 +76,10 @@ vec3 linearToSRGB(vec3 linear){
     );
 }
 
+float calculateHardShadows(sampler2D shadowMap, vec3 shadowPosition, float bias) {
+    return 1.0 - fstep(texture2D(shadowMap, shadowPosition.xy).x, shadowPosition.z - bias);
+}
+
 #include "/lib/options/skyOptions.glsl"
 #include "/lib/options/cameraOptions.glsl"
 #include "/lib/options/lightingOptions.glsl"
@@ -83,3 +87,4 @@ vec3 linearToSRGB(vec3 linear){
 #include "/lib/utilities/pow.glsl"
 #include "/lib/utilities/encoding.glsl"
 #include "/lib/utilities/noise.glsl"
+#include "/lib/utilities/volumetricOperators.glsl"

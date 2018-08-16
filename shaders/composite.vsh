@@ -3,6 +3,7 @@
 #define VERTEX
 
 varying vec2 texcoord;
+varying mat4 shadowMatrix;
 
 varying vec3 sunVector;
 varying vec3 moonVector;
@@ -16,6 +17,9 @@ varying vec3 moonColorClouds;
 varying vec3 skyColor;
 
 uniform mat4 gbufferModelViewInverse;
+
+uniform mat4 shadowModelView;
+uniform mat4 shadowProjection;
 
 uniform vec3 sunPosition;
 uniform vec3 upPosition;
@@ -44,4 +48,6 @@ void main() {
 	moonColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wMoonVector, 3) * moonColorBase;
 	
 	skyColor = calculateAtmosphere(vec3(0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), wSunVector, wMoonVector, 10);
+
+	shadowMatrix = shadowProjection * shadowModelView;
 }
