@@ -38,7 +38,7 @@ vec3 calculateVolumetricLightLighting(vec3 position, vec3 wLightVector, vec2 od,
 }
 
 vec3 calculateVolumetricLight(vec3 backGround, vec3 worldPosition, vec3 wLightVector, vec3 worldVector, float dither){
-    const int steps = 32;
+    const int steps = 16;
     const float rSteps = 1.0 / steps;
 
     float vDotL = dot(worldVector, wLightVector);
