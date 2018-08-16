@@ -41,17 +41,17 @@ vec3 clampNormal(vec3 n, vec3 v){
     return normalize( NoV * v + n );
 }
 
-const vec3 blackbody(const float t){
+vec3 blackbody(float t){
     // http://en.wikipedia.org/wiki/Planckian_locus
 
     const vec4 vx = vec4(-0.2661239e9,-0.2343580e6,0.8776956e3,0.179910);
     const vec4 vy = vec4(-1.1063814,-1.34811020,2.18555832,-0.20219683);
-    const float it = 1./t;
-    const float it2= it*it;
-    const float x = dot(vx,vec4(it*it2,it2,it,1.));
-    const float x2 = x*x;
-    const float y = dot(vy,vec4(x*x2,x2,x,1.));
-    const float z = 1. - x - y;
+    float it = 1./t;
+    float it2= it*it;
+    float x = dot(vx,vec4(it*it2,it2,it,1.));
+    float x2 = x*x;
+    float y = dot(vy,vec4(x*x2,x2,x,1.));
+    float z = 1. - x - y;
     
     // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
     const mat3 xyzToSrgb = mat3(

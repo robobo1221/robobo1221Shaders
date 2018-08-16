@@ -1,17 +1,17 @@
 float calculateScatterIntergral(float opticalDepth, const float coeff){
-    const float a = -coeff / log(2.0);
+    const float a = -coeff * rLOG2;
     const float b = -1.0 / coeff;
     const float c =  1.0 / coeff;
 
-    return exp2(a * opticalDepth * rLOG2) * b + c;
+    return exp2(a * opticalDepth) * b + c;
 }
 
 vec3 calculateScatterIntergral(float opticalDepth, const vec3 coeff){
-    const vec3 a = -coeff / log(2.0);
+    const vec3 a = -coeff * rLOG2;
     const vec3 b = -1.0 / coeff;
     const vec3 c =  1.0 / coeff;
 
-    return exp2(a * opticalDepth * rLOG2) * b + c;
+    return exp2(a * opticalDepth) * b + c;
 }
 
 float phaseG(float vDotL, const float g){
