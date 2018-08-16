@@ -106,5 +106,7 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
         transmittance *= currentTransmittance;
     }
 
-    return backGround * transmittance + scattering;
+    float fogDistance = clamp01(length(startPosition) * 0.00001);
+
+    return mix(backGround * transmittance + scattering, backGround, fogDistance);
 }
