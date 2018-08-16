@@ -111,11 +111,11 @@ void main() {
 	if (depth >= 1.0) {
 		float vDotL = dot(-viewVector, sunVector);
 
-		vec3 finalColor = vec3(0.0);
-		     finalColor += CalculateSunSpot(vDotL) * sunColorBase;
-			 finalColor += CalculateMoonSpot(-vDotL) * moonColorBase;
+		vec3 color = vec3(0.0);
+		     color += CalculateSunSpot(vDotL) * sunColorBase;
+			 color += CalculateMoonSpot(-vDotL) * moonColorBase;
 
-		vec3 sky = calculateAtmosphere(finalColor, -viewVector, upVector, sunVector, moonVector, 25);
+		vec3 sky = calculateAtmosphere(color, -viewVector, upVector, sunVector, moonVector, 25);
 		gl_FragData[0] = encodeRGBE8(max0(sky));
 		return;
 	}

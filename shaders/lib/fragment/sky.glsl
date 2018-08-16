@@ -5,7 +5,7 @@ float sky_rayleighPhase(float cosTheta) {
 
 float sky_miePhase(float cosTheta, const float g) {
 	const float gg = g * g;
-	return (0.25 * rPI) * (1.0 - gg) * pow((1.0 + gg) - g * 2.0 * cosTheta, -1.5);
+	return (gg * -0.25 + 0.25) * pow(-2.0 * (g * cosTheta) + (gg + 1.0), -1.5);
 }
 
 vec2 sky_phase(float cosTheta, const float g) {
@@ -34,7 +34,7 @@ vec3 sky_density(float centerDistance) {
 }
 
 vec3 sky_airmass(vec3 position, vec3 direction, float rayLength, const float steps) {
-	float stepSize  = rayLength / steps;
+	float stepSize  = rayLength * (1.0 / steps);
 	vec3  increment = direction * stepSize;
 	position += increment * 0.5;
 
@@ -46,8 +46,9 @@ vec3 sky_airmass(vec3 position, vec3 direction, float rayLength, const float ste
 	return airmass * stepSize;
 }
 vec3 sky_airmass(vec3 position, vec3 direction, const float steps) {
-	float PoD = dot(position, direction);
-	float rayLength = sqrt(PoD * PoD + sky_atmosphereRadiusSquared - dot(position, position)) - PoD;
+	float rayLength = dot(position, direction);
+		  if (rayLength < 0.0) return vec3(0.0);
+	      rayLength = sqrt(rayLength * rayLength + sky_atmosphereRadiusSquared - dot(position, position)) - rayLength;
 
 	return sky_airmass(position, direction, rayLength, steps);
 }
@@ -114,7 +115,7 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 		vec3 stepOpticalDepth = sky_coefficientsAttenuation * stepAirmass;
 
 		vec3 stepTransmittance       = exp2(-stepOpticalDepth * rLOG2);
-		vec3 stepTransmittedFraction = clamp((stepTransmittance - 1.0) / -stepOpticalDepth, 0.0, 1.0);
+		vec3 stepTransmittedFraction = clamp01((stepTransmittance - 1.0) / -stepOpticalDepth);
 		vec3 stepScatteringVisible   = transmittance * stepTransmittedFraction;
 
 		scatteringSun  += sky_coefficientsScattering * (stepAirmass.xy * phaseSun ) * stepScatteringVisible * sky_transmittance(position, sunVector,  jSteps);
@@ -128,5 +129,5 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 
 	vec3 scattering = scatteringSun * sunColorBase + scatteringMoon * moonColorBase + scatteringAmbient * skyColor;
 
-	return (planetIntersected ? scattering : background * transmittance + scattering) * TAU;
+	return (!planetIntersected ? background * transmittance : vec3(0.0)) + scattering * TAU;
 }
