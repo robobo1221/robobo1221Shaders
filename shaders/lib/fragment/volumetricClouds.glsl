@@ -63,13 +63,13 @@ float calculateCloudTransmittance(vec3 position, vec3 direction, const int steps
     return exp2(-transmittance * 1.11 * rLOG2 * rSteps);
 }
 
-vec3 calculateCloudLighting(vec3 position, vec3 wLightVector, float od, float phase, float vDotL){
+vec3 calculateCloudLighting(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float phase, float vDotL){
 
     vec3 directLighting = (sunColorClouds + moonColorClouds) * calculateCloudTransmittance(position, wLightVector, 10) * 
                           phase * calculatePowderEffect(od, vDotL) * TAU;
     vec3 skyLighting = skyColor * 0.25 * hPI;
 
-    return (directLighting + skyLighting);
+    return scatterCoeff * (directLighting + skyLighting);
 }
 
 vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float dither){
@@ -100,10 +100,10 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
         float od = calculateCloudOD(curvedPosition, false) * rayLength;
         if (od <= 0.0) continue;
 
-        float currentTransmittance = exp2(-od * 1.11 * rLOG2);
+        float scatterCoeff = calculateScatterIntergral(od, 1.11);
 
-        scattering += calculateCloudLighting(curvedPosition, wLightVector, od, phase, vDotL) * calculateScatterIntergral(currentTransmittance, transmittance);
-        transmittance *= currentTransmittance;
+        scattering += calculateCloudLighting(curvedPosition, wLightVector, scatterCoeff, od, phase, vDotL) * transmittance;
+        transmittance *= exp2(-od * 1.11 * rLOG2);
     }
 
     float fogDistance = clamp01(length(startPosition) * 0.00001);

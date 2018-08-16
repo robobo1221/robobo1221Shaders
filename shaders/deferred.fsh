@@ -114,7 +114,7 @@ void main() {
 			 finalColor += CalculateMoonSpot(-vDotL) * moonColorBase;
 
 		vec3 sky = calculateAtmosphere(finalColor, -viewVector, upVector, sunVector, moonVector, 25);
-		gl_FragData[0] = encodeRGBE8(sky);
+		gl_FragData[0] = encodeRGBE8(max0(sky));
 		return;
 	}
 
@@ -126,6 +126,6 @@ void main() {
 
 	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
 
-	gl_FragData[0] = encodeRGBE8(finalColor);
+	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	gl_FragData[1] = vec4(0.0);
 }

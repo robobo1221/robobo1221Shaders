@@ -6,12 +6,13 @@ vec2 calculateVolumetricLightOD(vec3 position){
     vec2 rayleighMie = exp2(-height * sky_inverseScaleHeights * rLOG2);
 
     od += rayleighMie;
+    //od.y += smoothstep(20.0, 19.0, height) * 5000.0;
 
     return od;
 }
 
 vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, const int steps){
-    float rayLength = (100.0 / steps) / abs(direction.y);
+    float rayLength = (25.0 / steps) / abs(direction.y);
 
     vec3 increment = direction * rayLength;
     position += 0.5 * increment;
@@ -32,7 +33,8 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, const int 
         float volumetricShadow = calculateHardShadows(shadowtex0, shadowPosition, 0.0);
 
         vec3 directLighting = (sunColor + moonColor) * volumetricShadow * calculateVolumeLightTransmittance(position, wLightVector, 8) * TAU;
-            directLighting = (scatterCoeffs * phase) * directLighting;
+             directLighting = (scatterCoeffs * phase) * directLighting;
+
         vec3 skyLighting = skyColor * (scatterCoeffs * vec2(0.25)) * hPI;
 
         return (directLighting + skyLighting);
