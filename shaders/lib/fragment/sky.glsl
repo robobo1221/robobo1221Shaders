@@ -47,8 +47,9 @@ vec3 sky_airmass(vec3 position, vec3 direction, float rayLength, const float ste
 }
 vec3 sky_airmass(vec3 position, vec3 direction, const float steps) {
 	float rayLength = dot(position, direction);
+	      rayLength = rayLength * rayLength + sky_atmosphereRadiusSquared - dot(position, position);
 		  if (rayLength < 0.0) return vec3(0.0);
-	      rayLength = sqrt(rayLength * rayLength + sky_atmosphereRadiusSquared - dot(position, position)) - rayLength;
+	      rayLength = sqrt(rayLength) - dot(position, direction);
 
 	return sky_airmass(position, direction, rayLength, steps);
 }

@@ -8,6 +8,7 @@ varying mat4 shadowMatrix;
 varying vec3 sunVector;
 varying vec3 moonVector;
 varying vec3 upVector;
+varying vec3 lightVector;
 varying vec3 wLightVector;
 
 varying vec3 sunColor;

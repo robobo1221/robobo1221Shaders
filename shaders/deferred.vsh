@@ -10,6 +10,7 @@ varying mat3x4 skySH;
 varying vec3 sunVector;
 varying vec3 moonVector;
 varying vec3 upVector;
+varying vec3 lightVector;
 varying vec3 wLightVector;
 
 varying vec3 sunColor;
@@ -26,6 +27,7 @@ uniform vec3 sunPosition;
 uniform vec3 upPosition;
 
 uniform float eyeAltitude;
+uniform int worldTime;
 
 #include "/lib/utilities.glsl"
 #include "/lib/fragment/sky.glsl"
@@ -87,7 +89,8 @@ void main() {
 	vec3 wSunVector = mat3(gbufferModelViewInverse) * sunVector;
 	vec3 wMoonVector = mat3(gbufferModelViewInverse) * moonVector;
 
-	wLightVector = wSunVector;
+	lightVector = (worldTime > 23075 || worldTime < 12925 ? sunVector : moonVector);
+	wLightVector = mat3(gbufferModelViewInverse) * lightVector;
 
 	sunColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wSunVector, 3) * sunColorBase;
 	moonColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wMoonVector, 3) * moonColorBase;
