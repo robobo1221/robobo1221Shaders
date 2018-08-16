@@ -45,6 +45,8 @@ const bool colortex1Clear = false;
 const bool colortex2Clear = false;
 const bool colortex5Clear = false;
 
+const float ambientOcclusionLevel = 0.0;
+
 */
 
 const int shadowMapResolution = 2048;
