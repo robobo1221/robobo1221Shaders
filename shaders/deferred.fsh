@@ -10,6 +10,7 @@ varying mat3x4 skySH;
 varying vec3 sunVector;
 varying vec3 moonVector;
 varying vec3 upVector;
+varying vec3 wLightVector;
 
 varying vec3 sunColor;
 varying vec3 moonColor;
@@ -86,9 +87,10 @@ vec2 getLightmaps(float data)
 	return vec2(lightmaps.x, lightmaps.y * lightmaps.y);
 }
 
-#include "/lib/uniform/shadowDistortion.glsl"
-#include "/lib/fragment/directLighting.glsl"
 #include "/lib/fragment/sky.glsl"
+#include "/lib/uniform/shadowDistortion.glsl"
+#include "/lib/fragment/volumetricLighting.glsl"
+#include "/lib/fragment/directLighting.glsl"
 
 /* DRAWBUFFERS:20 */
 
@@ -122,7 +124,7 @@ void main() {
 	vec3 normal = getNormal(data1.x);
 	vec2 lightmaps = getLightmaps(data1.y);
 
-	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, lightmaps, 1.0);
+	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
 
 	gl_FragData[0] = encodeRGBE8(finalColor);
 	gl_FragData[1] = vec4(0.0);
