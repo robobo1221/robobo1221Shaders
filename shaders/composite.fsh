@@ -11,10 +11,13 @@ varying vec3 upVector;
 varying vec3 lightVector;
 varying vec3 wLightVector;
 
+varying vec3 baseSunColor;
 varying vec3 sunColor;
 varying vec3 sunColorClouds;
+varying vec3 baseMoonColor;
 varying vec3 moonColor;
 varying vec3 moonColorClouds;
+
 varying vec3 skyColor;
 
 uniform sampler2D colortex0;
