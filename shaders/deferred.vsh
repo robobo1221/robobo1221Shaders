@@ -70,7 +70,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambient
 			float c = cos(latitude);
 			vec3 kernel = vec3(c * cos(longitude), sin(latitude), c * sin(longitude));
 
-			vec3 skyCol = calculateAtmosphere(vec3(0.0), mat3(gbufferModelView) * normalize(kernel + vec3(0.0, offset, 0.0)), upVector, sunVector, moonVector, 10);
+			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel + vec3(0.0, offset, 0.0)), upVector, sunVector, moonVector, 10);
 		
 			shR += ToSH(skyCol.r, kernel);
 			shG += ToSH(skyCol.g, kernel);
@@ -105,5 +105,5 @@ void main() {
 
 	shadowMatrix = shadowProjection * shadowModelView;
 
-	CalculateSkySH(sunVector, moonVector, upVector, skyColor);
+	CalculateSkySH(wSunVector, wMoonVector, vec3(0.0, 1.0, 0.0), skyColor);
 }
