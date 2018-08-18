@@ -23,6 +23,7 @@ varying vec3 skyColor;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D depthtex1;
+uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 
 uniform mat4 gbufferModelView;
@@ -52,10 +53,6 @@ const bool colortex5Clear = false;
 const float ambientOcclusionLevel = 0.0;
 
 */
-
-const int shadowMapResolution = 2048;
-const float rShadowMapResolution = 1.0 / float(shadowMapResolution);
-const float shadowDistance = 120.0;
 
 vec3 getNormal(float data) {
 	return decodeNormal(data, gbufferModelView);
