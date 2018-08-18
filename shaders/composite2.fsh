@@ -56,7 +56,7 @@ vec3 hableTonemap(vec3 x){
 }
 */
 
-/* DRAWBUBBERS:0 */
+/* DRAWBUFFERS:0 */
 void main() {
 	vec4 colorSample = texture2D(colortex2, texcoord);
 	vec3 color = decodeColor(decodeRGBE8(colorSample));

@@ -21,8 +21,8 @@ float calculateTorchLightAttenuation(float lightmap){
 	return (1.0 - clamp01((1.0 - lightmap) * 2.0 - 1.0)) / (dist * dist);
 }
 
-vec3 calculateSkyLighting(float lightmap){
-	#if defined porgram_deferred
+vec3 calculateSkyLighting(float lightmap, vec3 normal){
+	#if defined program_deferred
 		vec3 skyCol = FromSH(skySH[0], skySH[1], skySH[2],mat3(gbufferModelViewInverse) * normal);
 	#else
 		vec3 skyCol = skyColor;
@@ -40,7 +40,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 	vec3 lighting = vec3(0.0);
 
 	lighting += shadows * diffuse * (sunColor + moonColor);
-	lighting += calculateSkyLighting(lightmaps.y);
+	lighting += calculateSkyLighting(lightmaps.y, normal);
 	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor;
 
 	return lighting * albedo;

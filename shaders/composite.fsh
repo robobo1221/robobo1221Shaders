@@ -79,7 +79,7 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }
 
-/* DRAWBUBBERS:5 */
+/* DRAWBUFFERS:5 */
 
 void main() {
 	float depth = texture2D(depthtex0, texcoord).x;
@@ -115,8 +115,8 @@ void main() {
 	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither);
 	
 	if (isTranslucent) {
-	color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
-	color = calculateVolumetricLight(color, position[1], wLightVector, worldVector, dither);
+		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
+		color = calculateVolumetricLight(color, position[1], wLightVector, worldVector, dither);
 	}
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
