@@ -91,7 +91,7 @@ float calculateStars(vec3 worldVector){
 	vec3 fr = (p - flr) - 0.5;
 
 	float intensity = hash13(flr);
-		  intensity = fstep(intensity, 0.01);
+		  intensity = fstep(intensity, 0.0025);
 	float stars = smoothstep(0.5, 0.0, length(fr)) * intensity;
 
 	return stars * 5.0;
