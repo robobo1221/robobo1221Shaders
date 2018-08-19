@@ -9,9 +9,18 @@ vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector) {
 	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL + 1.0);
 		  shadowBias = shadowBias * calculateDistFactor(shadowPosition.xy) * pixelSize * 0.2;
 
-    float shadows = calculateHardShadows(shadowtex1, shadowPosition, shadowBias);
+	float shadow1 = calculateHardShadows(shadowtex1, shadowPosition, shadowBias);
 
-    return vec3(shadows);
+	#ifndef COLOURED_SHADOWS
+		return vec3(shadow1);
+	#endif
+
+	float shadow0 = calculateHardShadows(shadowtex0, shadowPosition, shadowBias);
+	vec3 colorShadow = texture2D(shadowcolor0, shadowPosition.xy).rgb;
+
+	vec3 colouredShadows = mix(vec3(shadow0), colorShadow, clamp01(shadow1 - shadow0));
+
+    return colouredShadows;
 }
 
 float calculateTorchLightAttenuation(float lightmap){

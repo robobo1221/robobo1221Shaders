@@ -14,4 +14,5 @@ void main(){
 	gl_Position.xyz = distortShadowMap(gl_Position.xyz);
 
 	texcoord = gl_MultiTexCoord0.xy;
+	color = gl_Color;
 }
