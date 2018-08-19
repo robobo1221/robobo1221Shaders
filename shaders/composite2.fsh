@@ -64,9 +64,9 @@ vec3 hableTonemap(vec3 x){
 
 vec3 calculateBloomTile(sampler2D textureSample, vec2 coord, const float lod){
 	const float lodScale = exp2(-lod);
-	const float offset = exp2(lod);
+	const float offset = lodScale * 1.5;
 
-	return decodeRGBE8(BicubicTexture(textureSample, coord * lodScale + lodScale));
+	return decodeRGBE8(BicubicTexture(textureSample, coord * lodScale + offset));
 }
 
 vec3 calculateBloom(vec2 coord, float EV){
