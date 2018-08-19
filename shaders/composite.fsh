@@ -106,8 +106,18 @@ void main() {
 
 	vec3 normal = getNormal(data1.x);
 	vec2 lightmaps = getLightmaps(data1.y);
-
 	float dither = bayer64(gl_FragCoord.xy);
+
+	if (backDepth >= 1.0) {
+		float vDotL = dot(viewVector, sunVector);
+
+		color += calculateSunSpot(vDotL) * sunColorBase;
+		color += calculateMoonSpot(-vDotL) * moonColorBase;
+		color += calculateStars(worldVector);
+
+		color = calculateAtmosphere(color, viewVector, upVector, sunVector, moonVector, 25);
+	}
+
 	#ifdef VOLUMETRIC_CLOUDS
 		if (backDepth >= 1.0) color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], dither);
 	#endif

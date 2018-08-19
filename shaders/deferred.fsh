@@ -99,7 +99,6 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 	f0 = decodedData.y;
 }
 
-#include "/lib/fragment/sky.glsl"
 #include "/lib/uniform/shadowDistortion.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
 #include "/lib/fragment/directLighting.glsl"
@@ -108,6 +107,12 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 
 void main() {
 	float depth = texture2D(depthtex1, texcoord).x;
+
+	if (depth >= 1.0) {
+		return;
+		discard;
+	}
+
 	vec4 data0 = texture2D(colortex0, texcoord);
 
 	mat2x3 position;
@@ -117,19 +122,6 @@ void main() {
 	vec3 viewVector = -normalize(position[0]);
 	vec3 worldVector = mat3(gbufferModelViewInverse) * viewVector;
 	vec3 shadowLightVector = shadowLightPosition * 0.01;
-
-	if (depth >= 1.0) {
-		float vDotL = dot(-viewVector, sunVector);
-
-		vec3 color = vec3(0.0);
-		     color += calculateSunSpot(vDotL) * sunColorBase;
-			 color += calculateMoonSpot(-vDotL) * moonColorBase;
-			 color += calculateStars(worldVector);
-
-		vec3 sky = calculateAtmosphere(color, -viewVector, upVector, sunVector, moonVector, 25);
-		gl_FragData[0] = encodeRGBE8(max0(sky));
-		return;
-	}
 
 	float roughness, f0;
 	vec4 data1 = texture2D(colortex1, texcoord);
