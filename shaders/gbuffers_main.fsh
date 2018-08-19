@@ -1,3 +1,5 @@
+#extension GL_EXT_gpu_shader4 : enable
+
 varying vec2 texcoord;
 varying vec4 color;
 
