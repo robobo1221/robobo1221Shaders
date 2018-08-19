@@ -101,3 +101,4 @@ vec2 rotate(vec2 x, float r){
 #include "/lib/utilities/encoding.glsl"
 #include "/lib/utilities/noise.glsl"
 #include "/lib/utilities/volumetricOperators.glsl"
+#include "/lib/utilities/lightingOperators.glsl"

@@ -1,5 +1,3 @@
-#include "/lib/utilities/lightingOperators.glsl"
-
 vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector) {
     vec3 shadowPosition = transMAD(shadowMatrix, worldPosition);
 	     shadowPosition = remapShadowMap(shadowPosition);
