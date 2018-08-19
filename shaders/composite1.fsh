@@ -37,7 +37,7 @@ vec3 calculateBloomTile(const float lod, vec2 pixelSize){
 	vec2 bloomCoord = (texcoord - offset) * lodScale;
 	vec2 scale = pixelSize * lodScale;
 
-    if (any(greaterThanEqual(abs(bloomCoord - 0.5), scale + 0.5)))
+    if (any(greaterThanEqual(abs(bloomCoord - 0.55), scale + 0.5)))
     	return vec3(0.0);
 
 	vec3 totalBloom = vec3(0.0);
@@ -70,16 +70,17 @@ vec3 calculateBloomTiles(){
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	vec3 bloomTiles = vec3(0.0);
 
-	const float lods[6] = float[6](
+	const float lods[7] = float[7](
 		2.0,
 		3.0,
 		4.0,
 		5.0,
 		6.0,
-		7.0
+		7.0,
+		8.0
 	);
 
-	for (int i = 0; i < 5; i++){
+	for (int i = 0; i < 6; i++){
 		bloomTiles += calculateBloomTile(lods[i], pixelSize);
 	}
 

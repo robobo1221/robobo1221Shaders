@@ -73,20 +73,21 @@ vec3 calculateBloom(vec2 coord, float EV){
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	vec3 bloom = vec3(0.0);
 
-	const float lods[6] = float[6](
+	const float lods[7] = float[7](
 		2.0,
 		3.0,
 		4.0,
 		5.0,
 		6.0,
-		7.0
+		7.0,
+		8.0
 	);
 
-	for (int i = 0; i < 5; i++){
+	for (int i = 0; i < 6; i++){
 		bloom += calculateBloomTile(colortex3, coord, lods[i]);
 	}
 
-	return decodeColor(bloom) * (1.0 / 5.0) * exp2(EV - 3.0);
+	return decodeColor(bloom) * (1.0 / 6.0) * exp2(EV - 3.0);
 }
 
 /* DRAWBUFFERS:0 */
