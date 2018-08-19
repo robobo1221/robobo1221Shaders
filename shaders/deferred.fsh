@@ -43,11 +43,13 @@ const float sunPathRotation = -45.0;
 const int colortex0Format = RGBA8;
 const int colortex1Format = RGBA16;
 const int colortex2Format = RGBA8;
+const int colortex3Format = RGBA8;
 const int colortex5Format = RGBA16F;
 
 const bool colortex0Clear = false;
 const bool colortex1Clear = false;
 const bool colortex2Clear = false;
+const bool colortex3Clear = false;
 const bool colortex5Clear = false;
 
 const float ambientOcclusionLevel = 0.0;

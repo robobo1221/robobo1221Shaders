@@ -25,8 +25,8 @@ const float rLOG2	= 1.0 / log(2.0);
 #define transMAD(mat, v) (mat3(mat) * (v) + (mat)[3].xyz)
 #define projMAD(mat, v) (diagonal3(mat) * (v) + (mat)[3].xyz)
 
-#define encodeColor(x) (x * 0.001)
-#define decodeColor(x) (x * 1000.0)
+#define encodeColor(x) (x * 0.0001)
+#define decodeColor(x) (x * 10000.0)
 
 #define cubeSmooth(x) (x * x * (3.0 - 2.0 * x))
 
@@ -86,6 +86,11 @@ float calculateHardShadows(sampler2D shadowMap, vec3 shadowPosition, float bias)
 vec3 genUnitVector(vec2 xy) {
     xy.x *= TAU; xy.y = xy.y * 2.0 - 1.0;
     return vec3(sincos(xy.x) * sqrt(1.0 - xy.y * xy.y), xy.y);
+}
+
+vec2 rotate(vec2 x, float r){
+    vec2 sc = sincos(r);
+    return mat2(sc.x, -sc.y, sc.y, sc.x) * x;
 }
 
 #include "/lib/options/skyOptions.glsl"

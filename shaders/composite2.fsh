@@ -5,7 +5,11 @@
 varying vec2 texcoord;
 
 uniform sampler2D colortex2;
+uniform sampler2D colortex3;
 uniform sampler2D colortex5;
+
+uniform float viewWidth;
+uniform float viewHeight;
 
 #include "/lib/utilities.glsl"
 #include "/lib/fragment/camera.glsl"
@@ -56,14 +60,47 @@ vec3 hableTonemap(vec3 x){
 }
 */
 
+#include "/lib/utilities/bicubic.glsl"
+
+vec3 calculateBloomTile(sampler2D textureSample, vec2 coord, const float lod){
+	const float lodScale = exp2(-lod);
+	const float offset = exp2(lod);
+
+	return decodeRGBE8(BicubicTexture(textureSample, coord * lodScale + lodScale));
+}
+
+vec3 calculateBloom(vec2 coord, float EV){
+	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
+	vec3 bloom = vec3(0.0);
+
+	const float lods[6] = float[6](
+		2.0,
+		3.0,
+		4.0,
+		5.0,
+		6.0,
+		7.0
+	);
+
+	for (int i = 0; i < 5; i++){
+		bloom += calculateBloomTile(colortex3, coord, lods[i]);
+	}
+
+	return decodeColor(bloom) * (1.0 / 5.0) * exp2(EV - 3.0);
+}
+
 /* DRAWBUFFERS:0 */
 void main() {
 	vec4 colorSample = texture2D(colortex2, texcoord);
 	vec3 color = decodeColor(decodeRGBE8(colorSample));
 
 	float avgLum = decodeColor(texture2D(colortex5, texcoord).a);
+	float exposureValue = calculateExposure(avgLum);
 
-	color = calculateExposure(avgLum) * color;
+	vec3 bloom = calculateBloom(texcoord, exposureValue);
+
+	color += bloom;
+	color = exposureValue * color;
 	color = jodieReinhardTonemap(color);
 
 	gl_FragData[0] = vec4(color, 1.0);
