@@ -122,8 +122,9 @@ void main() {
 		float vDotL = dot(-viewVector, sunVector);
 
 		vec3 color = vec3(0.0);
-		     color += CalculateSunSpot(vDotL) * sunColorBase;
-			 color += CalculateMoonSpot(-vDotL) * moonColorBase;
+		     color += calculateSunSpot(vDotL) * sunColorBase;
+			 color += calculateMoonSpot(-vDotL) * moonColorBase;
+			 color += calculateStars(worldVector);
 
 		vec3 sky = calculateAtmosphere(color, -viewVector, upVector, sunVector, moonVector, 25);
 		gl_FragData[0] = encodeRGBE8(max0(sky));

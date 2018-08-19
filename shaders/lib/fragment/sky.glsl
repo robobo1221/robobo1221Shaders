@@ -65,7 +65,7 @@ vec3 sky_transmittance(vec3 position, vec3 direction, const float steps) {
 	return exp2(-sky_opticalDepth(position, direction, steps) * rLOG2);
 }
 
-float CalculateSunSpot(float VdotL) {
+float calculateSunSpot(float VdotL) {
 	const float sunAngularSize = 0.533333;
     const float sunRadius = radians(sunAngularSize);
     const float cosSunRadius = cos(sunRadius);
@@ -74,13 +74,27 @@ float CalculateSunSpot(float VdotL) {
 	return fstep(cosSunRadius, VdotL) * sunLuminance;
 }
 
-float CalculateMoonSpot(float VdotL) {
+float calculateMoonSpot(float VdotL) {
 	const float moonAngularSize = 0.516667;
     const float moonRadius = radians(moonAngularSize);
     const float cosMoonRadius = cos(moonRadius);
 	const float moonLuminance = 1.0 / ((1.0 - cosMoonRadius) * PI);
 
 	return fstep(cosMoonRadius, VdotL) * moonLuminance;
+}
+
+float calculateStars(vec3 worldVector){
+	const int res = 256;
+
+	vec3 p = worldVector * res;
+	vec3 flr = floor(p);
+	vec3 fr = (p - flr) - 0.5;
+
+	float intensity = hash13(flr);
+		  intensity = fstep(intensity, 0.01);
+	float stars = smoothstep(0.5, 0.0, length(fr)) * intensity;
+
+	return stars * 5.0;
 }
 
 vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, const int iSteps) {

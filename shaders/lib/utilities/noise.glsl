@@ -26,3 +26,21 @@ float bayer2(vec2 a){
 #define bayer32(a)  (bayer16(.5*(a))*.25+bayer2(a))
 #define bayer64(a)  (bayer32(.5*(a))*.25+bayer2(a))
 #define bayer128(a) (bayer64(.5*(a))*.25+bayer2(a))
+
+#define HASHSCALE1 443.8975
+#define HASHSCALE3 vec3(443.897, 441.423, 437.195)
+#define HASHSCALE4 vec3(443.897, 441.423, 437.195, 444.129)
+
+//  1 out, 3 in...
+float hash13(vec3 p3)
+{
+	p3  = fract(p3 * HASHSCALE1);
+    p3 += dot(p3, p3.yzx + 19.19);
+    return fract((p3.x + p3.y) * p3.z);
+}
+
+vec3 hash33(vec3 p){
+    p = fract(p * HASHSCALE3);
+    p += dot(p.zxy, p.yxz + 19.19);
+    return fract(vec3(p.x * p.y, p.z * p.x, p.y * p.z));
+}
