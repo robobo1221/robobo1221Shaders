@@ -3,10 +3,9 @@ vec2 calculateVolumetricLightOD(vec3 position){
     float height = adjustedPosition.y;
     vec2 od = vec2(0.0);
 
-    vec2 rayleighMie = exp2(-height * sky_inverseScaleHeights * rLOG2);
+    vec2 rayleighMie = sky_density(height + sky_planetRadius).xy;
 
     od += rayleighMie;
-    //od.y += smoothstep(80.0, 66.0, height) * 10000.0;
 
     return od;
 }
@@ -19,7 +18,7 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, const int 
 
     vec2 od = vec2(0.0);
 
-    for (int i = 0; i < steps; i++, position += increment){
+    for (int i = 0; i < steps; ++i, position += increment){
         od += calculateVolumetricLightOD(position);
     }
     return exp2(-mat2x3(sky_coefficientsAttenuation) * od * rLOG2 * rayLength);
@@ -59,7 +58,7 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, const int 
 
         vec2 phase = vec2(phaseRayleigh(vDotL), phaseG(vDotL, sky_mieg));
 
-        for (int i = 0; i < steps; i++, rayPosition += increment){
+        for (int i = 0; i < steps; ++i, rayPosition += increment){
             vec2 od = calculateVolumetricLightOD(rayPosition) * rayLength;
 
             mat2x3 scatterCoeffs = mat2x3(

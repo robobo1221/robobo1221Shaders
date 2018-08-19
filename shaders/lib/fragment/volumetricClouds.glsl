@@ -57,7 +57,7 @@ float calculateCloudTransmittance(vec3 position, vec3 direction, const int steps
 
     float transmittance = 0.0;
 
-    for (int i = 0; i < steps; i++, position += increment){
+    for (int i = 0; i < steps; ++i, position += increment){
         transmittance += calculateCloudOD(position, true);
     }
     return exp2(-transmittance * 1.11 * rLOG2 * rSteps);
@@ -71,7 +71,7 @@ float calculateCloudTransmittanceSkyLight(vec3 position, vec3 direction, const i
 
     float transmittance = 0.0;
 
-    for (int i = 0; i < steps; i++, position += increment){
+    for (int i = 0; i < steps; ++i, position += increment){
         transmittance += calculateCloudOD(position, true);
     }
     return exp2(-transmittance * 1.11 * rLOG2 * rSteps * 0.5);
