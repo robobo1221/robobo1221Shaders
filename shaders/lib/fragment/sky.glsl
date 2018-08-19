@@ -25,16 +25,11 @@ vec2 rsi(vec3 position, vec3 direction, float radius) {
 }
 
 vec3 sky_density(float centerDistance) {
-	vec2 rayleighMie = exp2((centerDistance * -sky_inverseScaleHeights + sky_scaledPlanetRadius) * rLOG2);
-
-	//float morningFog = exp2((max0(centerDistance - sky_planetRadius) * -0.003) * rLOG2) * 10.0;
+	vec2 rayleighMie = exp(centerDistance * -sky_inverseScaleHeights + sky_scaledPlanetRadius);
 
 	// Ozone distribution curve by Sergeant Sarcasm - https://www.desmos.com/calculator/j0wozszdwa
-	float ozone = exp2(-max(0.0, (35000.0 - centerDistance) - sky_planetRadius) * (1.0 / 5000.0) * rLOG2)
-	            * exp2(-max(0.0, (centerDistance - 35000.0) - sky_planetRadius) * (1.0 / 15000.0) * rLOG2);
-
-	//rayleighMie.y += morningFog;
-
+	float ozone = exp(-max(0.0, (35000.0 - centerDistance) - sky_planetRadius) * (1.0 / 5000.0))
+	            * exp(-max(0.0, (centerDistance - 35000.0) - sky_planetRadius) * (1.0 / 15000.0));
 	return vec3(rayleighMie, ozone);
 }
 

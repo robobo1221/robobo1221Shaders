@@ -101,7 +101,6 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 }
 
 #include "/lib/uniform/shadowDistortion.glsl"
-#include "/lib/fragment/sky.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
 #include "/lib/fragment/directLighting.glsl"
 
