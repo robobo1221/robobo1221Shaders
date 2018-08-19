@@ -140,7 +140,7 @@ void main() {
 
 	getRoughnessF0(data1.z, roughness, f0);
 
-	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
+	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	gl_FragData[1] = vec4(0.0);

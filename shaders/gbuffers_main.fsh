@@ -19,6 +19,7 @@ void main() {
 	vec4 specularData = texture2D(specular, texcoord);
 
 	normal = normal * 2.0 - 1.0;
+	normal = normal == vec3(0.0) || normal == vec3(-1.0) ? vec3(0.0, 0.0, 1.0) : normal;
 
 	#if defined program_gbuffers_terrain
 		normal = clampNormal(normal, tangentVec);
