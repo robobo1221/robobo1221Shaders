@@ -59,7 +59,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambient
 	const float longitudeSize = rLonSamples * TAU;
 
 	vec4 shR = vec4(0.0), shG = vec4(0.0), shB = vec4(0.0);
-	const float offset = 0.1;
+	const float offset = 0.5;
 
 	for (int i = 0; i < latSamples; ++i) {
 		float latitude = float(i) * latitudeSize;
@@ -70,7 +70,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambient
 			float c = cos(latitude);
 			vec3 kernel = vec3(c * cos(longitude), sin(latitude), c * sin(longitude));
 
-			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel + vec3(0.0, offset, 0.0)), upVector, sunVector, moonVector, 10);
+			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel * 0.5 + 0.5), upVector, sunVector, moonVector, 10);
 		
 			shR += ToSH(skyCol.r, kernel);
 			shG += ToSH(skyCol.g, kernel);

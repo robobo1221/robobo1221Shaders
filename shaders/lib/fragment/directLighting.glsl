@@ -17,7 +17,7 @@ vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector) {
 }
 
 float calculateTorchLightAttenuation(float lightmap){
-	float dist = clamp((1.0 - lightmap) * 15.0, 0.0, 15.0);
+	float dist = clamp((1.0 - lightmap) * 15.0, 1.0, 15.0);
 	return (1.0 - clamp01((1.0 - lightmap) * 2.0 - 1.0)) / (dist * dist);
 }
 

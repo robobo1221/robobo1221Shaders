@@ -92,6 +92,13 @@ vec2 getLightmaps(float data)
 	return vec2(lightmaps.x, lightmaps.y * lightmaps.y);
 }
 
+void getRoughnessF0(float data, out float roughness, out float f0){
+	vec2 decodedData = decodeVec2(data);
+	
+	roughness = decodedData.x;
+	f0 = decodedData.y;
+}
+
 #include "/lib/fragment/sky.glsl"
 #include "/lib/uniform/shadowDistortion.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
@@ -123,11 +130,14 @@ void main() {
 		return;
 	}
 
+	float roughness, f0;
 	vec4 data1 = texture2D(colortex1, texcoord);
 
 	vec3 albedo = srgbToLinear(data0.rgb);
 	vec3 normal = getNormal(data1.x);
 	vec2 lightmaps = getLightmaps(data1.y);
+
+	getRoughnessF0(data1.z, roughness, f0);
 
 	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
 
