@@ -80,6 +80,8 @@ vec3 linearToSRGB(vec3 linear){
 }
 
 float calculateHardShadows(sampler2D shadowMap, vec3 shadowPosition, float bias) {
+    if(shadowPosition.z > 1.0) return 1.0;
+
     return 1.0 - fstep(texture2D(shadowMap, shadowPosition.xy).x, shadowPosition.z - bias);
 }
 
