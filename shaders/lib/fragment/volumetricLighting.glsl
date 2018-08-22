@@ -30,7 +30,7 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, const int 
         vec3 shadowPosition = transMAD(shadowMatrix, position);
             shadowPosition = remapShadowMap(shadowPosition);
 
-        float volumetricShadow = calculateHardShadows(shadowtex1, shadowPosition, 0.0);
+        float volumetricShadow = calculateHardShadows(shadowtex1, shadowPosition, 0.0) * transitionFading;
 
         vec3 directLighting = (sunColor + moonColor) * volumetricShadow * calculateVolumeLightTransmittance(position, wLightVector, 8) * TAU;
              directLighting = (scatterCoeffs * phase) * directLighting;

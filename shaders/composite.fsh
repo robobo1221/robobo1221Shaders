@@ -17,8 +17,9 @@ varying vec3 sunColorClouds;
 varying vec3 baseMoonColor;
 varying vec3 moonColor;
 varying vec3 moonColorClouds;
-
 varying vec3 skyColor;
+
+varying float transitionFading;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;

@@ -69,7 +69,7 @@ float calculateCloudTransmittanceSkyLight(vec3 position, const vec3 direction, c
 
 vec3 calculateCloudLighting(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float phase, float vDotL){
 
-    vec3 directLighting = (sunColorClouds + moonColorClouds) * calculateCloudTransmittance(position, wLightVector, 5) * 
+    vec3 directLighting = (sunColorClouds + moonColorClouds) * transitionFading * calculateCloudTransmittance(position, wLightVector, 5) * 
                           phase * calculatePowderEffect(od, vDotL) * TAU;
     vec3 skyLighting = skyColor * calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), 3) * 0.25 * PI;
 

@@ -42,11 +42,15 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 	vec3 shadows = calculateShadows(worldPosition, normal, shadowLightVector);
 		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, 8);
 
-	float diffuse = GeometrySmithGGX(normal, viewVector, shadowLightVector, roughness);
+	#if defined program_deferred
+		float diffuse = GeometrySmithGGX(normal, viewVector, shadowLightVector, roughness);
+	#else
+		float diffuse = clamp01(dot(normal, shadowLightVector));	//Lambert for stained glass
+	#endif
 
 	vec3 lighting = vec3(0.0);
 
-	lighting += shadows * diffuse * (sunColor + moonColor);
+	lighting += shadows * diffuse * (sunColor + moonColor) * transitionFading;
 	lighting += calculateSkyLighting(lightmaps.y, normal);
 	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor;
 

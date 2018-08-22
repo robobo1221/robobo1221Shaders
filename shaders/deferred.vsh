@@ -17,8 +17,9 @@ varying vec3 baseSunColor;
 varying vec3 sunColor;
 varying vec3 baseMoonColor;
 varying vec3 moonColor;
-
 varying vec3 skyColor;
+
+varying float transitionFading;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
@@ -83,6 +84,10 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambient
 void main() {
 	gl_Position.xy = gl_Vertex.xy * 2.0 - 1.0;
 	texcoord = gl_MultiTexCoord0.xy;
+
+	const float tTime = (1.0 / 50.0);
+	float wTime = float(worldTime);
+	transitionFading = clamp01(clamp01((wTime - 23215.0) * tTime) + (1.0 - clamp01((wTime - 12735.0) * tTime)) + clamp01((wTime - 12925.0) * tTime) * (1.0 - clamp01((wTime - 23075.0) * tTime)));
 
 	upVector = upPosition * 0.01;
 	sunVector = sunPosition * 0.01;
