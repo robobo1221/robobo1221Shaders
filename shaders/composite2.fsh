@@ -20,12 +20,13 @@ vec3 jodieReinhardTonemap(vec3 c){
     return linearToSRGB(mix(c/(l+1.),tc,tc));
 }
 
-/*
+
 vec3 burgressTonemap(vec3 c){
-	vec3 x = max0(c - 0.004);
+	vec3 x = max0(c - 0.002);
 	return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
 }
 
+/*
 vec3 ACESFilmTonemap(vec3 x )
 {
     const float a = 2.51;
@@ -102,7 +103,7 @@ void main() {
 
 	color += bloom;
 	color = exposureValue * color;
-	color = jodieReinhardTonemap(color);
+	color = burgressTonemap(color);
 
 	gl_FragData[0] = vec4(color, 1.0);
 }

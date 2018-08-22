@@ -13,6 +13,34 @@
 
         return cubeSmooth(noise);
     }
+
+    float fbm(vec2 x, const float d, const float m, const int oct) {
+        float v = 0.0;
+        float a = 0.5;
+        const vec2 shift = vec2(100.0);
+        const mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
+
+        for (int i = 0; i < oct; ++i) {
+            v += a * texture2D(noisetex, x).xy;
+            x = rot * x * m + shift;
+            a *= d;
+        }
+        return v;
+    }
+
+
+    float fbm(vec3 x, const float d, const float m, const int oct) {
+        float v = 0.0;
+        float a = 0.5;
+        const vec3 shift = vec3(100.0);
+
+        for (int i = 0; i < oct; ++i) {
+            v += a * calculate3DNoise(x);
+            x = x * m + shift;
+            a *= d;
+        }
+        return v;
+    }
 #endif
 
 float bayer2(vec2 a){
