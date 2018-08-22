@@ -40,7 +40,7 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 
 vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness) {
 	vec3 shadows = calculateShadows(worldPosition, normal, shadowLightVector);
-		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, 8);
+		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
 
 	#if defined program_deferred
 		float diffuse = GeometrySmithGGX(normal, viewVector, shadowLightVector, roughness);
