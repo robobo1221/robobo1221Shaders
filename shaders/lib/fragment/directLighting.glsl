@@ -6,7 +6,7 @@ vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector) {
 
 	float pixelSize = rShadowMapResolution;
 
-	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL + 1.0);
+	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL);
 		  shadowBias = shadowBias * calculateDistFactor(shadowPosition.xy) * pixelSize * 0.2;
 
 	float shadow1 = calculateHardShadows(shadowtex1, shadowPosition, shadowBias);
