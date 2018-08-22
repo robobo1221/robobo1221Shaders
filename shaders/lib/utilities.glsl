@@ -95,6 +95,28 @@ vec2 rotate(vec2 x, float r){
     return mat2(sc.x, -sc.y, sc.y, sc.x) * x;
 }
 
+mat3 getRotMat(vec3 x,vec3 y){
+    float d = dot(x,y);
+    vec3 cr = cross(y,x);
+    
+    float s = length(cr);
+    
+    float id = 1.-d;
+    
+    vec3 m = cr/s;
+    
+    vec3 m2 = m*m*id+d;
+    vec3 sm = s*m;
+    
+    vec3 w = (m.xy*id).xxy*m.yzz;
+    
+    return mat3(
+        m2.x,     w.x-sm.z, w.y+sm.y,
+        w.x+sm.z, m2.y,     w.z-sm.x, 
+        w.y-sm.y, w.z+sm.x, m2.z
+    );
+}
+
 #include "/lib/options/skyOptions.glsl"
 #include "/lib/options/cameraOptions.glsl"
 #include "/lib/options/lightingOptions.glsl"

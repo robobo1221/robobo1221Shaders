@@ -8,7 +8,9 @@ varying mat4 shadowMatrix;
 varying mat3x4 skySH;
 
 varying vec3 sunVector;
+varying vec3 wSunVector;
 varying vec3 moonVector;
+varying vec3 wMoonVector;
 varying vec3 upVector;
 varying vec3 lightVector;
 varying vec3 wLightVector;
@@ -93,8 +95,8 @@ void main() {
 	sunVector = sunPosition * 0.01;
 	moonVector = -sunVector;
 
-	vec3 wSunVector = mat3(gbufferModelViewInverse) * sunVector;
-	vec3 wMoonVector = mat3(gbufferModelViewInverse) * moonVector;
+	wSunVector = mat3(gbufferModelViewInverse) * sunVector;
+	wMoonVector = mat3(gbufferModelViewInverse) * moonVector;
 
 	lightVector = (worldTime > 23075 || worldTime < 12925 ? sunVector : moonVector);
 	wLightVector = mat3(gbufferModelViewInverse) * lightVector;

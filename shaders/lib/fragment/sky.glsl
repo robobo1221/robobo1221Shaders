@@ -83,8 +83,10 @@ float calculateMoonSpot(float VdotL) {
 	return fstep(cosMoonRadius, VdotL) * moonLuminance;
 }
 
-float calculateStars(vec3 worldVector){
+float calculateStars(vec3 worldVector, vec3 moonVector){
 	const int res = 256;
+
+	worldVector = getRotMat(moonVector, vec3(0.0, 1.0, 0.0)) * worldVector;
 
 	vec3 p = worldVector * res;
 	vec3 flr = floor(p);

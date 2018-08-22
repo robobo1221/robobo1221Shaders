@@ -6,7 +6,9 @@ varying vec2 texcoord;
 varying mat4 shadowMatrix;
 
 varying vec3 sunVector;
+varying vec3 wSunVector;
 varying vec3 moonVector;
+varying vec3 wMoonVector;
 varying vec3 upVector;
 varying vec3 lightVector;
 varying vec3 wLightVector;
@@ -115,7 +117,7 @@ void main() {
 
 		color += calculateSunSpot(vDotL) * sunColorBase;
 		color += calculateMoonSpot(-vDotL) * moonColorBase;
-		color += calculateStars(worldVector);
+		color += calculateStars(worldVector, wMoonVector);
 
 		color = calculateAtmosphere(color, viewVector, upVector, sunVector, moonVector, 25);
 	}
