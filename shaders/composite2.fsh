@@ -22,7 +22,7 @@ vec3 jodieReinhardTonemap(vec3 c){
 
 
 vec3 burgressTonemap(vec3 c){
-	vec3 x = max0(c - 0.002);
+	vec3 x = c;
 	return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
 }
 
