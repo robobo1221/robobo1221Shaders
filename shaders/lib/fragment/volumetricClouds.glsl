@@ -67,13 +67,10 @@ float calculateCloudTransmittanceSkyLight(vec3 position, const vec3 direction, c
     return exp2(-transmittance * 1.11 * rLOG2 * rSteps * 0.25);
 }
 
-vec3 calculateCloudLighting(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float phase, float vDotL){
-
-    vec3 directLighting = (sunColorClouds + moonColorClouds) * transitionFading * calculateCloudTransmittance(position, wLightVector, 5) * 
-                          phase * calculatePowderEffect(od, vDotL) * TAU;
-    vec3 skyLighting = skyColor * calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), 3) * 0.25 * PI;
-
-    return scatterCoeff * ( skyLighting + directLighting);
+void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float indirectScattering){
+    
+    directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, 5) * calculatePowderEffect(od, vDotL) * transmittance;
+    indirectScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), 3) * transmittance;
 }
 
 #define CLOUD_MULTI_SCATTER
@@ -97,7 +94,8 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
     float rayLength = length(increment);
 
     float transmittance = 1.0;
-    vec3 scattering = vec3(0.0);
+    float directScattering = 0.0;
+    float indirectScattering = 0.0;
 
     float phase = calculateCloudPhase(vDotL);
 
@@ -108,11 +106,15 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
 
         float scatterCoeff = calculateScatterIntergral(od, 1.11);
 
-        scattering += calculateCloudLighting(curvedPosition, wLightVector, scatterCoeff, od, phase, vDotL) * transmittance;
+        calculateCloudScattering(curvedPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, indirectScattering);
         transmittance *= exp2(-od * 1.11 * rLOG2);
     }
 
     float fogDistance = clamp01(length(startPosition) * 0.00001);
+
+    vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase * TAU;
+    vec3 indirectLighting = indirectScattering * skyColor * 0.25 * PI;
+    vec3 scattering = directLighting + indirectLighting;
 
     return mix(backGround * transmittance + scattering, backGround, fogDistance);
 }
