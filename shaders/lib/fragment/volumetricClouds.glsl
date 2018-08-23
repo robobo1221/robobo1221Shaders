@@ -80,7 +80,7 @@ vec3 calculateCloudLighting(vec3 position, vec3 wLightVector, float scatterCoeff
 
 vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float dither){
     if (worldVector.y < 0.0) return backGround;
-    const int steps = 32;
+    const int steps = 20;
     const float rSteps = 1.0 / steps;
 
     float vDotL = dot(worldVector, wLightVector);
