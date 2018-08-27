@@ -13,6 +13,7 @@ uniform sampler2D tex;
 void main()
 {
 	vec4 albedo = texture2D(tex, texcoord) * color;
+	albedo.rgb = srgbToLinear(albedo.rgb);
 
 	gl_FragData[0] = albedo;
 }
