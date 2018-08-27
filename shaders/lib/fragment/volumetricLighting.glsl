@@ -69,7 +69,7 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, float shad
             transmittance *= exp2(-(mat2x3(sky_coefficientsAttenuation) * od) * rLOG2);
         }
 
-        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * TAU;
+        vec3 directLighting = directScattering * (sunColor + moonColor) * transitionFading * TAU;
         vec3 indirectLighting = indirectScattering * skyColor * PI;
         vec3 scattering = directLighting + indirectLighting;
 
