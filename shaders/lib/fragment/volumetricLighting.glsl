@@ -6,7 +6,7 @@ vec2 calculateVolumetricLightOD(vec3 position){
     vec2 rayleighMie = exp2(-height * sky_inverseScaleHeights * rLOG2);
 
     od += rayleighMie;
-    //od.y += smoothstep(80.0, 66.0, height) * 1000.0;
+    //od.y += smoothstep(80.0, 66.0, height) * 10000.0;
 
     return od;
 }
@@ -27,18 +27,14 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, float shad
 }
 
 #if defined program_composite0
-    vec3 calculateVolumetricLightLighting(vec3 position, vec3 wLightVector, vec2 od, vec2 phase, mat2x3 scatterCoeffs){
+    void calculateVolumetricLightScattering(vec3 position, vec3 wLightVector, mat2x3 scatterCoeffs, vec2 phase, vec3 transmittance, inout vec3 directScattering, inout vec3 indirectScattering){
         vec3 shadowPosition = transMAD(shadowMatrix, position);
              shadowPosition = remapShadowMap(shadowPosition);
 
-        float volumetricShadow = calculateHardShadows(shadowtex1, shadowPosition, 0.0) * transitionFading;
+        float volumetricShadow = calculateHardShadows(shadowtex1, shadowPosition, 0.0);
 
-        vec3 directLighting = (sunColor + moonColor) * volumetricShadow * calculateVolumeLightTransmittance(position, wLightVector, volumetricShadow, 8) * TAU;
-             directLighting = (scatterCoeffs * phase) * directLighting;
-
-        vec3 skyLighting = skyColor * (scatterCoeffs * vec2(0.25)) * PI;
-
-        return (directLighting + skyLighting);
+        directScattering += (scatterCoeffs * phase) * volumetricShadow * calculateVolumeLightTransmittance(position, wLightVector, volumetricShadow, 8) * transmittance;
+        indirectScattering += (scatterCoeffs * vec2(0.25)) * transmittance;
     }
 
     vec3 calculateVolumetricLight(vec3 backGround, vec3 worldPosition, vec3 wLightVector, vec3 worldVector, float dither){
@@ -55,8 +51,9 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, float shad
 
         float rayLength = length(increment);
 
-        vec3 scattering = vec3(0.0);
         vec3 transmittance = vec3(1.0);
+        vec3 directScattering = vec3(0.0);
+        vec3 indirectScattering = vec3(0.0);
 
         vec2 phase = vec2(phaseRayleigh(vDotL), phaseG(vDotL, sky_mieg));
 
@@ -68,9 +65,14 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, float shad
                 sky_coefficientsScattering[1] * calculateScatterIntergral(od.y, sky_coefficientsAttenuation[1])
             );
 
-            scattering += calculateVolumetricLightLighting(rayPosition, wLightVector, od, phase, scatterCoeffs) * transmittance;
+            calculateVolumetricLightScattering(rayPosition, wLightVector, scatterCoeffs, phase, transmittance, directScattering, indirectScattering);
             transmittance *= exp2(-(mat2x3(sky_coefficientsAttenuation) * od) * rLOG2);
         }
+
+        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * TAU;
+        vec3 indirectLighting = indirectScattering * skyColor * PI;
+        vec3 scattering = directLighting + indirectLighting;
+
         return backGround * transmittance + scattering;
     }
 #endif
