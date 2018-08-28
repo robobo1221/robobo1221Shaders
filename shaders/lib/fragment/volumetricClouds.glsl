@@ -23,7 +23,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
     float wind = TIME * 0.025;
 
-    vec3 cloudPos = position * 0.0005 + vec3(wind, 0.0, wind);
+    vec3 cloudPos = position * 0.00045 + vec3(wind, 0.0, wind);
 
     float worldHeight = position.y - volumetric_cloudHeight;
     float normalizedHeight = worldHeight * (1.0 / volumetric_cloudThickness);
