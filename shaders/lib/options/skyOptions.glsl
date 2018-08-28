@@ -35,4 +35,4 @@ const float volumetric_cloudThickness = 2000.0;
 const float volumetric_cloudMaxHeight = volumetric_cloudHeight + volumetric_cloudThickness;
 
 //#define VOLUMETRIC_CLOUDS
-#define volumetric_cloudDensity 0.0075
+#define volumetric_cloudDensity 0.0125

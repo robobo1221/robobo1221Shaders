@@ -31,7 +31,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
     float clouds = calculateCloudShape(cloudPos, wind, octaves);
 
-    clouds = clamp01(clouds * heightAttenuation * 2.0 - (heightAttenuation + 0.25));
+    clouds = clamp01(clouds * heightAttenuation * 2.0 - (heightAttenuation + 0.3));
 
     return clouds * volumetric_cloudDensity;
 }
