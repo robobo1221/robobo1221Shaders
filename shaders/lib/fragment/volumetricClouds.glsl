@@ -27,14 +27,11 @@ float calculateCloudOD(vec3 position, const int octaves){
 
     float worldHeight = position.y - volumetric_cloudHeight;
     float normalizedHeight = worldHeight * (1.0 / volumetric_cloudThickness);
-
-    float remappedHeight0 = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0));
-    float remappedHeight1 = clamp01(remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
-    float heightAttenuation = remappedHeight0 * remappedHeight1;
+    float heightAttenuation = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0) * remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
 
     float clouds = calculateCloudShape(cloudPos, wind, octaves);
 
-    clouds = clamp01(clouds * heightAttenuation * 3.0 - (1.75 * remappedHeight1));
+    clouds = clamp01(clouds * heightAttenuation * 2.0 - (heightAttenuation + 0.25));
 
     return clouds * volumetric_cloudDensity;
 }
