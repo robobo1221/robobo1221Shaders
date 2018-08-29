@@ -123,7 +123,7 @@ void main() {
 	}
 
 	#ifdef VOLUMETRIC_CLOUDS
-		if (backDepth >= 1.0) color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], dither);
+		color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], depth, dither);
 	#endif
 
 	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither);

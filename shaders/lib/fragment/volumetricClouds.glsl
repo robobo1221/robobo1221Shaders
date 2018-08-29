@@ -21,14 +21,14 @@ float calculateCloudShape(vec3 position, vec3 windDirection, const int octaves){
 }
 
 float calculateCloudOD(vec3 position, const int octaves){
-    if (position.y > volumetric_cloudMaxHeight || position.y < volumetric_cloudHeight) return 0.0;
+    if (position.y > volumetric_cloudMaxHeight || position.y < volumetric_cloudMinHeight) return 0.0;
 
     float wind = TIME * 0.025;
     vec3 windDirection = vec3(wind, 0.0, wind);
 
-    vec3 cloudPos = position * 0.00045 + windDirection;
+    vec3 cloudPos = position * 0.00045 * volumetric_cloudScale + windDirection;
 
-    float worldHeight = position.y - volumetric_cloudHeight;
+    float worldHeight = position.y - volumetric_cloudMinHeight;
     float normalizedHeight = worldHeight * (1.0 / volumetric_cloudThickness);
     float heightAttenuation = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0) * remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
 
@@ -36,7 +36,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
     clouds = clamp01(clouds * heightAttenuation * 2.0 - (heightAttenuation + 0.3));
 
-    return clouds * volumetric_cloudDensity;
+    return clouds * (volumetric_cloudDensity * volumetric_cloudScale);
 }
 
 float calculateCloudTransmittance(vec3 position, vec3 direction, const int steps){
@@ -75,18 +75,28 @@ void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoe
 
 #define CLOUD_MULTI_SCATTER
 
-vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float dither){
-    if (worldVector.y < 0.0) return backGround;
+vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, float dither){
+    //if (worldVector.y < 0.0) return backGround;
     const int steps = 20;
     const float rSteps = 1.0 / steps;
 
-    float vDotL = dot(worldVector, wLightVector);
+    vec2 bottomSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMinHeight);
+    vec2 topSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMaxHeight);
 
-    float bottomSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudHeight).y;
-    float topSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMaxHeight).y;
+    float startDistance = max0(cameraPosition.y > volumetric_cloudMaxHeight ? topSphere.x : bottomSphere.y);
+    float endDistance = max0(cameraPosition.y > volumetric_cloudMaxHeight ? bottomSphere.x : topSphere.y);
 
-    vec3 startPosition = worldVector * bottomSphere;
-    vec3 endPosition = worldVector * topSphere;
+    vec3 startPosition = worldVector * startDistance;
+    vec3 endPosition = worldVector * endDistance;
+
+    float marchRange = (1.0 - clamp01((cameraPosition.y - volumetric_cloudMaxHeight) * 0.1)) * (1.0 - clamp01((volumetric_cloudMinHeight - cameraPosition.y) * 0.1));
+          marchRange = mix(1.0, marchRange, float(depth >= 1.0));
+
+    startPosition = mix(startPosition, gbufferModelViewInverse[3].xyz, marchRange);
+    endPosition = mix(endPosition, worldPosition * (depth >= 1.0 ? (volumetric_cloudHeight / 160.0) * 2.0 : 1.0), marchRange);
+
+    float fogDistance = clamp01(length(startPosition) * 0.00001 * volumetric_cloudScale);
+    if (fogDistance >= 1.0) return backGround;
 
     vec3 increment = (endPosition - startPosition) * rSteps;
     vec3 cloudPosition = increment * dither + startPosition + cameraPosition;
@@ -97,6 +107,7 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
     float directScattering = 0.0;
     float indirectScattering = 0.0;
 
+    float vDotL = dot(worldVector, wLightVector);
     float phase = calculateCloudPhase(vDotL);
 
     for (int i = 0; i < steps; ++i, cloudPosition += increment){
@@ -109,8 +120,6 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
         calculateCloudScattering(curvedPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, indirectScattering);
         transmittance *= exp2(-od * 1.11 * rLOG2);
     }
-
-    float fogDistance = clamp01(length(startPosition) * 0.00001);
 
     vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase * TAU;
     vec3 indirectLighting = indirectScattering * skyColor * 0.25 * PI;
