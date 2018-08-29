@@ -7,6 +7,7 @@ flat varying mat3 tbn;
 flat varying vec3 tangentVec;
 
 varying vec2 lightmaps;
+flat varying float material;
 
 uniform sampler2D tex;
 
@@ -21,7 +22,7 @@ void main() {
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 	gl_Position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
 
-	float material = mc_Entity.x;
+	material = mc_Entity.x;
 
 	texcoord = gl_MultiTexCoord0.xy;
 	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);

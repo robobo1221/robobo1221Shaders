@@ -7,6 +7,7 @@ flat varying mat3 tbn;
 flat varying vec3 tangentVec;
 
 varying vec2 lightmaps;
+flat varying float material;
 
 uniform sampler2D tex;
 uniform sampler2D normals;
@@ -25,6 +26,9 @@ void main() {
 
 	#if defined program_gbuffers_terrain
 		normal = clampNormal(normal, tangentVec);
+	#endif
+	#if defined program_gbuffers_water
+		//if (material == 8 || material == 9)albedo = vec4(1.0, 1.0, 1.0, 0.0);
 	#endif
 
 	float roughness = 1.0 - specularData.z;
