@@ -43,7 +43,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
 
 	#if defined program_deferred
-		float diffuse = GeometrySmithGGX(normal, viewVector, shadowLightVector, roughness);
+		vec3 diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
 	#else
 		float diffuse = clamp01(dot(normal, shadowLightVector));	//Lambert for stained glass
 	#endif

@@ -4,7 +4,7 @@ float GeometrySchlickGGX(float NdotV, float k){
     return NdotV / denom;
 }
 
-float GeometrySmithGGX(vec3 N, vec3 V, vec3 L, float r){
+vec3 GeometrySmithGGX(vec3 diffuseColor, vec3 N, vec3 V, vec3 L, float r){
 	float k = pow2(r + 1.0) * (1.0 / 8.0);
 
 	vec3 H = L + V;
@@ -15,7 +15,9 @@ float GeometrySmithGGX(vec3 N, vec3 V, vec3 L, float r){
     float ggx1 = GeometrySchlickGGX(NdotH, k);
     float ggx2 = GeometrySchlickGGX(NdotL, k);
 
-    return ggx1 * ggx2;
+    float multiScattering = 0.1159 * r;
+
+    return (diffuseColor * multiScattering + ggx1 * ggx2) * NdotL;
 }
 
 float specularGGX(vec3 n, vec3 v, vec3 l, float r, float F0) {
