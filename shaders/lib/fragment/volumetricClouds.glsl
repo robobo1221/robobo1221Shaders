@@ -79,7 +79,7 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
     if ((cameraPosition.y < volumetric_cloudMinHeight && worldVector.y < 0.0) ||
         (cameraPosition.y > volumetric_cloudMaxHeight && worldVector.y > 0.0)) return backGround;
 
-    const int steps = 20;
+    const int steps = VC_QUALITY;
     const float rSteps = 1.0 / steps;
 
     vec2 bottomSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMinHeight);
