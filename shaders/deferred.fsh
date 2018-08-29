@@ -29,6 +29,7 @@ uniform sampler2D depthtex1;
 uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 uniform sampler2D shadowcolor0;
+uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferProjectionInverse;
@@ -38,6 +39,7 @@ uniform vec3 shadowLightPosition;
 uniform vec3 cameraPosition;
 
 uniform float eyeAltitude;
+uniform float frameTimeCounter;
 
 #include "/lib/utilities.glsl"
 
@@ -104,6 +106,7 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 }
 
 #include "/lib/uniform/shadowDistortion.glsl"
+#include "/lib/fragment/volumetricClouds.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
 #include "/lib/fragment/directLighting.glsl"
 

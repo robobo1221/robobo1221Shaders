@@ -117,6 +117,18 @@ mat3 getRotMat(vec3 x,vec3 y){
     );
 }
 
+// No intersection if returned y component is < 0.0
+vec2 rsi(vec3 position, vec3 direction, float radius) {
+	float PoD = dot(position, direction);
+	float radiusSquared = radius * radius;
+
+	float delta = PoD * PoD + radiusSquared - dot(position, position);
+	if (delta < 0.0) return vec2(-1.0);
+	      delta = sqrt(delta);
+
+	return -PoD + vec2(-delta, delta);
+}
+
 #include "/lib/options/skyOptions.glsl"
 #include "/lib/options/cameraOptions.glsl"
 #include "/lib/options/lightingOptions.glsl"

@@ -12,18 +12,6 @@ vec2 sky_phase(float cosTheta, const float g) {
 	return vec2(sky_rayleighPhase(cosTheta), sky_miePhase(cosTheta, g));
 }
 
-// No intersection if returned y component is < 0.0
-vec2 rsi(vec3 position, vec3 direction, float radius) {
-	float PoD = dot(position, direction);
-	float radiusSquared = radius * radius;
-
-	float delta = PoD * PoD + radiusSquared - dot(position, position);
-	if (delta < 0.0) return vec2(-1.0);
-	      delta = sqrt(delta);
-
-	return -PoD + vec2(-delta, delta);
-}
-
 vec3 sky_density(float centerDistance) {
 	vec2 rayleighMie = exp(centerDistance * -sky_inverseScaleHeights + sky_scaledPlanetRadius);
 

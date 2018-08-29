@@ -45,9 +45,6 @@ uniform float eyeAltitude;
 
 uniform float frameTimeCounter;
 
-const int noiseTextureResolution = 64;
-const float rNoiseTexRes = 1.0 / noiseTextureResolution;
-
 #include "/lib/utilities.glsl"
 #include "/lib/uniform/shadowDistortion.glsl"
 #include "/lib/fragment/sky.glsl"
@@ -122,16 +119,16 @@ void main() {
 		color = calculateAtmosphere(color, viewVector, upVector, sunVector, moonVector, 25);
 	}
 
-	#ifdef VOLUMETRIC_CLOUDS
-		color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], depth, dither);
-	#endif
-
 	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither);
 	
 	if (isTranslucent) {
 		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
 		color = calculateVolumetricLight(color, position[1], wLightVector, worldVector, dither);
 	}
+
+	#ifdef VOLUMETRIC_CLOUDS
+		color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], depth, dither);
+	#endif
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }

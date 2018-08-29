@@ -42,6 +42,10 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 	vec3 shadows = calculateShadows(worldPosition, normal, shadowLightVector);
 		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
 
+		#ifdef VOLUMETRIC_CLOUDS
+		 	shadows *= calculateCloudShadows(worldPosition + cameraPosition, wLightVector, 5);
+		#endif
+
 	#if defined program_deferred
 		vec3 diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
 	#else
