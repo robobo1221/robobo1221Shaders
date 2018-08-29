@@ -7,12 +7,14 @@ float calculatePowderEffect(float od, float vDotL){
     return mix(powder, 1.0, vDotL * 0.5 + 0.5);
 }
 
-float calculateCloudShape(vec3 position, float wind, const int octaves){
+float calculateCloudShape(vec3 position, vec3 windDirection, const int octaves){
     const float d = 0.5;
     const float m = 3.0;
     const float h = (d / m) / octaves;
 
-    float noise = fbm(position, d, m, octaves);
+    vec3 shiftMult = -windDirection * 0.013;
+
+    float noise = fbm(position, shiftMult, d, m, octaves);
           noise += h;
     
     return noise;
@@ -22,14 +24,15 @@ float calculateCloudOD(vec3 position, const int octaves){
     if (position.y > volumetric_cloudMaxHeight || position.y < volumetric_cloudHeight) return 0.0;
 
     float wind = TIME * 0.025;
+    vec3 windDirection = vec3(wind, 0.0, wind);
 
-    vec3 cloudPos = position * 0.00045 + vec3(wind, 0.0, wind);
+    vec3 cloudPos = position * 0.00045 + windDirection;
 
     float worldHeight = position.y - volumetric_cloudHeight;
     float normalizedHeight = worldHeight * (1.0 / volumetric_cloudThickness);
     float heightAttenuation = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0) * remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
 
-    float clouds = calculateCloudShape(cloudPos, wind, octaves);
+    float clouds = calculateCloudShape(cloudPos, windDirection, octaves);
 
     clouds = clamp01(clouds * heightAttenuation * 2.0 - (heightAttenuation + 0.3));
 

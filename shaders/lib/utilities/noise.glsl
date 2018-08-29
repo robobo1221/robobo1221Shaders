@@ -14,10 +14,10 @@
         return cubeSmooth(noise);
     }
 
-    float fbm(vec2 x, const float d, const float m, const int oct) {
+    float fbm(vec2 x, vec2 shiftM, const float d, const float m, const int oct) {
         float v = 0.0;
         float a = 0.5;
-        const vec2 shift = vec2(100.0);
+        vec2 shift = vec2(100.0) * shiftM;
         const mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
 
         for (int i = 0; i < oct; ++i) {
@@ -29,10 +29,10 @@
     }
 
 
-    float fbm(vec3 x, const float d, const float m, const int oct) {
+    float fbm(vec3 x, vec3 shiftM, const float d, const float m, const int oct) {
         float v = 0.0;
         float a = 0.5;
-        const vec3 shift = vec3(100.0);
+        vec3 shift = vec3(100.0) * shiftM;
 
         for (int i = 0; i < oct; ++i) {
             v += a * calculate3DNoise(x);
