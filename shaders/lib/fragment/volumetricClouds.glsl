@@ -76,7 +76,9 @@ void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoe
 #define CLOUD_MULTI_SCATTER
 
 vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, float dither){
-    //if (worldVector.y < 0.0) return backGround;
+    if ((cameraPosition.y < volumetric_cloudMinHeight && worldVector.y < 0.0) ||
+        (cameraPosition.y > volumetric_cloudMaxHeight && worldVector.y > 0.0)) return backGround;
+
     const int steps = 20;
     const float rSteps = 1.0 / steps;
 
@@ -94,9 +96,6 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
 
     startPosition = mix(startPosition, gbufferModelViewInverse[3].xyz, marchRange);
     endPosition = mix(endPosition, worldPosition * (depth >= 1.0 ? (volumetric_cloudHeight / 160.0) * 2.0 : 1.0), marchRange);
-
-    float fogDistance = clamp01(length(startPosition) * 0.00001 * volumetric_cloudScale);
-    if (fogDistance >= 1.0) return backGround;
 
     vec3 increment = (endPosition - startPosition) * rSteps;
     vec3 cloudPosition = increment * dither + startPosition + cameraPosition;
@@ -121,6 +120,8 @@ vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVec
         transmittance *= exp2(-od * 1.11 * rLOG2);
     }
 
+    float fogDistance = clamp01(length(startPosition) * 0.00001 * volumetric_cloudScale);
+    
     vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase * TAU;
     vec3 indirectLighting = indirectScattering * skyColor * 0.25 * PI;
     vec3 scattering = directLighting + indirectLighting;
