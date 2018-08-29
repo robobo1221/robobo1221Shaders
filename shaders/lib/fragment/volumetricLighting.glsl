@@ -70,7 +70,7 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, float shad
         }
 
         vec3 directLighting = directScattering * (sunColor + moonColor) * transitionFading * TAU;
-        vec3 indirectLighting = indirectScattering * skyColor * PI;
+        vec3 indirectLighting = indirectScattering * skyColor * 0.25 * PI;
         vec3 scattering = directLighting + indirectLighting;
 
         return backGround * transmittance + scattering;
