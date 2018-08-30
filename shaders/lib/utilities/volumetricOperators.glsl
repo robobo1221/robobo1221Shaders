@@ -28,7 +28,7 @@ float calculateCloudPhase(float vDotL){
     const float a = 0.7;
     const float mixer = 0.8;
 
-    float g1 = phaseG(vDotL, 0.8 * a);
+    float g1 = phaseG(vDotL, 0.9 * a);
     float g2 = phaseG(vDotL, -0.5 * a);
 
     return mix(g2, g1, mixer);

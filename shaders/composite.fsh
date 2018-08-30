@@ -127,7 +127,7 @@ void main() {
 	}
 
 	#ifdef VOLUMETRIC_CLOUDS
-		color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], depth, dither);
+		color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], backDepth, dither);
 	#endif
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
