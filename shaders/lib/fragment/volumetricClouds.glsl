@@ -86,11 +86,11 @@ float calculateCloudOD(vec3 position, const int octaves){
         const int steps = VC_QUALITY;
         const float rSteps = 1.0 / steps;
 
-        vec2 bottomSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMinHeight);
-        vec2 topSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMaxHeight);
-
         if ((cameraPosition.y < volumetric_cloudMinHeight && planetSphere.y > 0.0) ||
             (cameraPosition.y > volumetric_cloudMaxHeight && worldVector.y > 0.0)) return backGround;
+
+        vec2 bottomSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMinHeight);
+        vec2 topSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMaxHeight);
 
         float startDistance = (cameraPosition.y > volumetric_cloudMaxHeight ? topSphere.x : bottomSphere.y);
         float endDistance = (cameraPosition.y > volumetric_cloudMaxHeight ? bottomSphere.x : topSphere.y);
