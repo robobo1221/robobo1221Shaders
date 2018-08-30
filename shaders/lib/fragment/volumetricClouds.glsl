@@ -99,10 +99,10 @@ float calculateCloudOD(vec3 position, const int octaves){
         vec3 endPosition = worldVector * endDistance;
 
         float marchRange = (1.0 - clamp01((cameraPosition.y - volumetric_cloudMaxHeight) * 0.1)) * (1.0 - clamp01((volumetric_cloudMinHeight - cameraPosition.y) * 0.1));
-            marchRange = mix(1.0, marchRange, float(depth >= 1.0));
+              marchRange = mix(1.0, marchRange, float(depth >= 1.0));
 
         startPosition = mix(startPosition, gbufferModelViewInverse[3].xyz, marchRange);
-        endPosition = mix(endPosition, worldPosition * (depth >= 1.0 ? (volumetric_cloudHeight / 160.0) * 2.0 : 1.0), marchRange);
+        endPosition = mix(endPosition, worldPosition * (depth >= 1.0 ? (volumetric_cloudHeight / 32.0) : 1.0), marchRange);
 
         startPosition = vec3(startPosition.x, length(startPosition + vec3(0.0, sky_planetRadius, 0.0)) - sky_planetRadius, startPosition.z);
         endPosition = vec3(endPosition.x, length(endPosition + vec3(0.0, sky_planetRadius, 0.0)) - sky_planetRadius, endPosition.z);
