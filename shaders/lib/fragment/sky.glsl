@@ -87,7 +87,7 @@ float calculateStars(vec3 worldVector, vec3 moonVector){
 	return stars * 5.0;
 }
 
-vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, const int iSteps) {
+vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, const int iSteps) {
 	const int jSteps = 3;
 
 	const float phaseIsotropic = 0.25 * rPI;
@@ -96,7 +96,8 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 
 	vec2 aid = rsi(viewPosition, viewVector, sky_atmosphereRadius);
 	if (aid.y < 0.0) return background;
-	vec2 pid = rsi(viewPosition, viewVector, sky_planetRadius * 0.998);
+	
+	pid = rsi(viewPosition, viewVector, sky_planetRadius * 0.998);
 	bool planetIntersected = pid.y >= 0.0;
 
 	vec2 sd = vec2((planetIntersected && pid.x < 0.0) ? pid.y : max(aid.x, 0.0), (planetIntersected && pid.x > 0.0) ? pid.x : aid.y);

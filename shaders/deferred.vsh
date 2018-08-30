@@ -51,7 +51,7 @@ vec4 ToSH(float value, vec3 dir) {
     return foo * vec4(1.0, dir.yzx) * value;
 }
 
-void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambientColor) {
+void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambientColor, vec2 planetSphere) {
 	const int latSamples = 5;
 	const int lonSamples = 5;
 	const float rLatSamples = 1.0 / latSamples;
@@ -72,7 +72,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambient
 			float c = cos(latitude);
 			vec3 kernel = vec3(c * cos(longitude), sin(latitude), c * sin(longitude));
 
-			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel * 0.5 + 0.5), upVector, sunVector, moonVector, 20);
+			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel * 0.5 + 0.5), upVector, sunVector, moonVector, planetSphere, 20);
 		
 			shR += ToSH(skyCol.r, kernel);
 			shG += ToSH(skyCol.g, kernel);
@@ -107,9 +107,10 @@ void main() {
 	sunColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wSunVector, 3) * baseSunColor;
 	moonColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wMoonVector, 3) * baseMoonColor;
 	
-	skyColor = calculateAtmosphere(vec3(0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), wSunVector, wMoonVector, 10);
+	vec2 planetSphere = vec2(0.0);
+	skyColor = calculateAtmosphere(vec3(0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), wSunVector, wMoonVector, planetSphere, 10);
 
 	shadowMatrix = shadowProjection * shadowModelView;
 
-	CalculateSkySH(wSunVector, wMoonVector, vec3(0.0, 1.0, 0.0), skyColor);
+	CalculateSkySH(wSunVector, wMoonVector, vec3(0.0, 1.0, 0.0), skyColor, planetSphere);
 }
