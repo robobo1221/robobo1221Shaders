@@ -17,6 +17,13 @@ float calculateCloudShape(vec3 position, vec3 windDirection, const int octaves){
 
 float calculateCloudOD(vec3 position, const int octaves){
     if (position.y > volumetric_cloudMaxHeight || position.y < volumetric_cloudMinHeight) return 0.0;
+    
+    float localCoverage = 1.0;
+
+    #ifdef VC_LOCAL_COVERAGE
+        localCoverage = texture2D(noisetex, (TIME * 50.0 + position.xz * volumetric_cloudScale) * 0.000001).x;
+        localCoverage = clamp01(localCoverage * 5.0 - 2.0);
+    #endif
 
     float wind = TIME * 0.05;
     vec3 windDirection = vec3(wind, 0.0, wind);
@@ -26,13 +33,6 @@ float calculateCloudOD(vec3 position, const int octaves){
     float worldHeight = position.y - volumetric_cloudMinHeight;
     float normalizedHeight = worldHeight * (1.0 / volumetric_cloudThickness);
     float heightAttenuation = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0) * remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
-
-    float localCoverage = 1.0;
-
-    #ifdef VC_LOCAL_COVERAGE
-        localCoverage = texture2D(noisetex, (TIME * 50.0 + position.xz * volumetric_cloudScale) * 0.000001).x;
-        localCoverage = clamp01(localCoverage * 5.0 - 2.0);
-    #endif
 
     float clouds = calculateCloudShape(cloudPos, windDirection, octaves);
 
