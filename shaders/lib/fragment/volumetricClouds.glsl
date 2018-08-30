@@ -97,23 +97,23 @@ float calculateCloudOD(vec3 position, const int octaves){
         const float rSteps = 1.0 / steps;
 
         // Early out when the clouds are behind the horizon or not visible.
-        if ((cameraPosition.y < volumetric_cloudMinHeight && planetSphere.y > 0.0) ||
-            (cameraPosition.y > volumetric_cloudMaxHeight && worldVector.y > 0.0)) return backGround;
+        if ((eyeAltitude < volumetric_cloudMinHeight && planetSphere.y > 0.0) ||
+            (eyeAltitude > volumetric_cloudMaxHeight && worldVector.y > 0.0)) return backGround;
 
         // Calculate the cloud spheres.
-        vec2 bottomSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMinHeight);
-        vec2 topSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + cameraPosition.y, worldVector, sky_planetRadius + volumetric_cloudMaxHeight);
+        vec2 bottomSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + eyeAltitude, worldVector, sky_planetRadius + volumetric_cloudMinHeight);
+        vec2 topSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + eyeAltitude, worldVector, sky_planetRadius + volumetric_cloudMaxHeight);
 
         // Get the distance from the eye to the start and endposition.
-        float startDistance = (cameraPosition.y > volumetric_cloudMaxHeight ? topSphere.x : bottomSphere.y);
-        float endDistance = (cameraPosition.y > volumetric_cloudMaxHeight ? bottomSphere.x : topSphere.y);
+        float startDistance = (eyeAltitude > volumetric_cloudMaxHeight ? topSphere.x : bottomSphere.y);
+        float endDistance = (eyeAltitude > volumetric_cloudMaxHeight ? bottomSphere.x : topSphere.y);
 
         // Multiply the direction and distance by eachother to.
         vec3 startPosition = worldVector * startDistance;
         vec3 endPosition = worldVector * endDistance;
 
         // Calculate the range of when the player is flying through the clouds.
-        float marchRange = (1.0 - clamp01((cameraPosition.y - volumetric_cloudMaxHeight) * 0.1)) * (1.0 - clamp01((volumetric_cloudMinHeight - cameraPosition.y) * 0.1));
+        float marchRange = (1.0 - clamp01((eyeAltitude - volumetric_cloudMaxHeight) * 0.1)) * (1.0 - clamp01((volumetric_cloudMinHeight - eyeAltitude) * 0.1));
               marchRange = mix(1.0, marchRange, float(depth >= 1.0));
 
         // Change the raymarcher's start and endposition when you fly through them or when geometry is behind it.
