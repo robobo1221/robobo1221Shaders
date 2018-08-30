@@ -141,7 +141,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
 float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
     const float rSteps = volumetric_cloudThickness / steps;
-    float stepSize = rSteps / direction.y;
+    float stepSize = rSteps / abs(direction.y);
 
     vec3 increment = direction * stepSize;
     position += position.y <= volumetric_cloudMinHeight ? direction * (volumetric_cloudMinHeight - position.y) / direction.y : vec3(0.0);

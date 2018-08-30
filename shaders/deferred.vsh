@@ -89,7 +89,7 @@ void main() {
 
 	const float tTime = (1.0 / 50.0);
 	float wTime = float(worldTime);
-	transitionFading = clamp01(clamp01((wTime - 23215.0) * tTime) + (1.0 - clamp01((wTime - 12735.0) * tTime)) + clamp01((wTime - 12925.0) * tTime) * (1.0 - clamp01((wTime - 23075.0) * tTime)));
+	transitionFading = clamp01(clamp01((wTime - 23215.0) * tTime) + (1.0 - clamp01((wTime - 12735.0) * tTime)) + clamp01((wTime - 12925.0) * tTime) * (1.0 - clamp01((wTime - 22975.0) * tTime)));
 
 	upVector = upPosition * 0.01;
 	sunVector = sunPosition * 0.01;
@@ -98,7 +98,7 @@ void main() {
 	wSunVector = mat3(gbufferModelViewInverse) * sunVector;
 	wMoonVector = mat3(gbufferModelViewInverse) * moonVector;
 
-	lightVector = (worldTime > 23075 || worldTime < 12925 ? sunVector : moonVector);
+	lightVector = (worldTime > 22975 || worldTime < 12925 ? sunVector : moonVector);
 	wLightVector = mat3(gbufferModelViewInverse) * lightVector;
 
 	baseSunColor = sunColorBase;
