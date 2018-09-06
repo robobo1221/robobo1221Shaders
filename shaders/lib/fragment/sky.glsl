@@ -87,7 +87,7 @@ float calculateStars(vec3 worldVector, vec3 moonVector){
 	return stars * 5.0;
 }
 
-vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, const int iSteps) {
+vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, out vec3 transmittance, const int iSteps) {
 	const int jSteps = 3;
 
 	const float phaseIsotropic = 0.25 * rPI;
@@ -112,7 +112,7 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	vec3 scatteringSun     = vec3(0.0);
 	vec3 scatteringMoon    = vec3(0.0);
 	vec3 scatteringAmbient = vec3(0.0);
-	vec3 transmittance     = vec3(1.0);
+	transmittance = vec3(1.0);
 
 	for (int i = 0; i < iSteps; ++i, position += increment) {
 		vec3 density          = sky_density(length(position));

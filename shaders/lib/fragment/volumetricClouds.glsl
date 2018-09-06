@@ -90,7 +90,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         indirectScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), 3) * transmittance;
     }
 
-    vec3 calculateVolumetricClouds(vec3 backGround, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither){
+    vec3 calculateVolumetricClouds(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither){
         
         // Marches per pixel.
         const int steps = VC_QUALITY;
@@ -159,7 +159,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         vec3 scattering = directLighting + indirectLighting;
 
         // Blend the clouds with the sky based on distance and returning the result.
-        return mix(backGround * transmittance + scattering, backGround, fogDistance);
+        return mix(backGround * transmittance + scattering, sky, fogDistance);
     }
 #endif
 

@@ -110,15 +110,18 @@ void main() {
 	float dither = bayer64(gl_FragCoord.xy);
 
 	vec2 planetSphere = vec2(0.0);
+	vec3 sky = vec3(0.0);
+	vec3 skyAbsorb = vec3(0.0);
 
 	if (backDepth >= 1.0) {
 		float vDotL = dot(viewVector, sunVector);
 
-		color += calculateSunSpot(vDotL) * sunColorBase;
-		color += calculateMoonSpot(-vDotL) * moonColorBase;
-		color += calculateStars(worldVector, wMoonVector);
+		sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
+		color = sky;
 
-		color = calculateAtmosphere(color, viewVector, upVector, sunVector, moonVector, planetSphere, 25);
+		color += calculateSunSpot(vDotL) * sunColorBase * skyAbsorb;
+		color += calculateMoonSpot(-vDotL) * moonColorBase * skyAbsorb;
+		color += calculateStars(worldVector, wMoonVector) * skyAbsorb;
 	}
 
 	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither);
@@ -129,7 +132,7 @@ void main() {
 	}
 
 	#ifdef VOLUMETRIC_CLOUDS
-		color = calculateVolumetricClouds(color, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither);
+		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither);
 	#endif
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
