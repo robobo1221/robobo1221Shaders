@@ -44,6 +44,7 @@ uniform vec3 cameraPosition;
 uniform float eyeAltitude;
 
 uniform float frameTimeCounter;
+uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
 #include "/lib/uniform/shadowDistortion.glsl"
@@ -107,7 +108,7 @@ void main() {
 
 	vec3 normal = getNormal(data1.x);
 	vec2 lightmaps = getLightmaps(data1.y);
-	float dither = bayer64(gl_FragCoord.xy);
+	float dither = fract(bayer64(gl_FragCoord.xy) + frameCounter * (1.0 / 7.0));
 
 	vec2 planetSphere = vec2(0.0);
 	vec3 sky = vec3(0.0);
