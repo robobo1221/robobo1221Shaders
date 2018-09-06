@@ -124,16 +124,16 @@ void main() {
 		color += calculateStars(worldVector, wMoonVector) * skyAbsorb;
 	}
 
+	#ifdef VOLUMETRIC_CLOUDS
+		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither);
+	#endif
+
 	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither);
 	
 	if (isTranslucent) {
 		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
 		color = calculateVolumetricLight(color, position[1], wLightVector, worldVector, dither);
 	}
-
-	#ifdef VOLUMETRIC_CLOUDS
-		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither);
-	#endif
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }
