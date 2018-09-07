@@ -4,8 +4,6 @@
 
 varying vec2 texcoord;
 
-flat varying vec2 jitter;
-
 uniform sampler2D colortex0;
 uniform sampler2D colortex4;
 uniform sampler2D depthtex0;
@@ -101,8 +99,6 @@ vec3 clipAABB(vec3 boxMin, vec3 boxMax, vec3 q) {
 }
 
 vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec3 previousCol, vec3 currentCol, vec2 velocity){
-	p += jitter;
-
 	vec3 col1 = sampleCurrentFrame(p + vec2(pixelSize.x, 0.0));
 	vec3 col2 = sampleCurrentFrame(p + vec2(-pixelSize.x, 0.0));
 	vec3 col3 = sampleCurrentFrame(p + vec2(pixelSize.x, pixelSize.y));
@@ -114,16 +110,19 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec3 previousCol, vec3 current
 
 	vec3 colMin = min(min4(col1, col2, col3, col4), min4(col5, col6, col7, col8));
 	vec3 colMax = max(max4(col1, col2, col3, col4), max4(col5, col6, col7, col8));
+	vec3 colAVG = (col1 + col2 + col3 + col4 + col5 + col6 + col7 + col8) * 0.125;
 
 	previousCol = clipAABB(colMin, colMax, previousCol); 
 
 	float edgeDetect = clamp01(distance(currentCol, previousCol));
-		  edgeDetect = mix(0.8, 1.0, sqrt(edgeDetect));
+		  edgeDetect = mix(0.875, 1.0, sqrt(edgeDetect));
 
 	p -= velocity;
 	edgeDetect = clamp01(p) != p ? 0.0 : edgeDetect;
 
-	return mix(currentCol, previousCol, edgeDetect);
+	vec3 sharpening = (1.0 - exp(-(currentCol - clamp(colAVG, colMin, colMax)))) * TAA_SHARPENING;
+
+	return mix(currentCol + sharpening, previousCol, edgeDetect);
 }
 
 vec3 calculateTAA(vec2 p, vec2 pixelSize){

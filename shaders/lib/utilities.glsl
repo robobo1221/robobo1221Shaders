@@ -134,6 +134,7 @@ vec2 rsi(vec3 position, vec3 direction, float radius) {
 #include "/lib/options/skyOptions.glsl"
 #include "/lib/options/cameraOptions.glsl"
 #include "/lib/options/lightingOptions.glsl"
+#include "/lib/options/postProcessOptions.glsl"
 
 #include "/lib/utilities/pow.glsl"
 #include "/lib/utilities/encoding.glsl"

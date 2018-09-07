@@ -3,6 +3,7 @@
 #define FRAGMENT
 
 varying vec2 texcoord;
+flat varying vec2 jitter;
 
 uniform sampler2D colortex5;
 
@@ -24,7 +25,7 @@ float calculateAverageLuminance(){
 	return mix(lum, prevLum, clamp(1.0 - frameTime, 0.0, 0.99));
 }
 
-vec3 calculateBloomTile(const float lod, vec2 pixelSize){
+vec3 calculateBloomTile(vec2 coord, const float lod, vec2 pixelSize){
 	const int iSteps = 10;
 	const int jSteps = 2;
 	const float rISteps = 1.0 / iSteps;
@@ -34,7 +35,7 @@ vec3 calculateBloomTile(const float lod, vec2 pixelSize){
 	const float lodScale = exp2(lod);
 	const float offset = exp2(-lod) * 1.5;
 
-	vec2 bloomCoord = (texcoord - offset) * lodScale;
+	vec2 bloomCoord = (coord - offset) * lodScale + jitter;
 	vec2 scale = pixelSize * lodScale;
 
     if (any(greaterThanEqual(abs(bloomCoord - 0.55), scale + 0.55)))
@@ -66,7 +67,7 @@ vec3 calculateBloomTile(const float lod, vec2 pixelSize){
 	return totalBloom / totalWeight;
 }
 
-vec3 calculateBloomTiles(){
+vec3 calculateBloomTiles(vec2 coord){
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
 	vec3 bloomTiles = vec3(0.0);
 
@@ -81,7 +82,7 @@ vec3 calculateBloomTiles(){
 	);
 
 	for (int i = 0; i < 6; i++){
-		bloomTiles += calculateBloomTile(lods[i], pixelSize);
+		bloomTiles += calculateBloomTile(coord, lods[i], pixelSize);
 	}
 
 	return bloomTiles;
@@ -90,8 +91,8 @@ vec3 calculateBloomTiles(){
 /* DRAWBUFFERS:235 */
 void main() {
 
-	vec3 color = texture2D(colortex5, texcoord).rgb;
-	vec3 bloomTiles = calculateBloomTiles();
+	vec3 color = texture2D(colortex5, texcoord + jitter).rgb;
+	vec3 bloomTiles = calculateBloomTiles(texcoord);
 
 	gl_FragData[0] = encodeRGBE8(color);
 	gl_FragData[1] = encodeRGBE8(bloomTiles);
