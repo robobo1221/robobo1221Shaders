@@ -126,12 +126,17 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec3 previousCol, vec3 current
 }
 
 vec3 calculateTAA(vec2 p, vec2 pixelSize){
+	vec3 currentCol = sampleCurrentFrame(p);
+
+	#ifndef TAA
+		return currentCol;
+	#endif
+
 	vec2 velocity = calculateVelocityVector(vec3(p, sampleDepth(p)));
 	vec3 closest = calculateClosestFragment(p - velocity, pixelSize);
 
 	velocity = calculateVelocityVector(closest);
 
-	vec3 currentCol = sampleCurrentFrame(p);
 	vec3 previousCol = samplePreviousFrame(p - velocity);
 
 	return temporalReprojection(p, pixelSize, previousCol, currentCol, velocity);

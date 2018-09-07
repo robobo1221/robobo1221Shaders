@@ -16,6 +16,10 @@ const vec2 bayerSequence4x4[16] = vec2[16](vec2(0, -3) / 16.0,
                                            vec2(5, 6) / 16.0);
 
 vec2 calculateTemporalJitter() {
+    #ifndef TAA
+        return vec2(0.0);
+    #endif
+
     vec2 pixelSize = 0.5 / vec2(viewWidth, viewHeight);
     return (bayerSequence4x4[int(mod(frameCounter, 16))] * 2.0 - 1.0) * pixelSize;
 }
