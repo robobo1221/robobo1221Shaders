@@ -6,7 +6,7 @@ vec2 calculateVolumetricLightOD(vec3 position){
     vec2 rayleighMie = exp2(-height * sky_inverseScaleHeights * rLOG2);
 
     od += rayleighMie;
-    //od.xy += smoothstep(20.0, 3.0, height) * vec2(1000.0, 10000.0);
+    //od.xy += smoothstep(50.0, 30.0, height) * vec2(1000.0, 10000.0);
 
     return od;
 }
