@@ -5,6 +5,8 @@
 varying vec2 texcoord;
 varying mat4 shadowMatrix;
 
+flat varying vec2 jitter;
+
 varying mat3x4 skySH;
 
 varying vec3 sunVector;
@@ -32,11 +34,16 @@ uniform mat4 shadowProjection;
 uniform vec3 sunPosition;
 uniform vec3 upPosition;
 
+uniform float viewWidth;
+uniform float viewHeight;
+
 uniform float eyeAltitude;
 uniform int worldTime;
+uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
 #include "/lib/fragment/sky.glsl"
+#include "/lib/uniform/TemporalJitter.glsl"
 
 vec4 ToSH(float value, vec3 dir) {
     const float transferl1 = 0.3849 * PI;
@@ -86,6 +93,8 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambient
 void main() {
 	gl_Position.xy = gl_Vertex.xy * 2.0 - 1.0;
 	texcoord = gl_MultiTexCoord0.xy;
+
+	jitter = calculateTemporalJitter() * 0.5;
 
 	const float tTime = (1.0 / 50.0);
 	float wTime = float(worldTime);

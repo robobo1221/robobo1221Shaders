@@ -5,6 +5,8 @@
 varying vec2 texcoord;
 varying mat4 shadowMatrix;
 
+flat varying vec2 jitter;
+
 varying vec3 sunVector;
 varying vec3 wSunVector;
 varying vec3 moonVector;
@@ -54,7 +56,7 @@ uniform int frameCounter;
 #include "/lib/fragment/directLighting.glsl"
 
 vec3 calculateViewSpacePosition(vec2 coord, float depth) {
-	vec3 viewCoord = vec3(coord, depth) * 2.0 - 1.0;
+	vec3 viewCoord = vec3(coord - jitter, depth) * 2.0 - 1.0;
 	return projMAD(gbufferProjectionInverse, viewCoord) / (viewCoord.z * gbufferProjectionInverse[2].w + gbufferProjectionInverse[3].w);
 }
 

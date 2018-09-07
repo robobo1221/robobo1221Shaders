@@ -22,12 +22,12 @@ uniform float viewHeight;
 uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
-#include "/lib/uniform/temporalGitter.glsl"
+#include "/lib/uniform/TemporalJitter.glsl"
 
 void main() {
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 	gl_Position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
-	gl_Position.xy += calculateTemporalgitter() * gl_Position.w;
+	gl_Position.xy += calculateTemporalJitter() * gl_Position.w;
 
 	material = mc_Entity.x;
 
