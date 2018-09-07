@@ -60,14 +60,14 @@ vec2 calculateVelocityVector(vec3 coord){
 }
 
 vec3 calculateClosestFragment(vec2 p, vec2 pixelSize){
-	vec3 depth1 = vec3(pixelSize.x, 	pixelSize.y, sampleDepth(p + vec2(pixelSize.x, 0.0)));
-	vec3 depth2 = vec3(-pixelSize.x, 	pixelSize.y, sampleDepth(p + vec2(-pixelSize.x, 0.0)));
-	vec3 depth3 = vec3(pixelSize.x, 	pixelSize.y, sampleDepth(p + vec2(pixelSize.x, pixelSize.y)));
-	vec3 depth4 = vec3(-pixelSize.x, 	pixelSize.y, sampleDepth(p + vec2(-pixelSize.x, pixelSize.y)));
-	vec3 depth5 = vec3(pixelSize.x, -	pixelSize.y, sampleDepth(p + vec2(pixelSize.x, -pixelSize.y)));
-	vec3 depth6 = vec3(-pixelSize.x, -	pixelSize.y, sampleDepth(p - vec2(pixelSize.x, pixelSize.y)));
-	vec3 depth7 = vec3(0.0,			 	pixelSize.y, sampleDepth(p + vec2(0.0, pixelSize.y)));
-	vec3 depth8 = vec3(0.0, 		-	pixelSize.y, sampleDepth(p + vec2(0.0, -pixelSize.y)));
+	vec3 depth1 = vec3(pixelSize.x, 0.0, sampleDepth(p + vec2(pixelSize.x, 0.0)));
+	vec3 depth2 = vec3(-pixelSize.x, 0.0, sampleDepth(p + vec2(-pixelSize.x, 0.0)));
+	vec3 depth3 = vec3(pixelSize.x, pixelSize.y, sampleDepth(p + vec2(pixelSize.x, pixelSize.y)));
+	vec3 depth4 = vec3(-pixelSize.x, pixelSize.y, sampleDepth(p + vec2(-pixelSize.x, pixelSize.y)));
+	vec3 depth5 = vec3(pixelSize.x, -pixelSize.y, sampleDepth(p + vec2(pixelSize.x, -pixelSize.y)));
+	vec3 depth6 = vec3(-pixelSize.x, -pixelSize.y, sampleDepth(p + vec2(-pixelSize.x, -pixelSize.y)));
+	vec3 depth7 = vec3(0.0, pixelSize.y, sampleDepth(p + vec2(0.0, pixelSize.y)));
+	vec3 depth8 = vec3(0.0, -pixelSize.y, sampleDepth(p + vec2(0.0, -pixelSize.y)));
 
 	vec3 depthMin = depth1;
 	depthMin = depthMin.z > depth2.z ? depth2 : depthMin;
@@ -104,13 +104,13 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec3 previousCol, vec3 current
 	vec3 col3 = sampleCurrentFrame(p + vec2(pixelSize.x, pixelSize.y));
 	vec3 col4 = sampleCurrentFrame(p + vec2(-pixelSize.x, pixelSize.y));
 	vec3 col5 = sampleCurrentFrame(p + vec2(pixelSize.x, -pixelSize.y));
-	vec3 col6 = sampleCurrentFrame(p - vec2(pixelSize.x, pixelSize.y));
+	vec3 col6 = sampleCurrentFrame(p + vec2(-pixelSize.x, -pixelSize.y));
 	vec3 col7 = sampleCurrentFrame(p + vec2(0.0, pixelSize.y));
 	vec3 col8 = sampleCurrentFrame(p + vec2(0.0, -pixelSize.y));
 
-	vec3 colMin = min(min4(col1, col2, col3, col4), min4(col5, col6, col7, col8));
-	vec3 colMax = max(max4(col1, col2, col3, col4), max4(col5, col6, col7, col8));
-	vec3 colAVG = (col1 + col2 + col3 + col4 + col5 + col6 + col7 + col8) * 0.125;
+	vec3 colMin = min(currentCol, min(min4(col1, col2, col3, col4), min4(col5, col6, col7, col8)));
+	vec3 colMax = max(currentCol, max(max4(col1, col2, col3, col4), max4(col5, col6, col7, col8)));
+	vec3 colAVG = (currentCol + col1 + col2 + col3 + col4 + col5 + col6 + col7 + col8) * (1.0 / 9.0);
 
 	previousCol = clipAABB(colMin, colMax, previousCol);
 

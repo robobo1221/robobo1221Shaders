@@ -35,7 +35,7 @@ vec3 calculateBloomTile(vec2 coord, const float lod, vec2 pixelSize){
 	const float lodScale = exp2(lod);
 	const float offset = exp2(-lod) * 1.5;
 
-	vec2 bloomCoord = (coord - offset) * lodScale + jitter;
+	vec2 bloomCoord = (coord - offset) * lodScale;
 	vec2 scale = pixelSize * lodScale;
 
     if (any(greaterThanEqual(abs(bloomCoord - 0.55), scale + 0.55)))
