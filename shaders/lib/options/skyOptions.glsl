@@ -31,7 +31,7 @@ const mat2x3 sky_coefficientsScattering  = mat2x3(sky_coefficientRayleigh, sky_c
 const mat3   sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh, sky_coefficientMie * 1.11, sky_coefficientOzone); // commonly called the extinction coefficient
 
 //#define VOLUMETRIC_CLOUDS
-#define VC_QUALITY 16 //[5 10 15 20 24 32 64 128 256 512]
+#define VC_QUALITY 10 //[5 10 15 20 24 32 64 128 256 512]
 #define VC_LOCAL_COVERAGE
 
 #define volumetric_cloudDensity 0.0125
