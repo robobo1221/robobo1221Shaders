@@ -19,7 +19,7 @@ float calculateExposure(float avg) {
     const float exposureOffset = CAM_EXPOFFSET;
     const float iso = CAM_ISO;
 
-    avg = clamp(avg, 0.5, 4096.0);
+    avg = clamp(avg, 0.25, 4096.0);
 
     #ifdef CAM_MANUAL
         float exposureValue = calculateEV100(apertureSquared, shutterSpeed, iso);

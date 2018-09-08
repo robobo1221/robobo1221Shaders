@@ -17,7 +17,7 @@ vec3 GeometrySmithGGX(vec3 diffuseColor, vec3 N, vec3 V, vec3 L, float r){
 
     float multiScattering = 0.1159 * r;
 
-    return (diffuseColor * multiScattering * NdotL + ggx1 * ggx2);
+    return (diffuseColor * multiScattering * NdotL + ggx1 * ggx2) * rPI;
 }
 
 float specularGGX(vec3 n, vec3 v, vec3 l, float r, float F0) {

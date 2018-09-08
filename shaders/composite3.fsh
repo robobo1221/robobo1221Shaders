@@ -131,11 +131,9 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize){
 	#ifndef TAA
 		return currentCol;
 	#endif
-
-	vec2 velocity = calculateVelocityVector(vec3(p, sampleDepth(p)));
-	vec3 closest = calculateClosestFragment(p - velocity, pixelSize);
-
-	velocity = calculateVelocityVector(closest);
+	
+	vec3 closest = calculateClosestFragment(p, pixelSize);
+	vec2 velocity = calculateVelocityVector(closest);
 
 	vec3 previousCol = samplePreviousFrame(p - velocity);
 
