@@ -63,6 +63,7 @@ const bool colortex4Clear = false;
 const bool colortex5Clear = false;
 
 const float ambientOcclusionLevel = 0.0;
+const float eyeBrightnessHalfLife = 10.0;
 
 */
 

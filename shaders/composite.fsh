@@ -41,6 +41,8 @@ uniform mat4 gbufferModelView;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 
+uniform ivec2 eyeBrightnessSmooth;
+
 uniform vec3 shadowLightPosition;
 uniform vec3 cameraPosition;
 uniform float eyeAltitude;
@@ -112,11 +114,17 @@ void main() {
 	vec2 lightmaps = getLightmaps(data1.y);
 
 	float dither = bayer64(gl_FragCoord.xy);
-	dither = fract(frameCounter * (1.0 / 7.0) + dither);
+	
+	#ifdef TAA
+		dither = fract(frameCounter * (1.0 / 7.0) + dither);
+	#endif
 
 	vec2 planetSphere = vec2(0.0);
 	vec3 sky = vec3(0.0);
 	vec3 skyAbsorb = vec3(0.0);
+
+	float ambientFogOcclusion = eyeBrightnessSmooth.y * (1.0 / 255.0);
+		  ambientFogOcclusion = pow2(ambientFogOcclusion);
 
 	if (backDepth >= 1.0) {
 		float vDotL = dot(viewVector, sunVector);
@@ -133,11 +141,11 @@ void main() {
 		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither);
 	#endif
 
-	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither);
+	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither, ambientFogOcclusion);
 	
 	if (isTranslucent) {
 		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
-		color = calculateVolumetricLight(color, position[1], wLightVector, worldVector, dither);
+		color = calculateVolumetricLight(color, position[1], wLightVector, worldVector, dither, ambientFogOcclusion);
 	}
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
