@@ -114,8 +114,8 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec3 previousCol, vec3 current
 
 	previousCol = clipAABB(colMin, colMax, previousCol);
 
-	float edgeDetect = clamp01(distance(currentCol, previousCol));
-		  edgeDetect = mix(0.85, 0.98, sqrt(edgeDetect));
+	float edgeDetect = sqrt(clamp01(distance(colMax, colMin)));
+		  edgeDetect = mix(0.85, 0.985, edgeDetect);
 
 	p -= velocity;
 	edgeDetect = clamp01(p) != p ? 0.0 : edgeDetect;
