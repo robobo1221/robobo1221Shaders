@@ -95,7 +95,7 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	vec3 viewPosition = (sky_planetRadius + eyeAltitude) * upVector;
 
 	vec2 aid = rsi(viewPosition, viewVector, sky_atmosphereRadius);
-	if (aid.y < 0.0) return background;
+	if (aid.y < 0.0) {transmittance = vec3(1.0); return background;}
 	
 	pid = rsi(viewPosition, viewVector, sky_planetRadius * 0.998);
 	bool planetIntersected = pid.y >= 0.0;
