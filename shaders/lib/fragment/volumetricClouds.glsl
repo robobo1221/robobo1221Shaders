@@ -154,9 +154,9 @@ float calculateCloudOD(vec3 position, const int octaves){
         float fogDistance = clamp01(length(startPosition) * 0.000005 * volumetric_cloudScale);
         
         // Light the scattering and sum them up.
-        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase * PI;
+        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase;
         vec3 indirectLighting = indirectScattering * skyColor * 0.25;
-        vec3 scattering = directLighting + indirectLighting;
+        vec3 scattering = (directLighting + indirectLighting) * PI;
 
         // Blend the clouds with the sky based on distance and returning the result.
         return mix(backGround * transmittance + scattering, sky, fogDistance);
