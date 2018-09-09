@@ -98,7 +98,7 @@ vec3 clipAABB(vec3 boxMin, vec3 boxMax, vec3 q) {
 		return q;
 }
 
-vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec3 previousCol, vec3 currentCol, vec2 velocity){
+vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec2 pixelResolution, vec3 previousCol, vec3 currentCol, vec2 velocity){
 	vec3 col1 = sampleCurrentFrame(p + vec2(pixelSize.x, 0.0));
 	vec3 col2 = sampleCurrentFrame(p + vec2(-pixelSize.x, 0.0));
 	vec3 col3 = sampleCurrentFrame(p + vec2(pixelSize.x, pixelSize.y));
@@ -114,18 +114,21 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec3 previousCol, vec3 current
 
 	previousCol = clipAABB(colMin, colMax, previousCol);
 
-	float edgeDetect = sqrt(clamp01(distance(colMax, colMin)));
-		  edgeDetect = mix(0.85, 0.985, edgeDetect);
+	vec2 pixelVelocity = abs(fract(velocity * pixelResolution) - 0.5) * 2.0;
+
+	float blendWeight = 0.97;
+		  //Zombye's neat way to get rid of blurring and ghosting. Thanks <3
+		  blendWeight *= sqrt(pixelVelocity.x * pixelVelocity.y) * 0.5 + 0.5;
 
 	p -= velocity;
-	edgeDetect = clamp01(p) != p ? 0.0 : edgeDetect;
+	blendWeight = clamp01(p) != p ? 0.0 : blendWeight;
 
 	vec3 sharpening = (1.0 - exp(-(currentCol - clamp(colAVG, colMin, colMax)))) * TAA_SHARPENING;
 
-	return mix(currentCol + sharpening, previousCol, edgeDetect);
+	return mix(currentCol + sharpening, previousCol, blendWeight);
 }
 
-vec3 calculateTAA(vec2 p, vec2 pixelSize){
+vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution){
 	vec3 currentCol = sampleCurrentFrame(p);
 
 	#ifndef TAA
@@ -137,15 +140,16 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize){
 
 	vec3 previousCol = samplePreviousFrame(p - velocity);
 
-	return temporalReprojection(p, pixelSize, previousCol, currentCol, velocity);
+	return temporalReprojection(p, pixelSize, pixelResolution, previousCol, currentCol, velocity);
 }
 
 /* DRAWBUFFERS:4 */
 void main() {
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
+	vec2 pixelResolution = vec2(viewWidth, viewHeight);
+	vec2 pixelSize = 1.0 / pixelResolution;
 
 	vec3 color = vec3(0.0);
-	color = calculateTAA(texcoord, pixelSize);
+	color = calculateTAA(texcoord, pixelSize, pixelResolution);
 
 	gl_FragData[0] = vec4(color, 1.0);
 }
