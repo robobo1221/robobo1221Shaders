@@ -40,6 +40,7 @@ uniform sampler2D depthtex0;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 shadowProjectionInverse;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -48,6 +49,7 @@ uniform vec3 cameraPosition;
 uniform float eyeAltitude;
 
 uniform float frameTimeCounter;
+uniform int isEyeInWater;
 uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
@@ -76,9 +78,24 @@ vec2 getLightmaps(float data)
 	return vec2(lightmaps.x, lightmaps.y * lightmaps.y);
 }
 
-vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float roughness){
+void getRoughnessF0(float data, out float roughness, out float f0){
+	vec2 decodedData = decodeVec2(data);
+	
+	roughness = decodedData.x;
+	f0 = decodedData.y;
+}
+
+void getMatflag(float data, out float matFlag){
+	vec2 decodedData = decodeVec2(data);
+
+	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 / 8.0);
+}
+
+vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float roughness, bool isWater){
 	vec4 albedo = texture2D(colortex0, texcoord);
 	vec3 correctedAlbedo = srgbToLinear(albedo.rgb);
+
+	albedo.a = isWater ? 0.0 : albedo.a;
 
 	vec3 litColor = calculateDirectLighting(correctedAlbedo, position[1], normal, viewVector, lightVector, wLightVector, lightmaps, roughness, false);
 
@@ -126,9 +143,9 @@ void main() {
 	float ambientFogOcclusion = eyeBrightnessSmooth.y * (1.0 / 255.0);
 		  ambientFogOcclusion = pow2(ambientFogOcclusion);
 
-	if (backDepth >= 1.0) {
-		float vDotL = dot(viewVector, sunVector);
+	float vDotL = dot(viewVector, sunVector);
 
+	if (backDepth >= 1.0) {
 		sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
 		color = sky;
 
@@ -137,15 +154,27 @@ void main() {
 		color += calculateStars(worldVector, wMoonVector) * skyAbsorb;
 	}
 
-	#ifdef VOLUMETRIC_CLOUDS
-		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither);
-	#endif
+	float roughness, f0, matFlag;
 
-	color = calculateVolumetricLight(color, backPosition[1], wLightVector, worldVector, dither, ambientFogOcclusion);
+	getRoughnessF0(data1.z, roughness, f0);
+	getMatflag(data1.w, matFlag);
+
+	bool isWater = matFlag > 2.5 && matFlag < 3.5;
+
+	#ifdef VOLUMETRIC_CLOUDS
+		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither, vDotL);
+	#endif
 	
 	if (isTranslucent) {
-		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, 1.0);
-		color = calculateVolumetricLight(color, position[1], wLightVector, worldVector, dither, ambientFogOcclusion);
+		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, roughness, isWater);
+	}
+
+	if (isWater || isEyeInWater == 1) {
+		color = calculateVolumetricLightWater(color, isEyeInWater == 1 ? gbufferModelViewInverse[3].xyz : position[1], isEyeInWater == 1 ? position[1] : backPosition[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
+	}
+
+	if (isEyeInWater == 0) {
+		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);

@@ -81,10 +81,10 @@ vec3 linearToSRGB(vec3 linear){
     );
 }
 
-float calculateHardShadows(sampler2D shadowMap, vec3 shadowPosition, float bias) {
+float calculateHardShadows(float shadowDepth, vec3 shadowPosition, float bias) {
     if(shadowPosition.z > 1.0) return 1.0;
 
-    return 1.0 - fstep(texture2D(shadowMap, shadowPosition.xy).x, shadowPosition.z - bias);
+    return 1.0 - fstep(shadowDepth, shadowPosition.z - bias);
 }
 
 vec3 genUnitVector(vec2 xy) {
@@ -132,6 +132,7 @@ vec2 rsi(vec3 position, vec3 direction, float radius) {
 }
 
 #include "/lib/options/skyOptions.glsl"
+#include "/lib/options/volumetricOptions.glsl"
 #include "/lib/options/cameraOptions.glsl"
 #include "/lib/options/lightingOptions.glsl"
 #include "/lib/options/postProcessOptions.glsl"

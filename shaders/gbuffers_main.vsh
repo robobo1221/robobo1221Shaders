@@ -36,11 +36,13 @@ void main() {
 	    // lit block fix
 		lightmaps.x = material == 89.0 || material == 169.0 || material == 124.0
 		|| material == 51.0 || material == 10.0 || material == 11.0 ? 1.0 : lightmaps.x;
+	#endif
 
-		matFlag = 0.0;
-		
-		//Plants/ Vegitation: 1.0
-		matFlag = (
+	#if defined program_gbuffers_water || defined program_gbuffers_terrain
+		matFlag = 1.0;
+
+		//Plants/ Vegitation : 1.0
+			matFlag = (
 			material == 18 ||
 			material == 161 ||
 			material == 175 ||
@@ -56,6 +58,12 @@ void main() {
 			material == 83 ||
 			material == 115
 		) ? 2.0 : matFlag;
+
+		//Water : 3.0
+			matFlag	= (
+			material == 8 ||
+			material == 9
+		) ? 3.0 : matFlag;
 
 		matFlag = floor(matFlag) * (1.0 / 32.0);
 	#endif

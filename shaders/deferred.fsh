@@ -36,6 +36,7 @@ uniform sampler2D noisetex;
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
+uniform mat4 shadowProjectionInverse;
 
 uniform vec3 shadowLightPosition;
 uniform vec3 cameraPosition;
@@ -113,7 +114,7 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 void getMatflag(float data, out float matFlag){
 	vec2 decodedData = decodeVec2(data);
 
-	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 /32.0);
+	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 / 8.0);
 }
 
 #include "/lib/uniform/shadowDistortion.glsl"
@@ -151,7 +152,7 @@ void main() {
 	getRoughnessF0(data1.z, roughness, f0);
 	getMatflag(data1.w, matFlag);
 
-	bool isVegitation = (matFlag > 1.9 && matFlag < 2.0);
+	bool isVegitation = (matFlag > 1.99 && matFlag < 2.01);
 
 	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, isVegitation);
 

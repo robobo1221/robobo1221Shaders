@@ -10,13 +10,15 @@ vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector, bool is
 	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL);
 		  shadowBias = shadowBias * calculateDistFactor(shadowPosition.xy) * pixelSize * 0.2;
 
-	float shadow1 = calculateHardShadows(shadowtex1, shadowPosition, shadowBias);
+	float shadowDepth1 = texture2D(shadowtex1, shadowPosition.xy).x;
+	float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
 
 	#ifndef COLOURED_SHADOWS
 		return vec3(shadow1);
 	#endif
 
-	float shadow0 = calculateHardShadows(shadowtex0, shadowPosition, shadowBias);
+	float shadowDepth0 = texture2D(shadowtex0, shadowPosition.xy).x;
+	float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
 	vec3 colorShadow = texture2D(shadowcolor0, shadowPosition.xy).rgb;
 
 	vec3 colouredShadows = mix(vec3(shadow0), colorShadow, clamp01(shadow1 - shadow0));
@@ -31,12 +33,12 @@ float calculateTorchLightAttenuation(float lightmap){
 
 vec3 calculateSkyLighting(float lightmap, vec3 normal){
 	#if defined program_deferred
-		vec3 skyCol = FromSH(skySH[0], skySH[1], skySH[2],mat3(gbufferModelViewInverse) * normal);
+		vec3 skyCol = FromSH(skySH[0], skySH[1], skySH[2],mat3(gbufferModelViewInverse) * normal) * PI;
 	#else
 		vec3 skyCol = skyColor;
 	#endif
 
-	return skyCol * PI * lightmap;
+	return skyCol * lightmap;
 }
 
 vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, bool isVegitation) {
@@ -51,7 +53,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 		vec3 diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
 			 diffuse = isVegitation ? vec3(rPI) : diffuse;
 	#else
-		float diffuse = clamp01(dot(normal, shadowLightVector));	//Lambert for stained glass
+		float diffuse = clamp01(dot(normal, shadowLightVector)) * rPI;	//Lambert for stained glass
 	#endif
 
 	vec3 lighting = vec3(0.0);
