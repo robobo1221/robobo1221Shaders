@@ -6,6 +6,7 @@ flat varying vec3 tangentVec;
 
 varying vec2 lightmaps;
 flat varying float material;
+flat varying float matFlag;
 
 uniform mat4 gbufferModelView;
 
@@ -35,6 +36,28 @@ void main() {
 	    // lit block fix
 		lightmaps.x = material == 89.0 || material == 169.0 || material == 124.0
 		|| material == 51.0 || material == 10.0 || material == 11.0 ? 1.0 : lightmaps.x;
+
+		matFlag = 0.0;
+		
+		//Plants/ Vegitation: 1.0
+		matFlag = (
+			material == 18 ||
+			material == 161 ||
+			material == 175 ||
+			material == 31 ||
+			material == 106 ||
+			material == 37 ||
+			material == 38 ||
+			material == 39 ||
+			material == 40 ||
+			material == 59 ||
+			material == 104 ||
+			material == 105 ||
+			material == 83 ||
+			material == 115
+		) ? 2.0 : matFlag;
+
+		matFlag = matFlag * (1.0 / 32.0);
 	#endif
 
 	vec3 tangent = at_tangent.xyz / at_tangent.w;

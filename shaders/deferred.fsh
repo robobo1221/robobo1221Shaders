@@ -110,6 +110,12 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 	f0 = decodedData.y;
 }
 
+void getMatflag(float data, out float matFlag){
+	vec2 decodedData = decodeVec2(data);
+
+	matFlag = (1.0 - decodedData.y) * 32.0;
+}
+
 #include "/lib/uniform/shadowDistortion.glsl"
 #include "/lib/fragment/volumetricClouds.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
@@ -135,7 +141,7 @@ void main() {
 	vec3 worldVector = mat3(gbufferModelViewInverse) * viewVector;
 	vec3 shadowLightVector = shadowLightPosition * 0.01;
 
-	float roughness, f0;
+	float roughness, f0, matFlag;
 	vec4 data1 = texture2D(colortex1, texcoord);
 
 	vec3 albedo = srgbToLinear(data0.rgb);
@@ -143,8 +149,10 @@ void main() {
 	vec2 lightmaps = getLightmaps(data1.y);
 
 	getRoughnessF0(data1.z, roughness, f0);
+	getMatflag(data1.w, matFlag);
 
 	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness);
+	//if (matFlag > 1.5) finalColor = vec3(0.0);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	gl_FragData[1] = vec4(0.0);

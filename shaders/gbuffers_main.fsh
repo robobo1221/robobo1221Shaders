@@ -8,6 +8,7 @@ flat varying vec3 tangentVec;
 
 varying vec2 lightmaps;
 flat varying float material;
+flat varying float matFlag;
 
 uniform sampler2D tex;
 uniform sampler2D normals;
@@ -34,5 +35,5 @@ void main() {
 	normal = tbn * normal;
 
 	gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(lightmaps), encodeVec2(roughness, f0), 1.0);
+	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(lightmaps), encodeVec2(roughness, f0), encodeVec2(1.0, 1.0 - matFlag));
 }
