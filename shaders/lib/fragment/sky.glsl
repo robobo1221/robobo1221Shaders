@@ -5,7 +5,7 @@ float sky_rayleighPhase(float cosTheta) {
 
 float sky_miePhase(float cosTheta, const float g) {
 	const float gg = g * g;
-	return (gg * -0.25 + 0.25) * pow(-2.0 * (g * cosTheta) + (gg + 1.0), -1.5);
+	return (gg * -0.25 + 0.25) * rPI * pow(-2.0 * (g * cosTheta) + (gg + 1.0), -1.5);
 }
 
 vec2 sky_phase(float cosTheta, const float g) {

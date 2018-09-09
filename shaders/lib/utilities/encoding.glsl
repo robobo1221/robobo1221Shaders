@@ -35,9 +35,9 @@ vec3 decodeNormal(float encoded, mat4 gbufferModelView) {
 }
 
 vec4 encodeRGBE8(vec3 rgb) {
-    float exponentPart = floor(log2(max(max(rgb.r, rgb.g), rgb.b)));
-    vec3  mantissaPart = clamp((128.0 / 255.0) * rgb / exp2(exponentPart), 0.0, 1.0);
-          exponentPart = clamp((exponentPart + 127.0) / 255.0, 0.0, 1.0);
+    float exponentPart = floor(log2(max3(rgb)));
+    vec3  mantissaPart = clamp01((128.0 / 255.0) * rgb * exp2(-exponentPart));
+          exponentPart = clamp01((exponentPart + 127.0) * (1.0 / 255.0));
 
     return vec4(mantissaPart, exponentPart);
 }

@@ -1,5 +1,3 @@
-#extension GL_EXT_gpu_shader4 : enable
-
 varying vec2 texcoord;
 varying vec4 color;
 
@@ -8,8 +6,6 @@ flat varying vec3 tangentVec;
 
 varying vec2 lightmaps;
 flat varying float material;
-
-uniform sampler2D tex;
 
 uniform mat4 gbufferModelView;
 
@@ -48,10 +44,7 @@ void main() {
 		normal = (gl_NormalMatrix * normal) * mat3(gbufferModelView);
 	#endif
 
-	vec2 atlasSize = vec2(textureSize2D(tex, 0));
-
 	tbn = mat3(tangent, cross(tangent, normal), normal);
-	mat3 tangentSize = mat3(tangent * atlasSize.y / atlasSize.x, tbn[1], tbn[2]);
 
-	tangentVec = -normalize((viewSpacePosition * gl_NormalMatrix) * tangentSize);
+	tangentVec = -normalize((viewSpacePosition * gl_NormalMatrix) * tbn);
 }

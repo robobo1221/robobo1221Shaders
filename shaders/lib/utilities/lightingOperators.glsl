@@ -5,7 +5,7 @@ float GeometrySchlickGGX(float NdotV, float k){
 }
 
 vec3 GeometrySmithGGX(vec3 diffuseColor, vec3 N, vec3 V, vec3 L, float r){
-	float k = pow2(r + 1.0) * (1.0 / 8.0);
+	float k = pow2(r + 1.0) * 0.125;
 
 	vec3 H = L + V;
 

@@ -24,9 +24,6 @@ void main() {
 	normal = normal * 2.0 - 1.0;
 	normal = normal == vec3(0.0) || normal == vec3(-1.0) ? vec3(0.0, 0.0, 1.0) : normal;
 
-	#if defined program_gbuffers_terrain
-		normal = clampNormal(normal, tangentVec);
-	#endif
 	#if defined program_gbuffers_water
 		//if (material == 8 || material == 9)albedo = vec4(1.0, 1.0, 1.0, 0.0);
 	#endif

@@ -14,9 +14,9 @@ vec3 calculateScatterIntergral(float opticalDepth, const vec3 coeff){
     return exp2(a * opticalDepth) * b + c;
 }
 
-float phaseG(float vDotL, const float g){
-    const float gg = g * g;
-    return 0.25 * (1.0 - gg) * pow(gg + 1.0 - 2.0 * g * vDotL, -1.5);
+float phaseG(float cosTheta, const float g){
+	const float gg = g * g;
+	return (gg * -0.25 + 0.25) * pow(-2.0 * (g * cosTheta) + (gg + 1.0), -1.5);
 }
 
 float phaseRayleigh(float cosTheta) {
