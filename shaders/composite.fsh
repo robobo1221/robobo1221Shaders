@@ -166,6 +166,7 @@ void main() {
 	#endif
 	
 	if (isTranslucent) {
+		color = calculateVolumetricLight(color, isEyeInWater == 1 ? position[0] : gbufferProjectionInverse[3].xyz, isEyeInWater == 1 ? position[1] : position[0], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, roughness, isWater);
 	}
 
