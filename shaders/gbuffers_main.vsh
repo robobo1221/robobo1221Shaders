@@ -57,7 +57,7 @@ void main() {
 			material == 115
 		) ? 2.0 : matFlag;
 
-		matFlag = matFlag * (1.0 / 32.0);
+		matFlag = floor(matFlag) * (1.0 / 32.0);
 	#endif
 
 	vec3 tangent = at_tangent.xyz / at_tangent.w;

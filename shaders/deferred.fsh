@@ -113,7 +113,7 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 void getMatflag(float data, out float matFlag){
 	vec2 decodedData = decodeVec2(data);
 
-	matFlag = (1.0 - decodedData.y) * 32.0;
+	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 /32.0);
 }
 
 #include "/lib/uniform/shadowDistortion.glsl"
@@ -151,8 +151,9 @@ void main() {
 	getRoughnessF0(data1.z, roughness, f0);
 	getMatflag(data1.w, matFlag);
 
-	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness);
-	//if (matFlag > 1.5) finalColor = vec3(0.0);
+	bool isVegitation = (matFlag > 1.9 && matFlag < 2.0);
+
+	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, isVegitation);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	gl_FragData[1] = vec4(0.0);

@@ -1,8 +1,9 @@
-vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector) {
+vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector, bool isVegitation) {
     vec3 shadowPosition = transMAD(shadowMatrix, worldPosition);
 	     shadowPosition = remapShadowMap(shadowPosition);
 
 	float NdotL = dot(normal, lightVector);
+		  NdotL = isVegitation ? 0.5 : NdotL;
 
 	float pixelSize = rShadowMapResolution;
 
@@ -38,8 +39,8 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 	return skyCol * PI * lightmap;
 }
 
-vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness) {
-	vec3 shadows = calculateShadows(worldPosition, normal, shadowLightVector);
+vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, bool isVegitation) {
+	vec3 shadows = calculateShadows(worldPosition, normal, shadowLightVector, isVegitation);
 		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
@@ -48,6 +49,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 
 	#if defined program_deferred
 		vec3 diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
+			 diffuse = isVegitation ? vec3(rPI) : diffuse;
 	#else
 		float diffuse = clamp01(dot(normal, shadowLightVector));	//Lambert for stained glass
 	#endif
