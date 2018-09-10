@@ -10,7 +10,7 @@ vec2 distortShadowMap(vec2 shadowPosition){
 }
 
 vec3 distortShadowMap(vec3 shadowPosition){
-	return vec3(distortShadowMap(shadowPosition.xy), shadowPosition.z * 0.2);
+	return vec3(distortShadowMap(shadowPosition.xy), shadowPosition.z * 0.25);
 }
 
 vec2 remapShadowMap(vec2 shadowPosition){
@@ -18,5 +18,5 @@ vec2 remapShadowMap(vec2 shadowPosition){
 }
 
 vec3 remapShadowMap(vec3 shadowPosition){
-	return vec3(remapShadowMap(shadowPosition.xy), shadowPosition.z * 0.2) * 0.5 + 0.5;
+	return vec3(remapShadowMap(shadowPosition.xy), shadowPosition.z * 0.25) * 0.5 + 0.5;
 }

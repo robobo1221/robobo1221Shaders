@@ -31,6 +31,7 @@ uniform sampler2D depthtex1;
 uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
 uniform sampler2D shadowcolor0;
+uniform sampler2D shadowcolor1;
 uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelView;
