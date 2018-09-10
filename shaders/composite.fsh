@@ -167,8 +167,11 @@ void main() {
 		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither, vDotL);
 	#endif
 	
+	if (isTranslucent && (!isWater || isEyeInWater == 1)){
+		color = calculateVolumetricLight(color, isEyeInWater == 1 ? position[1] : gbufferProjectionInverse[3].xyz, isEyeInWater == 1 ? backPosition[1] : position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
+	}
+
 	if (isTranslucent) {
-		color = calculateVolumetricLight(color, isEyeInWater == 1 ? position[0] : gbufferProjectionInverse[3].xyz, isEyeInWater == 1 ? position[1] : position[0], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, roughness, isWater);
 	}
 
