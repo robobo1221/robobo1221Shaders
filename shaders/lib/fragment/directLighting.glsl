@@ -38,7 +38,7 @@ vec3 calculateShadows(vec3 worldPosition, vec3 normal, vec3 lightVector, bool is
 
 float calculateTorchLightAttenuation(float lightmap){
 	float dist = clamp((1.0 - lightmap) * 15.0, 1.0, 15.0);
-	return (1.0 - clamp01((1.0 - lightmap) * 2.0 - 1.0)) / (dist * dist);
+	return (1.0 - clamp01((1.0 - lightmap) * 2.0 - 1.0)) / (dist * dist * TAU);
 }
 
 vec3 calculateSkyLighting(float lightmap, vec3 normal){
