@@ -26,17 +26,17 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, float shad
     return exp2(-mat2x3(sky_coefficientsAttenuation) * od * rLOG2 * rayLength);
 }
 
-vec3 calculateWaterTransmittance(float shadowWaterMask, float sDepth, float depth0, float depth1){
+vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, float depth0, float depth1){
     //Help me with dis it no work
-    depth0 = depth0 * 2.0 - 1.0;
-    depth0 = depth0 * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
-    depth1 = depth1 * 2.0 - 1.0;
-    depth1 = depth1 * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+    float waterDepth = (depth0 * 8.0 - 4.0);
+          waterDepth = waterDepth * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+		  waterDepth = (waterDepth - transMAD(shadowModelView, worldPosition).z);
 
-    float propagateDepth = depth0 - depth1;
-    propagateDepth = mix(0.0, propagateDepth, shadowWaterMask);
+    if (waterDepth < 0.0) return vec3(1.0);
+
+          waterDepth = mix(0.0, waterDepth, shadowWaterMask);
     
-    return exp2(-waterTransmittanceCoefficient * propagateDepth * rLOG2);
+    return exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
 }
 
 #if defined program_composite0
@@ -50,7 +50,6 @@ vec3 calculateWaterTransmittance(float shadowWaterMask, float sDepth, float dept
         indirectScattering += (scatterCoeffs * vec2(0.25)) * transmittance;
     }
 
-
     void calculateVolumetricLightScatteringWater(vec3 position, vec3 shadowPosition, vec3 wLightVector, vec3 scatterCoeff, float phase, vec3 transmittance, inout vec3 directScattering, inout vec3 indirectScattering){
         shadowPosition = remapShadowMap(shadowPosition);
 
@@ -58,12 +57,12 @@ vec3 calculateWaterTransmittance(float shadowWaterMask, float sDepth, float dept
         float shadowDepth1 = texture2D(shadowtex1, shadowPosition.xy).x;
         vec4 shadowColor1 = texture2D(shadowcolor1, shadowPosition.xy);
 
-        float shadowWaterMask = shadowColor1.a * 0.5 + 0.5;
+        float shadowWaterMask = shadowColor1.a * 2.0 - 1.0;
 
         float volumetricShadow = calculateHardShadows(shadowDepth1, shadowPosition, 0.0);
-        vec3 waterTransmittance = calculateWaterTransmittance(shadowWaterMask, shadowPosition.z, shadowDepth0, shadowDepth1);
+        vec3 waterTransmittance = calculateWaterTransmittance(position, shadowWaterMask, shadowDepth0, shadowDepth1);
 
-        directScattering += scatterCoeff * phase * volumetricShadow * transmittance;
+        directScattering += scatterCoeff * phase * volumetricShadow * transmittance * waterTransmittance;
         indirectScattering += scatterCoeff * 0.25 * transmittance;
     }
 
