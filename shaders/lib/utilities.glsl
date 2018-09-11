@@ -14,6 +14,7 @@ const float rLOG2	= 1.0 / log(2.0);
 #define max0(x) max(x, 0.0)
 #define min0(x) min(x, 0.0)
 #define max3(a) max(max(a.x, a.y), a.z)
+#define min3(a) min(min(a.x, a.y), a.z)
 #define max4(a, b, c, d) max(max(a, b), max(c, d))
 #define min4(a, b, c, d) min(min(a, b), min(c, d))
 
