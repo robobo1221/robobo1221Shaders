@@ -1,3 +1,5 @@
+#include "/lib/options/TAAOptions.glsl"
+
 #if defined program_composite2 || defined program_composite3
     #include "/lib/options/cameraOptions.glsl"
     #include "/lib/options/postProcessOptions.glsl"
