@@ -131,15 +131,14 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }
 
-vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth) {
-	const int rayTraceQuality = 16;
+vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float dither) {
+	const int rayTraceQuality = 64;
 	const float rQuality = 1.0 / rayTraceQuality;
 
 	int raySteps = rayTraceQuality + 4;
-	int refinements = 7;
+	int refinements = 4;
 
-	vec3 reflectVector = normalize(reflect(viewVector, normal));
-	vec3 direction = ViewSpaceToScreenSpace(viewPosition + reflectVector);
+	vec3 direction = ViewSpaceToScreenSpace(viewPosition + reflectedVector);
 	//vec3 unNormalizedDirection = normalize(direction);
 
 	float maxLength = rQuality;
@@ -170,6 +169,8 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal,
             break;
 	}
 
+	float marchedDepth = depth;
+
 	while (--refinements > 0) {
 
 		p = direction * clamp((depth - p.z) * stepWeight, -stepLength, stepLength) + p;
@@ -178,9 +179,23 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal,
 		stepLength *= 0.5;
 	}
 
-	bool visible = abs(p.z - depth) * min(stepWeight, 400.0) <= maxLength;
+	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength && 0.97 < p.z;
 
 	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : vec3(0.0);
+}
+
+vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 lightVector, vec3 normal, float dither, float originalDepth, float roughness, float f0){
+	float NoV = dot(normal, viewVector);
+	float NoL = dot(normal, lightVector);
+	float LoV = dot(lightVector, viewVector);
+
+	vec3 fresnel = Fresnel(f0, 1.0, -NoV);
+	vec3 reflectVector = reflect(viewVector, normal);
+	
+	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither);
+	reflection = reflection * fresnel;
+
+	return color + reflection;
 }
 
 /* DRAWBUFFERS:5 */
@@ -262,7 +277,7 @@ void main() {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
-	//if (depth < 1.0) color = rayTaceReflections(position[0], vec3(texcoord, depth), viewVector, normal, dither, depth);
+	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, 1.0);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }
