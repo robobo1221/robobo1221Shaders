@@ -160,7 +160,7 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 	while(--raySteps > 0){
 		stepLength = clamp((depth - p.z) * stepWeight, minLength, maxLength);
 		p = direction * stepLength + p;
-		depth = texture2D(depthtex1, p.xy).x;
+		depth = texture2D(depthtex0, p.xy).x;
 
 		if (clamp01(p) != p) return vec3(0.0);
 
@@ -174,7 +174,7 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 	while (--refinements > 0) {
 
 		p = direction * clamp((depth - p.z) * stepWeight, -stepLength, stepLength) + p;
-		depth = texture2D(depthtex1, p.xy).x;
+		depth = texture2D(depthtex0, p.xy).x;
 
 		stepLength *= 0.5;
 	}
@@ -195,7 +195,7 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither);
 	reflection = reflection * fresnel;
 
-	return color + reflection;
+	return reflection;
 }
 
 /* DRAWBUFFERS:5 */
