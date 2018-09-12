@@ -179,7 +179,7 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 		stepLength *= 0.5;
 	}
 
-	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength && 0.97 < p.z;
+	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength && 0.96 < p.z;
 
 	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : vec3(0.0);
 }
@@ -193,9 +193,9 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflectVector = reflect(viewVector, normal);
 	
 	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither);
-	reflection = reflection * fresnel;
+	reflection = reflection;
 
-	return reflection + color * (1.0 - fresnel);
+	return reflection * fresnel + color * (1.0 - fresnel);
 }
 
 /* DRAWBUFFERS:5 */
