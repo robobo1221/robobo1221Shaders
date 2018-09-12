@@ -131,20 +131,26 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }
 
-vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither) {
+vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth) {
 	const int rayTraceQuality = 16;
 	const float rQuality = 1.0 / rayTraceQuality;
 
 	int raySteps = rayTraceQuality + 4;
-	int refinements = 6;
+	int refinements = 7;
 
 	vec3 reflectVector = normalize(reflect(viewVector, normal));
-	vec3 direction = normalize(ViewSpaceToScreenSpace(viewPosition + reflectVector) - p);
+	vec3 direction = ViewSpaceToScreenSpace(viewPosition + reflectVector);
+	//vec3 unNormalizedDirection = normalize(direction);
 
-    float maxLength = rQuality;
+	float maxLength = rQuality;
     float minLength = maxLength * 0.1;
 
-	float stepLength = minLength;
+	float stepLength = minLength + minLength * dither;
+
+	direction = normalize(direction - p);
+	//vec3 newDirection = direction.z > unNormalizedDirection.z * 0.1 ? -direction : direction;
+	//vec3 maxdir = direction;
+
 	float stepWeight = 1.0 / abs(direction.z);
 
 	p += direction * stepLength;
@@ -256,7 +262,7 @@ void main() {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
-	//if (depth < 1.0) color = rayTaceReflections(position[0], vec3(texcoord, depth), viewVector, normal, dither);
+	//if (depth < 1.0) color = rayTaceReflections(position[0], vec3(texcoord, depth), viewVector, normal, dither, depth);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }
