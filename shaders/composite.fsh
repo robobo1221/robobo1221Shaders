@@ -132,7 +132,7 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 }
 
 vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float dither) {
-	const int rayTraceQuality = 64;
+	const int rayTraceQuality = 16;
 	const float rQuality = 1.0 / rayTraceQuality;
 
 	int raySteps = rayTraceQuality + 4;
