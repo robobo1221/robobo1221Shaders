@@ -195,7 +195,7 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither);
 	reflection = reflection * fresnel;
 
-	return reflection;
+	return reflection + color;
 }
 
 /* DRAWBUFFERS:5 */
@@ -277,7 +277,7 @@ void main() {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
-	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, 1.0);
+	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }
