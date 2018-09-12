@@ -195,7 +195,7 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither);
 	reflection = reflection * fresnel;
 
-	return reflection + color;
+	return reflection + color * (1.0 - fresnel);
 }
 
 /* DRAWBUFFERS:5 */
@@ -257,6 +257,8 @@ void main() {
 
 	bool isWater = matFlag > 2.5 && matFlag < 3.5;
 
+	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0);
+
 	#ifdef VOLUMETRIC_CLOUDS
 		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither, vDotL);
 	#endif
@@ -276,8 +278,6 @@ void main() {
 	if (isEyeInWater == 0) {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
-
-	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0);
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
 }
