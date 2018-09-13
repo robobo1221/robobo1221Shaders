@@ -257,8 +257,6 @@ void main() {
 
 	bool isWater = matFlag > 2.5 && matFlag < 3.5;
 
-	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0);
-
 	#ifdef VOLUMETRIC_CLOUDS
 		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither, vDotL);
 	#endif
@@ -274,6 +272,8 @@ void main() {
 	if (isWater || isEyeInWater == 1) {
 		color = calculateVolumetricLightWater(color, isEyeInWater == 1 ? gbufferModelViewInverse[3].xyz : position[1], isEyeInWater == 1 ? position[1] : backPosition[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
+
+	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0);
 
 	if (isEyeInWater == 0) {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
