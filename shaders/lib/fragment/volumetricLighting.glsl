@@ -50,7 +50,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         indirectScattering += (scatterCoeffs * vec2(0.25)) * transmittance;
     }
 
-    void calculateVolumetricLightScatteringWater(vec3 position, vec3 shadowPosition, vec3 wLightVector, vec3 scatterCoeff, float phase, vec3 transmittance, inout vec3 directScattering, inout vec3 indirectScattering){
+    void calculateVolumetricLightScatteringWater(vec3 position, vec3 shadowPosition, vec3 wLightVector, vec3 transmittance, inout vec3 directScattering, inout vec3 indirectScattering){
         shadowPosition = remapShadowMap(shadowPosition);
 
         float shadowDepth0 = texture2D(shadowtex0, shadowPosition.xy).x;
@@ -62,8 +62,8 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         float volumetricShadow = calculateHardShadows(shadowDepth1, shadowPosition, 0.0);
         vec3 waterTransmittance = calculateWaterTransmittance(position, shadowWaterMask, shadowDepth0, shadowDepth1);
 
-        directScattering += scatterCoeff * phase * volumetricShadow * transmittance * waterTransmittance;
-        indirectScattering += scatterCoeff * 0.25 * transmittance;
+        directScattering += volumetricShadow * transmittance * waterTransmittance;
+        indirectScattering += transmittance;
     }
 
     vec3 calculateVolumetricLight(vec3 backGround, vec3 startPosition, vec3 endPosition, vec3 wLightVector, vec3 worldVector, float dither, float ambientOcclusion, float vDotL){
@@ -127,16 +127,18 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
 
         float phase = phaseG(vDotL, 0.5);
 
-        for (int i = 0; i < steps; ++i, rayPosition += increment, shadowPosition += shadowIncrement){
-            vec3 scatterCoeff = waterScatterCoefficient * calculateScatterIntergral(rayLength, waterTransmittanceCoefficient);
+        vec3 scatterCoeff = waterScatterCoefficient * calculateScatterIntergral(rayLength, waterTransmittanceCoefficient);
+        vec3 stepTransmittance = exp2(-waterTransmittanceCoefficient * rayLength * rLOG2);
 
-            calculateVolumetricLightScatteringWater(rayPosition, shadowPosition, wLightVector, scatterCoeff, phase, transmittance, directScattering, indirectScattering);
-            transmittance *= exp2(-waterTransmittanceCoefficient * rayLength * rLOG2);
+        for (int i = 0; i < steps; ++i, rayPosition += increment, shadowPosition += shadowIncrement){
+
+            calculateVolumetricLightScatteringWater(rayPosition, shadowPosition, wLightVector, transmittance, directScattering, indirectScattering);
+            transmittance *= stepTransmittance;
         }
 
-        vec3 directLighting = directScattering * (sunColor + moonColor) * transitionFading;
-        vec3 indirectLighting = indirectScattering * skyColor * ambientOcclusion;
-        vec3 scattering = directLighting + indirectLighting;
+        vec3 directLighting = phase * directScattering * (sunColor + moonColor) * transitionFading;
+        vec3 indirectLighting = 0.25 * indirectScattering * skyColor * ambientOcclusion;
+        vec3 scattering = (directLighting + indirectLighting) * scatterCoeff;
 
         return backGround * transmittance + scattering;
     }
