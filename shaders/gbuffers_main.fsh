@@ -25,12 +25,14 @@ void main() {
 	normal = normal * 2.0 - 1.0;
 	normal = normal == vec3(0.0) || normal == vec3(-1.0) ? vec3(0.0, 0.0, 1.0) : normal;
 
-	#if defined program_gbuffers_water
-		if (material == 8 || material == 9)albedo = vec4(1.0);
-	#endif
-
 	float roughness = 1.0 - specularData.z;
 	float f0 = specularData.x;
+
+	#if defined program_gbuffers_water
+		albedo = (material == 8 || material == 9) ? vec4(1.0) : albedo;
+		roughness = (material == 8 || material == 9) ? 0.05 : roughness;
+		f0 = (material == 8 || material == 9) ? 0.021 : f0;
+	#endif
 
 	normal = tbn * normal;
 

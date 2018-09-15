@@ -98,6 +98,17 @@ vec2 rotate(vec2 x, float r){
     return mat2(sc.x, -sc.y, sc.y, sc.x) * x;
 }
 
+vec3 cartToSphere(vec2 coord) {
+	coord *= vec2(TAU, PI);
+	vec2 lon = sincos(coord.x) * sin(coord.y);
+	return vec3(lon.x, cos(coord.y), lon.y);
+}
+
+vec2 sphereToCart(vec3 dir) {
+    vec2 lonlat = vec2(atan(-dir.x, dir.z), acos(dir.y));
+    return lonlat * vec2(rTAU, rPI) + vec2(0.5, 0.0);
+}
+
 mat3 getRotMat(vec3 x,vec3 y){
     float d = dot(x,y);
     vec3 cr = cross(y,x);

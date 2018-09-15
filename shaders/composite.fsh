@@ -28,6 +28,7 @@ varying float transitionFading;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
+uniform sampler2D colortex3;
 uniform sampler2D colortex5;
 uniform sampler2D shadowtex0;
 uniform sampler2D shadowtex1;
@@ -131,12 +132,12 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }
 
-vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float dither) {
+vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float dither, vec3 sky, float skyLightmap) {
 	const int rayTraceQuality = 16;
 	const float rQuality = 1.0 / rayTraceQuality;
 
 	int raySteps = rayTraceQuality + 4;
-	int refinements = 4;
+	int refinements = 8;
 
 	vec3 direction = ViewSpaceToScreenSpace(viewPosition + reflectedVector);
 	//vec3 unNormalizedDirection = normalize(direction);
@@ -162,7 +163,7 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 		p = direction * stepLength + p;
 		depth = texture2D(depthtex0, p.xy).x;
 
-		if (clamp01(p) != p) return vec3(0.0);
+		if (clamp01(p) != p) return sky * skyLightmap;
 
 		rayHit = depth <= p.z;
 		if (rayHit)
@@ -179,20 +180,29 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 		stepLength *= 0.5;
 	}
 
+	if (depth >= 1.0) return sky;
+
 	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength && 0.96 < p.z;
 
-	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : vec3(0.0);
+	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : sky * skyLightmap;
 }
 
-vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 lightVector, vec3 normal, float dither, float originalDepth, float roughness, float f0){
+vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 lightVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap){
+	if (f0 < 0.005) return color;
+
 	float NoV = dot(normal, viewVector);
 	float NoL = dot(normal, lightVector);
 	float LoV = dot(lightVector, viewVector);
 
-	vec3 fresnel = Fresnel(f0, 1.0, -NoV);
+	vec3 fresnel = Fresnel(f0, 1.0, clamp01(-NoV));
 	vec3 reflectVector = reflect(viewVector, normal);
+	vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
+
+	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
 	
-	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither);
+	skyLightmap = clamp01(skyLightmap * 1.1);
+
+	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap);
 	reflection = reflection;
 
 	return reflection * fresnel + color * (1.0 - fresnel);
@@ -273,7 +283,7 @@ void main() {
 		color = calculateVolumetricLightWater(color, isEyeInWater == 1 ? gbufferModelViewInverse[3].xyz : position[1], isEyeInWater == 1 ? position[1] : backPosition[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
-	//if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0);
+	if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0, lightmaps.y);
 
 	if (isEyeInWater == 0) {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);

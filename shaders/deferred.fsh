@@ -78,6 +78,12 @@ vec3 FromSH(vec4 cR, vec4 cG, vec4 cB, vec3 lightDir) {
     );
 }
 
+#include "/lib/uniform/shadowDistortion.glsl"
+#include "/lib/fragment/volumetricClouds.glsl"
+#include "/lib/fragment/volumetricLighting.glsl"
+#include "/lib/fragment/directLighting.glsl"
+#include "/lib/fragment/sky.glsl"
+
 vec2 getLightmaps(float data)
 {
 	vec2 lightmaps = decodeVec2(data);
@@ -97,15 +103,39 @@ void getMatflag(float data, out float matFlag){
 	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 / 8.0);
 }
 
-#include "/lib/uniform/shadowDistortion.glsl"
-#include "/lib/fragment/volumetricClouds.glsl"
-#include "/lib/fragment/volumetricLighting.glsl"
-#include "/lib/fragment/directLighting.glsl"
+vec3 calculateSkySphere(vec2 p){
+	if (any(greaterThan(p, vec2(0.501)))) return vec3(0.0);
+	p *= 2.0;
 
-/* DRAWBUFFERS:20 */
+	vec2 planetSphere = vec2(0.0);
+	vec3 sky = vec3(0.0);
+	vec3 skyAbsorb = vec3(0.0);
+	vec3 color = vec3(0.0);
+
+	vec3 positionWorld = cartToSphere(p) * vec3(1.0, 1.0, -1.0);
+	vec3 positionView = mat3(gbufferModelView) * positionWorld;
+	vec3 viewVector = -positionView;
+
+	float vDotL = dot(viewVector, sunVector);
+
+	sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
+
+	color = sky;
+
+	//color += calculateSunSpot(vDotL) * sunColorBase * skyAbsorb;
+	//color += calculateMoonSpot(-vDotL) * moonColorBase * skyAbsorb;
+	//color += calculateStars(positionWorld, wMoonVector) * skyAbsorb;
+
+	return color;
+}
+
+/* DRAWBUFFERS:203 */
 
 void main() {
 	float depth = texture2D(depthtex1, texcoord).x;
+	vec3 skySphere = calculateSkySphere(texcoord);
+
+	gl_FragData[2] = encodeRGBE8(max0(skySphere));
 
 	if (depth >= 1.0) {
 		return;
