@@ -8,15 +8,18 @@ varying vec2 lightmaps;
 flat varying float material;
 flat varying float matFlag;
 
-uniform mat4 gbufferModelView;
+varying vec3 worldPosition;
 
-attribute vec4 at_tangent;
-attribute vec3 mc_Entity;
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferModelViewInverse;
 
 uniform float viewWidth;
 uniform float viewHeight;
 
 uniform int frameCounter;
+
+attribute vec4 at_tangent;
+attribute vec3 mc_Entity;
 
 #include "/lib/utilities.glsl"
 #include "/lib/uniform/TemporalJitter.glsl"
@@ -25,6 +28,8 @@ void main() {
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 	gl_Position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
 	gl_Position.xy += calculateTemporalJitter() * gl_Position.w;
+
+	worldPosition = transMAD(gbufferModelViewInverse, viewSpacePosition);
 
 	material = mc_Entity.x;
 

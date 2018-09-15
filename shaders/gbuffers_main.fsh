@@ -10,29 +10,41 @@ varying vec2 lightmaps;
 flat varying float material;
 flat varying float matFlag;
 
+varying vec3 worldPosition;
+
 uniform sampler2D tex;
 uniform sampler2D normals;
 uniform sampler2D specular;
 
+uniform vec3 cameraPosition;
+
+uniform float frameTimeCounter;
+
 #include "/lib/utilities.glsl"
+
+#ifdef program_gbuffers_water
+	#include "/lib/fragment/waterWaves.glsl"
+#endif
 
 /* DRAWBUFFERS:01 */
 void main() {
 	vec4 albedo = texture2D(tex, texcoord) * color;
-	vec3 normal = texture2D(normals, texcoord).rgb;
+	vec3 normal = texture2D(normals, texcoord).rgb * 2.0 - 1.0;
 	vec4 specularData = texture2D(specular, texcoord);
-
-	normal = normal * 2.0 - 1.0;
-	normal = normal == vec3(0.0) || normal == vec3(-1.0) ? vec3(0.0, 0.0, 1.0) : normal;
 
 	float roughness = 1.0 - specularData.z;
 	float f0 = specularData.x;
 
 	#if defined program_gbuffers_water
-		albedo = (material == 8 || material == 9) ? vec4(1.0) : albedo;
-		roughness = (material == 8 || material == 9) ? 0.075 : roughness;
-		f0 = (material == 8 || material == 9) ? 0.021 : f0;
+		bool isWater = (material == 8 || material == 9);
+
+		albedo = isWater ? vec4(1.0) : albedo;
+		roughness = isWater ? 0.075 : roughness;
+		f0 = isWater ? 0.021 : f0;
+		if (isWater) normal = calculateWaveNormals(worldPosition.xz + cameraPosition.xz);
 	#endif
+
+	normal = normal == vec3(0.0) || normal == vec3(-1.0) ? vec3(0.0, 0.0, 1.0) : normal;
 
 	normal = tbn * normal;
 
