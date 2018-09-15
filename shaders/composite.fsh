@@ -137,7 +137,7 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 	const float rQuality = 1.0 / rayTraceQuality;
 
 	int raySteps = rayTraceQuality + 4;
-	int refinements = 8;
+	int refinements = 4;
 
 	vec3 direction = ViewSpaceToScreenSpace(viewPosition + reflectedVector);
 	//vec3 unNormalizedDirection = normalize(direction);
@@ -198,13 +198,13 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflectVector = reflect(viewVector, normal);
 	vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
 
-	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
 	vec3 sunReflection = specularGGX(normal, -viewVector, sunVector, roughness, f0) * sunColor;
+	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5)) + sunReflection;
 	
 	skyLightmap = clamp01(skyLightmap * 1.1);
 
 	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap);
-	reflection = reflection + sunReflection;
+	reflection = reflection;
 
 	return reflection * fresnel + color * (1.0 - fresnel);
 }
