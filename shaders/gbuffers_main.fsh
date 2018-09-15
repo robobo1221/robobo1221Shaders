@@ -30,7 +30,7 @@ void main() {
 
 	#if defined program_gbuffers_water
 		albedo = (material == 8 || material == 9) ? vec4(1.0) : albedo;
-		roughness = (material == 8 || material == 9) ? 0.05 : roughness;
+		roughness = (material == 8 || material == 9) ? 0.075 : roughness;
 		f0 = (material == 8 || material == 9) ? 0.021 : f0;
 	#endif
 

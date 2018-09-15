@@ -199,11 +199,12 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
 
 	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
+	vec3 sunReflection = specularGGX(normal, -viewVector, sunVector, roughness, f0) * sunColor;
 	
 	skyLightmap = clamp01(skyLightmap * 1.1);
 
 	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap);
-	reflection = reflection;
+	reflection = reflection + sunReflection;
 
 	return reflection * fresnel + color * (1.0 - fresnel);
 }
@@ -283,7 +284,7 @@ void main() {
 		color = calculateVolumetricLightWater(color, isEyeInWater == 1 ? gbufferModelViewInverse[3].xyz : position[1], isEyeInWater == 1 ? position[1] : backPosition[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
-	if (depth < 1.0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0, lightmaps.y);
+	if (depth < 1.0 && isEyeInWater == 0) color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, shadowLightVector, normal, dither, depth, roughness, f0, lightmaps.y);
 
 	if (isEyeInWater == 0) {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
