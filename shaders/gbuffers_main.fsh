@@ -32,6 +32,10 @@ uniform float frameTimeCounter;
 
 /* DRAWBUFFERS:01 */
 void main() {
+	#if defined program_gbuffers_water
+		if(!gl_FrontFacing) discard;
+	#endif
+
 	vec4 albedo = texture2D(tex, texcoord) * color;
 	vec3 normal = texture2D(normals, texcoord).rgb * 2.0 - 1.0;
 	vec4 specularData = texture2D(specular, texcoord);

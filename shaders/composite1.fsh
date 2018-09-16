@@ -30,7 +30,6 @@ vec3 calculateBloomTile(vec2 coord, const float lod, vec2 pixelSize){
 	const int jSteps = 2;
 	const float rISteps = 1.0 / iSteps;
 	const float rJSteps = 1.0 / jSteps;
-	const float rSteps = 1.0 / (jSteps * iSteps);
 
 	const float lodScale = exp2(lod);
 	const float offset = exp2(-lod) * 1.5;

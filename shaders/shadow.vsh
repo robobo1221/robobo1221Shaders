@@ -5,7 +5,10 @@
 varying vec2 texcoord;
 varying vec4 color;
 
+flat varying vec3 normals;
 flat varying float material;
+
+uniform mat4 shadowModelView;
 
 attribute vec3 mc_Entity;
 
@@ -22,4 +25,6 @@ void main(){
 	color = gl_Color;
 
 	material = mc_Entity.x;
+
+	normals = (gl_NormalMatrix * gl_Normal) * mat3(shadowModelView);
 }

@@ -15,6 +15,8 @@ uniform sampler2D tex;
 /* DRAWBUFFERS:01 */
 void main()
 {
+	if(!gl_FrontFacing) discard;
+
 	vec4 albedo = texture2D(tex, texcoord) * color;
 	albedo.rgb = srgbToLinear(albedo.rgb);
 	
@@ -22,6 +24,6 @@ void main()
 
 	albedo = isWater ? vec4(1.0, 1.0, 1.0, 1.0) : albedo;
 
-	gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(normals, float(isWater) * 0.5 + 0.5);
+	gl_FragData[0] = vec4(albedo.rgb, albedo.a);
+	gl_FragData[1] = vec4(normals * 0.5 + 0.5, float(isWater) * 0.5 + 0.5);
 }

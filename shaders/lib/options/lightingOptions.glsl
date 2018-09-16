@@ -6,3 +6,5 @@ const float shadowDistance = 120.0;
 #define torchColor (blackbody(2700.0) * torchIlluminance)
 
 //#define COLOURED_SHADOWS
+
+//#define GI        //HIGHLY WIP

@@ -42,12 +42,15 @@ uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjectionInverse;
 uniform mat4 shadowModelView;
+uniform mat4 shadowProjection;
 
 uniform vec3 shadowLightPosition;
 uniform vec3 cameraPosition;
 
 uniform float eyeAltitude;
 uniform float frameTimeCounter;
+
+uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
 
@@ -174,7 +177,13 @@ void main() {
 
 	bool isVegitation = (matFlag > 1.99 && matFlag < 2.01);
 
-	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, isVegitation);
+	float dither = bayer64(gl_FragCoord.xy);
+	
+	#ifdef TAA
+		dither = fract(frameCounter * (1.0 / 7.0) + dither);
+	#endif
+
+	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	gl_FragData[1] = vec4(0.0);
