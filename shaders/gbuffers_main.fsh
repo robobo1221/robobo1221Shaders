@@ -16,13 +16,17 @@ uniform sampler2D tex;
 uniform sampler2D normals;
 uniform sampler2D specular;
 
+#if defined program_gbuffers_water
+	uniform sampler2D noisetex;
+#endif
+
 uniform vec3 cameraPosition;
 
 uniform float frameTimeCounter;
 
 #include "/lib/utilities.glsl"
 
-#ifdef program_gbuffers_water
+#if defined program_gbuffers_water
 	#include "/lib/fragment/waterWaves.glsl"
 #endif
 
@@ -44,7 +48,7 @@ void main() {
 		if (isWater) normal = calculateWaveNormals(worldPosition.xz + cameraPosition.xz);
 	#endif
 
-	normal = normal == vec3(0.0) || normal == vec3(-1.0) ? vec3(0.0, 0.0, 1.0) : normal;
+	normal = dot(normal, normal) <= 0.0 ? vec3(0.0, 0.0, 1.0) : normal;
 
 	normal = tbn * normal;
 

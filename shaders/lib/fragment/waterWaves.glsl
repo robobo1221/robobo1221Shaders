@@ -14,27 +14,36 @@ float calculateTrochoidalWave(vec2 coord, float waveLength, float time, vec2 wav
 float generateWaves(vec2 coord){
     float waveLength = 10.0;
     float time = TIME;
-    float waveAmplitude = 0.1;
-    float waveSteepness = 0.6;
-    vec2 waveDirection = vec2(0.5, 1.0);
+    float waveAmplitude = 0.07;
+    float waveSteepness = 0.7;
+    vec2 waveDirection = vec2(1.0, 0.5);
+
+    vec2 anpos = coord * 0.005;
 
     float waves = 0.0;
 
-    for (int i = 0; i < 13; ++i){
-        waves += calculateTrochoidalWave(coord, waveLength, time, waveDirection, waveAmplitude, waveSteepness);
+    const float r = 0.5;
+    const vec2 sc = vec2(sin(r), cos(r));
+    const mat2 rot = mat2(sc.y, -sc.x, sc.x, sc.y);
+
+    for (int i = 0; i < 11; ++i){
+        vec2 addNoise = (texture2D(noisetex, anpos * inversesqrt(waveLength)).xy * 2.0 - 1.0) * sqrt(waveLength);
+        waves += calculateTrochoidalWave(coord + addNoise, waveLength, time, waveDirection, waveAmplitude, waveSteepness);
 
         waveLength *= 0.7;
-        waveDirection = rotate(waveDirection, 1.0);
         waveAmplitude *= 0.6;
         waveSteepness *= 1.03;
         time *= 0.8;
+
+        waveDirection *= rot;
+        anpos *= rot;
     }
 
     return -waves;
 }
 
 vec3 calculateWaveNormals(vec2 coord){
-    const float delta = 0.001;
+    const float delta = 0.03;
     const float rDelta = 1.0 / delta;
 
     float c = generateWaves(coord);

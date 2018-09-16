@@ -46,7 +46,7 @@ float calculateCloudOD(vec3 position, const int octaves){
     return clouds * (volumetric_cloudDensity * volumetric_cloudScale);
 }
 
-#if defined program_composite0
+#if defined program_composite0 || defined program_deferred
     // Approximation for in-scattering probability.
     float calculatePowderEffect(float od, float vDotL){
         float powder = 1.0 - exp2(-od * 2.0);
@@ -58,7 +58,6 @@ float calculateCloudOD(vec3 position, const int octaves){
         const float rSteps = volumetric_cloudThickness / steps;
 
         vec3 increment = direction * rSteps;
-        position += 0.5 * increment;
 
         float transmittance = 0.0;
 
@@ -84,16 +83,15 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     // Calculate the total energy of the clouds.
-    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float indirectScattering){
+    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float indirectScattering, const int dlSteps, const int alSteps){
         
-        directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, 5) * calculatePowderEffect(od, vDotL) * transmittance;
-        indirectScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), 3) * transmittance;
+        directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, dlSteps) * calculatePowderEffect(od, vDotL) * transmittance;
+        indirectScattering += scatterCoeff /* calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), alSteps) */ * transmittance;
     }
 
-    vec3 calculateVolumetricClouds(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither, float vDotL){
+    vec3 calculateVolumetricClouds(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither, float vDotL, const int steps, const int dlSteps, const int alSteps){
         
         // Marches per pixel.
-        const int steps = VC_QUALITY;
         const float rSteps = 1.0 / steps;
 
         // Early out when the clouds are behind the horizon or not visible.
@@ -146,7 +144,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             // Scattering intergral.
             float scatterCoeff = calculateScatterIntergral(od, 1.11);
             
-            calculateCloudScattering(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, indirectScattering);
+            calculateCloudScattering(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, indirectScattering, dlSteps, alSteps);
             transmittance *= exp2(-od * 1.11 * rLOG2);
         }
 

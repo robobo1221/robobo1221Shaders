@@ -1,7 +1,7 @@
 const int noiseTextureResolution = 64;
 const float rNoiseTexRes = 1.0 / noiseTextureResolution;
 
-#if (defined program_composite0 || defined program_deferred) && defined FRAGMENT
+#if (defined program_composite0 || defined program_deferred || defined program_gbuffers_water) && defined FRAGMENT
     float calculate3DNoise(vec3 position){
         float yTile = floor(position.y);
         float yRep  = position.y - yTile;

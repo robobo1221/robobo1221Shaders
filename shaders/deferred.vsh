@@ -19,8 +19,10 @@ varying vec3 wLightVector;
 
 varying vec3 baseSunColor;
 varying vec3 sunColor;
+varying vec3 sunColorClouds;
 varying vec3 baseMoonColor;
 varying vec3 moonColor;
+varying vec3 moonColorClouds;
 varying vec3 skyColor;
 
 varying float transitionFading;
@@ -115,6 +117,8 @@ void main() {
 
 	sunColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wSunVector, 3) * baseSunColor;
 	moonColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wMoonVector, 3) * baseMoonColor;
+	sunColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wSunVector, 3) * baseSunColor;
+	moonColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wMoonVector, 3) * baseMoonColor;
 	
 	vec2 planetSphere = vec2(0.0);
 	vec3 transmittance = vec3(0.0);

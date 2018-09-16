@@ -19,8 +19,10 @@ varying vec3 wLightVector;
 
 varying vec3 baseSunColor;
 varying vec3 sunColor;
+varying vec3 sunColorClouds;
 varying vec3 baseMoonColor;
 varying vec3 moonColor;
+varying vec3 moonColorClouds;
 varying vec3 skyColor;
 
 varying float transitionFading;
@@ -35,6 +37,7 @@ uniform sampler2D shadowcolor1;
 uniform sampler2D noisetex;
 
 uniform mat4 gbufferModelView;
+uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjectionInverse;
@@ -59,6 +62,10 @@ vec3 calculateViewSpacePosition(vec2 coord, float depth) {
 
 vec3 calculateWorldSpacePosition(vec3 coord) {
 	return transMAD(gbufferModelViewInverse, coord);
+}
+
+vec3 ViewSpaceToScreenSpace(vec3 viewPos) {
+	return ((projMAD(gbufferProjection, viewPos) / -viewPos.z)) * 0.5 + 0.5;
 }
 
 vec3 FromSH(vec4 cR, vec4 cG, vec4 cB, vec3 lightDir) {
@@ -119,8 +126,11 @@ vec3 calculateSkySphere(vec2 p){
 	float vDotL = dot(viewVector, sunVector);
 
 	sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
-
 	color = sky;
+
+	#ifdef VOLUMETRIC_CLOUDS
+		color = calculateVolumetricClouds(color, sky, -positionWorld, wLightVector, positionWorld, 1.0, planetSphere, 0.5, vDotL, 10, 3, 3);
+	#endif
 
 	//color += calculateSunSpot(vDotL) * sunColorBase * skyAbsorb;
 	//color += calculateMoonSpot(-vDotL) * moonColorBase * skyAbsorb;

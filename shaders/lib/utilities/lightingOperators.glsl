@@ -21,21 +21,21 @@ vec3 GeometrySmithGGX(vec3 diffuseColor, vec3 N, vec3 V, vec3 L, float r){
 }
 
 float specularGGX(vec3 n, vec3 v, vec3 l, float r, float F0) {
-  r*=r;r*=r;
+    r*=r;r*=r;
 
-  vec3 h = l + v;
-  float hn = inversesqrt(dot(h, h));
+    vec3 h = l + v;
+    float hn = inversesqrt(dot(h, h));
 
-  float dotLH = clamp01(dot(h,l)*hn);
-  float dotNH = clamp01(dot(h,n)*hn);
-  float dotNL = clamp01(dot(n,l));
+    float dotLH = clamp01(dot(h,l)*hn);
+    float dotNH = clamp01(dot(h,n)*hn);
+    float dotNL = clamp01(dot(n,l));
 
-  float denom = (dotNH * r - dotNH) * dotNH + 1.;
-  float D = r / (PI * denom * denom);
-  float F = F0 + (1. - F0) * exp2((-5.55473*dotLH-6.98316)*dotLH);
-  float k2 = .25 * r;
+    float denom = (dotNH * r - dotNH) * dotNH + 1.;
+    float D = r / (PI * denom * denom);
+    float F = F0 + (1. - F0) * exp2((-5.55473*dotLH-6.98316)*dotLH);
+    float k2 = .25 * r;
 
-  return dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2);
+    return dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2);
 }
 
 float DistributionGGX(vec3 N, vec3 H, float a)
