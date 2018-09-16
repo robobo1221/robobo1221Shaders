@@ -167,6 +167,8 @@ float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
 
     vec3 increment = direction * stepSize;
 
+    float fade = smoothstep(0.125, 0.075, abs(direction.y));
+
     // Make sure the shadows keep on going even after we absorbed through the cloud.
     position += position.y <= volumetric_cloudMinHeight ? direction * (volumetric_cloudMinHeight - position.y) / direction.y : vec3(0.0);
 
@@ -175,5 +177,5 @@ float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
     for (int i = 0; i < steps; ++i, position += increment){
         transmittance += calculateCloudOD(position, 3);
     }
-    return exp2(-transmittance * 1.11 * rLOG2 * stepSize);
+    return exp2(-transmittance * 1.11 * rLOG2 * stepSize) * (1.0 - fade) + fade;
 }
