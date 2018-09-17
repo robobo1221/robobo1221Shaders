@@ -32,7 +32,7 @@ vec3 calculateShadows(vec3 shadowPosition, vec3 normal, vec3 lightVector, bool i
 
 	vec3 colouredShadows = mix(vec3(shadow0), colorShadow, clamp01(shadow1 - shadow0));
 
-    return colouredShadows;
+    return colouredShadows * waterTransmittance;
 }
 
 float calculateTorchLightAttenuation(float lightmap){
