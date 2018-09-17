@@ -84,11 +84,10 @@ float calculateTorchLightAttenuation(float lightmap){
 				if (LoN <= 0.0) continue;
 
 				float falloff = 1.0 / max(pixelLength * normFactor, 1.0);
-
 				/*
 				float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
 
-				float surfaceDepth0 = (texture2D(shadowtex0, remappedCoord).x * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+				float surfaceDepth0 = (texture2DLod(shadowtex0, remappedCoord, 3).x * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
 				float surfaceDepth1 = (shadow * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
 				float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
 				waterDepth = mix(0.0, waterDepth, waterMask);
