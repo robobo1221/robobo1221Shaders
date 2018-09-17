@@ -9,8 +9,8 @@ vec3 calculateShadows(vec3 shadowPosition, vec3 normal, vec3 lightVector, bool i
 	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL);
 		  shadowBias = shadowBias * calculateDistFactor(shadowPosition.xy) * pixelSize * 0.2;
 	
-	float shadowDepth0 = texture2D(shadowtex0, shadowPosition.xy).x;
-	float shadowDepth1 = texture2D(shadowtex1, shadowPosition.xy).x;
+	float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
+	float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
 	float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
 
 	vec4 colorShadow1 = texture2D(shadowcolor1, shadowPosition.xy);
@@ -40,8 +40,9 @@ float calculateTorchLightAttenuation(float lightmap){
 	return (1.0 - clamp01((1.0 - lightmap) * 2.0 - 1.0)) / (dist * dist * TAU);
 }
 
+#if defined program_deferred
 	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, const bool isVolumetric){
-		const int iSteps = 3;
+		const int iSteps = 6;
 		const int jSteps = 6;
 		const float rISteps = 1.0 / iSteps;
 		const float rJSteps = 1.0 / jSteps;
@@ -67,7 +68,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec2 offsetCoord = shadowPosition.xy + coordOffset;
 				vec2 remappedCoord = remapShadowMap(offsetCoord) * 0.5 + 0.5;
 
-				float shadow = texture2D(shadowtex1, remappedCoord).x;
+				float shadow = texture2DLod(shadowtex1, remappedCoord, 3).x;
 
 				vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
 				float normFactor = dot(samplePostion, samplePostion);
@@ -76,7 +77,7 @@ float calculateTorchLightAttenuation(float lightmap){
 
 				if (SoN <= 0.0) continue;
 
-				vec3 normal = mat3(shadowModelView) * (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
+				vec3 normal = mat3(shadowModelView) * (texture2DLod(shadowcolor1, remappedCoord, 3).rgb * 2.0 - 1.0);
 				normal.xy = -normal.xy;
 
 				float LoN = clamp01(dot(sampleVector, normal));
@@ -84,9 +85,9 @@ float calculateTorchLightAttenuation(float lightmap){
 
 				float falloff = 1.0 / max(pixelLength * normFactor, 1.0);
 
-				float waterMask = texture2D(shadowcolor1, remappedCoord).a * 2.0 - 1.0;
-
 				/*
+				float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
+
 				float surfaceDepth0 = (texture2D(shadowtex0, remappedCoord).x * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
 				float surfaceDepth1 = (shadow * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
 				float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
@@ -95,7 +96,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
 				*/
 
-				vec4 albedo = texture2D(shadowcolor0, remappedCoord);
+				vec4 albedo = texture2DLod(shadowcolor0, remappedCoord, 3);
 					 albedo.rgb = albedo.rgb * albedo.a /** waterTransmittance*/;
 
 				total += albedo.rgb * LoN * SoN * falloff * weight;
@@ -104,6 +105,7 @@ float calculateTorchLightAttenuation(float lightmap){
 
 		return total / totalWeight;
 	}
+#endif
 
 vec3 calculateSkyLighting(float lightmap, vec3 normal){
 	#if defined program_deferred
