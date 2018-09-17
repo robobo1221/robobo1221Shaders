@@ -119,12 +119,15 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 
 vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation) {
 	vec3 shadowPosition = transMAD(shadowMatrix, worldPosition);
+
+	float cloudShadows = 1.0;
 	
 	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, isVegitation);
 		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
-		 	shadows *= calculateCloudShadows(worldPosition + cameraPosition, wLightVector, 5);
+		 	cloudShadows = calculateCloudShadows(worldPosition + cameraPosition, wLightVector, 5);
+			shadows *= cloudShadows;
 		#endif
 
 	#if defined program_deferred
@@ -142,7 +145,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 
 	#if defined program_deferred
 		#ifdef GI
-			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, false) * (sunColor + moonColor) * transitionFading;
+			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, false) * (sunColor + moonColor) * transitionFading * cloudShadows;
 		#endif
 	#endif
 
