@@ -51,18 +51,20 @@ float calculateTorchLightAttenuation(float lightmap){
 		float rotateAmountJ = PI * 0.5;
 
 		vec2 pixelOffset = vec2(50.0) * rShadowMapResolution;
-		float pixelLength = inversesqrt(dot(pixelOffset, pixelOffset));
+		float pixelLength = inversesqrt(dot(pixelOffset, pixelOffset)) * 16.0;
 
 		vec3 total = vec3(0.0);
-		float totalWeight = 1.0;
+		float totalWeight = 0.0;
 
 		vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * viewSpaceNormal * vec3(1.0, 1.0, -1.0);
 
 		for (int i = 0; i < iSteps; ++i){
-			vec2 rotatedCoordOffset = rotate(pixelOffset, rotateAmountI * (float(i) + 1.0));
+			vec2 rotatedCoordOffset = rotate(pixelOffset, rotateAmountI * (float(i) + 1.0)) * rJSteps;
 			for (int j = 0; j < jSteps; ++j){
-				vec2 coordOffset = rotate(rotatedCoordOffset * rJSteps * (float(j) + 1.0), rotateAmountJ * float(j));
+				vec2 coordOffset = rotate(rotatedCoordOffset * (float(j) + 1.0), rotateAmountJ * float(j));
 				float weight = 1.0;
+
+				totalWeight += weight;
 
 				vec2 offsetCoord = shadowPosition.xy + coordOffset;
 				vec2 remappedCoord = remapShadowMap(offsetCoord) * 0.5 + 0.5;
@@ -74,9 +76,9 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec3 sampleVector = samplePostion * inversesqrt(normFactor);
 				float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
 
-				float falloff = 1.0 / (normFactor * 255.0 + 1.0);
-
 				if (SoN <= 0.0) continue;
+
+				float falloff = 1.0 / max(pixelLength * normFactor, 1.0);
 
 				vec3 normal = mat3(shadowModelView) * (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
 				normal.xy = -normal.xy;
@@ -85,14 +87,13 @@ float calculateTorchLightAttenuation(float lightmap){
 				if (LoN <= 0.0) continue;
 
 				vec4 albedo = texture2D(shadowcolor0, remappedCoord);
+					 albedo.rgb = albedo.rgb * albedo.a;
 
 				total += albedo.rgb * LoN * SoN * falloff * weight;
-
-				totalWeight += weight;
 			}
 		}
 
-		return total / totalWeight * rPI;
+		return total / totalWeight;
 	}
 #endif
 
