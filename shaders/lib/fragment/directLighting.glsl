@@ -42,7 +42,7 @@ float calculateTorchLightAttenuation(float lightmap){
 
 #if defined program_deferred
 	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, const bool isVolumetric){
-		const int iSteps = 6;
+		const int iSteps = 3;
 		const int jSteps = 6;
 		const float rISteps = 1.0 / iSteps;
 		const float rJSteps = 1.0 / jSteps;
