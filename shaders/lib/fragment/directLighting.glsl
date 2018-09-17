@@ -40,8 +40,7 @@ float calculateTorchLightAttenuation(float lightmap){
 	return (1.0 - clamp01((1.0 - lightmap) * 2.0 - 1.0)) / (dist * dist * TAU);
 }
 
-#if defined program_deferred
-	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither){
+	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, const bool isVolumetric){
 		const int iSteps = 3;
 		const int jSteps = 6;
 		const float rISteps = 1.0 / iSteps;
@@ -74,11 +73,9 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
 				float normFactor = dot(samplePostion, samplePostion);
 				vec3 sampleVector = samplePostion * inversesqrt(normFactor);
-				float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
+				float SoN = isVolumetric ? 1.0 : clamp01(dot(sampleVector, shadowSpaceNormal));
 
 				if (SoN <= 0.0) continue;
-
-				float falloff = 1.0 / max(pixelLength * normFactor, 1.0);
 
 				vec3 normal = mat3(shadowModelView) * (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
 				normal.xy = -normal.xy;
@@ -86,8 +83,21 @@ float calculateTorchLightAttenuation(float lightmap){
 				float LoN = clamp01(dot(sampleVector, normal));
 				if (LoN <= 0.0) continue;
 
+				float falloff = 1.0 / max(pixelLength * normFactor, 1.0);
+
+				float waterMask = texture2D(shadowcolor1, remappedCoord).a * 2.0 - 1.0;
+
+				/*
+				float surfaceDepth0 = (texture2D(shadowtex0, remappedCoord).x * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+				float surfaceDepth1 = (shadow * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+				float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
+				waterDepth = mix(0.0, waterDepth, waterMask);
+
+				vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
+				*/
+
 				vec4 albedo = texture2D(shadowcolor0, remappedCoord);
-					 albedo.rgb = albedo.rgb * albedo.a;
+					 albedo.rgb = albedo.rgb * albedo.a /** waterTransmittance*/;
 
 				total += albedo.rgb * LoN * SoN * falloff * weight;
 			}
@@ -95,7 +105,6 @@ float calculateTorchLightAttenuation(float lightmap){
 
 		return total / totalWeight;
 	}
-#endif
 
 vec3 calculateSkyLighting(float lightmap, vec3 normal){
 	#if defined program_deferred
@@ -132,7 +141,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 
 	#if defined program_deferred
 		#ifdef GI
-			lighting += calculateGlobalIllumination(shadowPosition, normal, dither) * (sunColor + moonColor) * transitionFading;
+			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, false) * (sunColor + moonColor) * transitionFading;
 		#endif
 	#endif
 
