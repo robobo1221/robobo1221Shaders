@@ -194,18 +194,22 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 fresnel = Fresnel(f0, 1.0, NoV);
 	vec3 reflectVector = reflect(viewVector, normal);
 	vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
+	
+	vec3 H = normalize(reflectVector + viewVector);
 
 	float NoL = clamp01(dot(normal, reflectVector));
-	float LoV = dot(reflectVector, viewVector);
+	float LoV = clamp01(dot(reflectVector, viewVector));
+	float VoH = clamp01(dot(H, reflectVector));
 
-	vec3 sunReflection = specularGGX(normal, -viewVector, lightVector, roughness, f0) * (sunColor + moonColor);
+	float sunReflection = specularGGX(normal, -viewVector, lightVector, roughness, f0) * NoL;
+
 	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
 	
 	skyLightmap = clamp01(skyLightmap * 1.1);
-	vec3 reflection = max0(rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap) * fresnel);
-	reflection += sunReflection * shadows;
+	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap);
+	reflection += sunReflection * (sunColor + moonColor) * shadows;
 
-	return reflection + color * (1.0 - fresnel);
+	return reflection * fresnel + color * (1.0 - fresnel);
 }
 
 /* DRAWBUFFERS:5 */
@@ -286,7 +290,7 @@ void main() {
 	if (depth < 1.0 && isEyeInWater == 0)
 	{
 		vec3 shadowPosition = remapShadowMap(transMAD(shadowMatrix, position[1]));
-		float hardShadows = float(texture2D(shadowtex0, shadowPosition.xy).x > shadowPosition.z - 0.001) * transitionFading;
+		float hardShadows = float(texture2DLod(shadowtex0, shadowPosition.xy, 0).x > shadowPosition.z - 0.001) * transitionFading;
 		color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, normal, dither, depth, roughness, f0, lightmaps.y, hardShadows);
 	}
 

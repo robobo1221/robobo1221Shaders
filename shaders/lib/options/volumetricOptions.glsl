@@ -12,5 +12,5 @@ const float volumetric_cloudMaxHeight = volumetric_cloudMinHeight + volumetric_c
 
 #define WATER_DENSITY 1.0
 
-const float waterScatterCoefficient = 0.01 * WATER_DENSITY;
+const float waterScatterCoefficient = 0.025 * WATER_DENSITY;
 const vec3 waterTransmittanceCoefficient = vec3(0.996078, 0.406863, 0.25098) * 0.25 * WATER_DENSITY + waterScatterCoefficient;

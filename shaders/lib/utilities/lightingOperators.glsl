@@ -38,6 +38,12 @@ float specularGGX(vec3 n, vec3 v, vec3 l, float r, float F0) {
     return dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2);
 }
 
+float GGX(float alpha2, float NoH) {
+	float d = (NoH * alpha2 - NoH) * NoH + 1.0;
+
+	return alpha2 / (d * d);
+}
+
 float DistributionGGX(vec3 N, vec3 H, float a)
 {
     float a2     = a*a;
