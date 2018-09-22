@@ -135,11 +135,16 @@ float calculateCloudOD(vec3 position, const int octaves){
         // Calculate the cloud phase.
         float phase = calculateCloudPhase(vDotL);
 
+        float cloudDepth = 0.0;
+
         // Raymarching.
         for (int i = 0; i < steps; ++i, cloudPosition += increment){
             float od = calculateCloudOD(cloudPosition, 4) * rayLength;
             // Early out.
             if (od <= 0.0) continue;
+
+            float rayDepth = length(cloudPosition);
+            cloudDepth = cloudDepth < rayDepth - cloudDepth ? rayDepth : cloudDepth;
 
             // Scattering intergral.
             float scatterCoeff = calculateScatterIntergral(od, 1.11);
@@ -148,7 +153,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             transmittance *= exp2(-od * 1.11 * rLOG2);
         }
 
-        float fogDistance = clamp01(length(startPosition) * 0.000005 * volumetric_cloudScale);
+        float fogDistance = clamp01(cloudDepth * 0.000005 * volumetric_cloudScale);
         
         // Light the scattering and sum them up.
         vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase;
