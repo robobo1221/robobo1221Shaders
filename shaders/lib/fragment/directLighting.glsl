@@ -13,7 +13,7 @@ vec3 calculateShadows(vec3 shadowPosition, vec3 normal, vec3 lightVector, bool i
 	float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
 	float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
 
-	vec4 colorShadow1 = texture2D(shadowcolor1, shadowPosition.xy);
+	vec4 colorShadow1 = texture2DLod(shadowcolor1, shadowPosition.xy, 0);
 	float waterMask = colorShadow1.a * 2.0 - 1.0;
 
 	float surfaceDepth0 = (shadowDepth0 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
@@ -28,7 +28,7 @@ vec3 calculateShadows(vec3 shadowPosition, vec3 normal, vec3 lightVector, bool i
 	#endif
 
 	float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
-	vec3 colorShadow = texture2D(shadowcolor0, shadowPosition.xy).rgb;
+	vec3 colorShadow = texture2DLod(shadowcolor0, shadowPosition.xy, 0).rgb;
 
 	vec3 colouredShadows = mix(vec3(shadow0), colorShadow, clamp01(shadow1 - shadow0));
 
