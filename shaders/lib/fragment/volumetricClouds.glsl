@@ -144,7 +144,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             if (od <= 0.0) continue;
 
             float rayDepth = length(cloudPosition);
-            cloudDepth = cloudDepth < rayDepth - cloudDepth ? rayDepth : cloudDepth;
+            cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
 
             // Scattering intergral.
             float scatterCoeff = calculateScatterIntergral(od, 1.11);

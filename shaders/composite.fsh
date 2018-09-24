@@ -253,14 +253,15 @@ void main() {
 	float ambientFogOcclusion = eyeBrightnessSmooth.y * (1.0 / 255.0);
 		  ambientFogOcclusion = pow2(ambientFogOcclusion);
 
-	float vDotL = dot(viewVector, sunVector);
+	float vDotL = dot(viewVector, lightVector);
+	float vDotV = dot(viewVector, sunVector);
 
 	if (backDepth >= 1.0) {
 		sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
 		color = sky;
 
-		color += calculateSunSpot(vDotL) * sunColorBase * skyAbsorb;
-		color += calculateMoonSpot(-vDotL) * moonColorBase * skyAbsorb;
+		color += calculateSunSpot(vDotV) * sunColorBase * skyAbsorb;
+		color += calculateMoonSpot(-vDotV) * moonColorBase * skyAbsorb;
 		color += calculateStars(worldVector, wMoonVector) * skyAbsorb;
 	}
 

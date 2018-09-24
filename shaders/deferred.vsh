@@ -60,7 +60,7 @@ vec4 ToSH(float value, vec3 dir) {
     return foo * vec4(1.0, dir.yzx) * value;
 }
 
-void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec3 ambientColor, vec2 planetSphere, vec3 transmittance) {
+void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetSphere, vec3 transmittance) {
 	const int latSamples = 5;
 	const int lonSamples = 5;
 	const float rLatSamples = 1.0 / latSamples;
@@ -122,9 +122,11 @@ void main() {
 	
 	vec2 planetSphere = vec2(0.0);
 	vec3 transmittance = vec3(0.0);
+	
+	skyColor = vec3(0.0);
 	skyColor = calculateAtmosphere(vec3(0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), wSunVector, wMoonVector, planetSphere, transmittance, 10);
 
 	shadowMatrix = shadowProjection * shadowModelView;
 
-	CalculateSkySH(wSunVector, wMoonVector, vec3(0.0, 1.0, 0.0), skyColor, planetSphere, transmittance);
+	CalculateSkySH(wSunVector, wMoonVector, vec3(0.0, 1.0, 0.0), planetSphere, transmittance);
 }

@@ -74,6 +74,8 @@ void main() {
 	
 	vec2 planetSphere = vec2(0.0);
 	vec3 transmittance = vec3(0.0);
+
+	skyColor = vec3(0.0);
 	skyColor = calculateAtmosphere(vec3(0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), wSunVector, wMoonVector, planetSphere, transmittance, 10);
 
 	shadowMatrix = shadowProjection * shadowModelView;

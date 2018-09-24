@@ -133,7 +133,7 @@ vec3 calculateSkySphere(vec2 p){
 	vec3 positionView = mat3(gbufferModelView) * positionWorld;
 	vec3 viewVector = -positionView;
 
-	float vDotL = dot(viewVector, sunVector);
+	float vDotL = dot(viewVector, lightVector);
 
 	sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
 	color = sky;

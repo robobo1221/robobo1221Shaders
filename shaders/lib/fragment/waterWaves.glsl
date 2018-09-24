@@ -13,7 +13,7 @@ float calculateTrochoidalWave(vec2 coord, float waveLength, float time, vec2 wav
 
 float generateWaves(vec2 coord){
     float waveLength = 10.0;
-    float time = TIME;
+    float time = TIME * 0.5;
     float waveAmplitude = 0.07;
     float waveSteepness = 0.7;
     vec2 waveDirection = vec2(1.0, 0.5);
@@ -31,12 +31,12 @@ float generateWaves(vec2 coord){
         waves += calculateTrochoidalWave(coord + addNoise, waveLength, time, waveDirection, waveAmplitude, waveSteepness);
 
         waveLength *= 0.7;
-        waveAmplitude *= 0.6;
+        waveAmplitude *= 0.62;
         waveSteepness *= 1.03;
-        time *= 0.8;
 
         waveDirection *= rot;
         anpos *= rot;
+        time *= 1.1;
     }
 
     return -waves;
