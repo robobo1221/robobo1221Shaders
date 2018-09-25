@@ -184,32 +184,36 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : sky * skyLightmap;
 }
 
+vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float f0, float alpha2){
+	vec3 H = normalize(lightVector - viewVector);
+
+	float NoL = clamp01(dot(normal, lightVector));
+	float VoH = clamp01(dot(H, lightVector));
+	float NoH = clamp01(dot(H, normal));
+	float NoV = clamp01(dot(normal, -viewVector));
+
+	return max0((Fresnel(f0, 1.0, VoH) * GGX(alpha2, NoH)) * ExactCorrelatedG2(alpha2, NoV, NoL) / (4.0 * NoL * NoV)) * NoL;
+}
+
 vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
 	if (f0 < 0.005) return color;
 
 	float alpha2 = roughness * roughness * roughness * roughness;
 
-	float NoV = clamp01(-dot(normal, viewVector));
-
+	float NoV = clamp01(dot(normal, -viewVector));
 	vec3 fresnel = Fresnel(f0, 1.0, NoV);
 	vec3 reflectVector = reflect(viewVector, normal);
 	vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
-	
-	vec3 H = normalize(reflectVector + viewVector);
 
-	float NoL = clamp01(dot(normal, reflectVector));
-	float LoV = clamp01(dot(reflectVector, viewVector));
-	float VoH = clamp01(dot(H, reflectVector));
-
-	float sunReflection = specularGGX(normal, -viewVector, lightVector, roughness, f0) * NoL;
+	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2);
 
 	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
 	
 	skyLightmap = clamp01(skyLightmap * 1.1);
-	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap);
+	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap) * fresnel;
 	reflection += sunReflection * (sunColor + moonColor) * shadows;
 
-	return reflection * fresnel + color * (1.0 - fresnel);
+	return reflection + color * (1.0 - fresnel);
 }
 
 /* DRAWBUFFERS:5 */

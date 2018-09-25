@@ -38,6 +38,13 @@ float specularGGX(vec3 n, vec3 v, vec3 l, float r, float F0) {
     return dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2);
 }
 
+float ExactCorrelatedG2(float alpha2, float NoV, float NoL) {
+    float x = 2.0 * NoL * NoV;
+    float y = (1.0 - alpha2);
+
+    return x / (NoV * sqrt(alpha2 + y * (NoL * NoL)) + NoL * sqrt(alpha2 + y * (NoV * NoV)));
+}
+
 float GGX(float alpha2, float NoH) {
 	float d = (NoH * alpha2 - NoH) * NoH + 1.0;
 

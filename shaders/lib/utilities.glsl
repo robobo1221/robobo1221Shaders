@@ -28,8 +28,8 @@ const float rLOG2	= 1.0 / log(2.0);
 #define transMAD(mat, v) (mat3(mat) * (v) + (mat)[3].xyz)
 #define projMAD(mat, v) (diagonal3(mat) * (v) + (mat)[3].xyz)
 
-#define encodeColor(x) (x * 0.0001)
-#define decodeColor(x) (x * 10000.0)
+#define encodeColor(x) (x * 0.00005)
+#define decodeColor(x) (x * 20000.0)
 
 #define cubeSmooth(x) (x * x * (3.0 - 2.0 * x))
 

@@ -2,6 +2,23 @@ const int noiseTextureResolution = 64;
 const float rNoiseTexRes = 1.0 / noiseTextureResolution;
 
 #if (defined program_composite0 || defined program_deferred || defined program_gbuffers_water) && defined FRAGMENT
+    float calculate2DNoiseSmooth(vec2 p){
+        p *= noiseTextureResolution;
+        vec2 id = floor(p) * rNoiseTexRes;
+        vec2 f = fract(p);
+        f = cubeSmooth(f);
+        
+        float a = texture2D(noisetex, id).x;
+        float b = texture2D(noisetex, id + vec2(1.0, 0.0) * rNoiseTexRes).x;
+        float c = texture2D(noisetex, id + vec2(0.0, 1.0) * rNoiseTexRes).x;
+        float d = texture2D(noisetex, id + vec2(1.0, 1.0) * rNoiseTexRes).x;
+
+        float x1 = mix(a, b, f.x);
+        float x2 = mix(c, d, f.x);
+
+        return mix(x1, x2, f.y);
+    }
+    
     float calculate3DNoise(vec3 position){
         float yTile = floor(position.y);
         float yRep  = position.y - yTile;
