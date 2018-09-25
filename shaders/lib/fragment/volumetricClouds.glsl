@@ -86,7 +86,11 @@ float calculateCloudOD(vec3 position, const int octaves){
     // Calculate the total energy of the clouds.
     void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float indirectScattering, const int dlSteps, const int alSteps){
         
-        directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, dlSteps) * calculatePowderEffect(od, vDotL) * transmittance;
+        // Calculate the cloud phase.
+        // Use the opticaldepth for inscattering probability
+        float phase = phaseG(vDotL, exp2(-od * 5e2 * rLOG2));
+
+        directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, dlSteps) * phase * transmittance;
         indirectScattering += scatterCoeff /* calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), alSteps) */ * transmittance;
     }
 
@@ -133,14 +137,11 @@ float calculateCloudOD(vec3 position, const int octaves){
         float directScattering = 0.0;
         float indirectScattering = 0.0;
 
-        // Calculate the cloud phase.
-        float phase = calculateCloudPhase(vDotL);
-
         float cloudDepth = 0.0;
 
         // Raymarching.
         for (int i = 0; i < steps; ++i, cloudPosition += increment){
-            float od = calculateCloudOD(cloudPosition, 4) * rayLength;
+            float od = calculateCloudOD(cloudPosition, 4);
             // Early out.
             if (od <= 0.0) continue;
 
@@ -148,16 +149,16 @@ float calculateCloudOD(vec3 position, const int octaves){
             cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
 
             // Scattering intergral.
-            float scatterCoeff = calculateScatterIntergral(od, 1.11);
+            float scatterCoeff = calculateScatterIntergral(od * rayLength, 1.11);
             
             calculateCloudScattering(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, indirectScattering, dlSteps, alSteps);
-            transmittance *= exp2(-od * 1.11 * rLOG2);
+            transmittance *= exp2(-od * rayLength * 1.11 * rLOG2);
         }
 
         float fogDistance = clamp01(cloudDepth * 0.000005 * volumetric_cloudScale);
         
         // Light the scattering and sum them up.
-        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase;
+        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading;
         vec3 indirectLighting = indirectScattering * skyColor * 0.25;
         vec3 scattering = (directLighting + indirectLighting) * PI;
 
