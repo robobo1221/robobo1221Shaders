@@ -58,6 +58,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         const float rSteps = volumetric_cloudThickness / steps;
 
         vec3 increment = direction * rSteps;
+        position += 0.5 * increment;
 
         float transmittance = 0.0;
 
