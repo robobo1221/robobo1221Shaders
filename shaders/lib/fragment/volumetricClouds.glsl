@@ -88,7 +88,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         
         // Calculate the cloud phase.
         // Use the opticaldepth for inscattering probability
-        float phase = phaseG(vDotL, exp2(-od * 5e2 * rLOG2));
+        float phase = phaseG(vDotL, exp2(-od * 4e2 * rLOG2));
 
         directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, dlSteps) * phase * transmittance;
         indirectScattering += scatterCoeff /* calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), alSteps) */ * transmittance;
