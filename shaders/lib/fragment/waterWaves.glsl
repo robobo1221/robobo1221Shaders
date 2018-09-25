@@ -43,15 +43,15 @@ float generateWaves(vec2 coord){
 }
 
 vec3 calculateWaveNormals(vec2 coord){
-    const float delta = 0.03;
-    const float rDelta = 1.0 / delta;
+    const float delta = 0.01;
+    
+    vec2 waves;
+    waves.x = generateWaves(coord + vec2(delta, -delta));
+    waves.y = generateWaves(coord + vec2(-delta, delta));
+    waves -= generateWaves(coord - vec2(delta));
 
-    float c = generateWaves(coord);
-    float h = generateWaves(coord + vec2(delta, 0.0));
-    float v = generateWaves(coord + vec2(0.0, delta));
+    vec3 normal = vec3(-2.0 * delta, -2.0 * (delta * delta + delta), 4.0 * delta * delta);
+    normal.xy *= waves;
 
-    float dx = (c - h) * rDelta;
-    float dy = (c - v) * rDelta;
-
-    return normalize(vec3(dx, dy, 1.0));
+    return normalize(normal);
 }
