@@ -205,13 +205,13 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflectVector = reflect(viewVector, normal);
 	vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
 
-	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2);
+	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2) * shadows * (sunColor + moonColor);
 
 	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
 	
 	skyLightmap = clamp01(skyLightmap * 1.1);
 	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap) * fresnel;
-	reflection += sunReflection * (sunColor + moonColor) * shadows;
+	reflection += sunReflection;
 
 	return reflection + color * (1.0 - fresnel);
 }
