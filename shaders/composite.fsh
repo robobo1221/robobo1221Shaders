@@ -303,6 +303,40 @@ void main() {
 		color = calculateVolumetricLight(color, gbufferModelViewInverse[3].xyz, position[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
+/*
+	vec3 marchDirection = normalize(reflect(viewVector, normal));
+
+	vec3 startPosition = position[0];
+
+	const float marchSteps = 200;
+	const float rMarchSteps = 1.0 / marchSteps;
+	float stepLength = 100.0 * rMarchSteps;
+
+	vec3 marchIncrement = marchDirection * stepLength;
+	vec3 marchPosition = startPosition;
+
+	float marchDepth = texture2D(depthtex0, ViewSpaceToScreenSpace(marchPosition).xy).x;
+
+	vec3 result = vec3(0.0);
+	vec3 screenPositionMarched = vec3(texcoord, marchDepth);
+
+	for(int i = 0; i < marchSteps; i++){
+		if (clamp01(screenPositionMarched) != screenPositionMarched) {result = vec3(1.0); continue;}
+		marchPosition += marchIncrement;
+
+		screenPositionMarched = ViewSpaceToScreenSpace(marchPosition);
+		marchDepth = texture2D(depthtex0, screenPositionMarched.xy).x;
+		if (screenPositionMarched.z > marchDepth) break;
+	}
+
+	bool outOfBounds = length(marchPosition) < marchSteps * stepLength;
+	bool visible = abs(screenPositionMarched.z - marchDepth) * length(marchPosition) < rMarchSteps && outOfBounds;
+
+	result = (result != vec3(1.0) && visible) ? decodeRGBE8(texture2D(colortex2, screenPositionMarched.xy)) : vec3(0.0);
+
+	color = result;
+	*/
+
 	//color = decodeRGBE8(texture2D(colortex3, texcoord * 0.5));
 
 	gl_FragData[0] = vec4(encodeColor(color), texture2D(colortex5, texcoord).a);
