@@ -68,7 +68,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec2 offsetCoord = shadowPosition.xy + coordOffset;
 				vec2 remappedCoord = remapShadowMap(offsetCoord) * 0.5 + 0.5;
 
-				float shadow = texture2DLod(shadowtex1, remappedCoord, 3).x;
+				float shadow = texture2DLod(shadowtex1, remappedCoord, 3).x - 0.00005;
 
 				vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
 				float normFactor = dot(samplePostion, samplePostion);
@@ -83,7 +83,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				float LoN = clamp01(dot(sampleVector, normal));
 				if (LoN <= 0.0) continue;
 
-				float falloff = 1.0 / max(pixelLength * normFactor, 1.0);
+				float falloff = 1.0 / max(normFactor * 1024.0, 1.0);
 				/*
 				float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
 
@@ -100,7 +100,8 @@ float calculateTorchLightAttenuation(float lightmap){
 
 				float skyLightMapShadow = albedo.a * 2.0 - 1.0;
 				float bleedingMask = skyLightMapShadow - skyLightMap;
-					  bleedingMask = 0.02 / (max0(bleedingMask * bleedingMask) + 0.02);
+					  bleedingMask = pow6(bleedingMask);
+					  bleedingMask = clamp01(0.001 / (max(bleedingMask, 0.001)));
 
 				total += albedo.rgb * LoN * SoN * falloff * bleedingMask * weight;
 			}
