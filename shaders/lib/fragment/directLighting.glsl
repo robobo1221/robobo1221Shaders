@@ -41,7 +41,7 @@ float calculateTorchLightAttenuation(float lightmap){
 }
 
 #if defined program_deferred
-	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, const bool isVolumetric){
+	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, float skyLightMap){
 		const int iSteps = 3;
 		const int jSteps = 6;
 		const float rISteps = 1.0 / iSteps;
@@ -73,7 +73,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
 				float normFactor = dot(samplePostion, samplePostion);
 				vec3 sampleVector = samplePostion * inversesqrt(normFactor);
-				float SoN = isVolumetric ? 1.0 : clamp01(dot(sampleVector, shadowSpaceNormal));
+				float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
 
 				if (SoN <= 0.0) continue;
 
@@ -96,9 +96,13 @@ float calculateTorchLightAttenuation(float lightmap){
 				*/
 
 				vec4 albedo = texture2DLod(shadowcolor0, remappedCoord, 3);
-					 albedo.rgb = albedo.rgb * albedo.a /** waterTransmittance*/;
+					 albedo.rgb = albedo.rgb /** waterTransmittance*/;
 
-				total += albedo.rgb * LoN * SoN * falloff * weight;
+				float skyLightMapShadow = albedo.a * 2.0 - 1.0;
+				float bleedingMask = skyLightMapShadow - skyLightMap;
+					  bleedingMask = 0.02 / (max0(bleedingMask * bleedingMask) + 0.02);
+
+				total += albedo.rgb * LoN * SoN * falloff * bleedingMask * weight;
 			}
 		}
 
@@ -144,7 +148,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 
 	#if defined program_deferred
 		#ifdef GI
-			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, false) * (sunColor + moonColor) * transitionFading * cloudShadows;
+			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, lightmaps.y) * (sunColor + moonColor) * transitionFading * cloudShadows;
 		#endif
 	#endif
 

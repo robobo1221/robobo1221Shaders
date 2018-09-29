@@ -5,6 +5,8 @@
 varying vec2 texcoord;
 varying vec4 color;
 
+varying vec2 lightmaps;
+
 flat varying vec3 normals;
 flat varying float material;
 
@@ -22,6 +24,7 @@ void main(){
 	gl_Position.xyz = distortShadowMap(gl_Position.xyz);
 
 	texcoord = gl_MultiTexCoord0.xy;
+	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
 	color = gl_Color;
 
 	material = mc_Entity.x;

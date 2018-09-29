@@ -139,14 +139,12 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 	int raySteps = rayTraceQuality + 4;
 	int refinements = 4;
 
-	vec3 direction = ViewSpaceToScreenSpace(viewPosition + reflectedVector);
+	vec3 direction = normalize(ViewSpaceToScreenSpace(viewPosition + reflectedVector) - p);
 
 	float maxLength = rQuality;
     float minLength = maxLength * 0.01;
 
 	float stepLength = minLength + minLength * dither;
-
-	direction = normalize(direction - p);
 
 	float stepWeight = 1.0 / abs(direction.z);
 
@@ -244,6 +242,13 @@ void main() {
 	vec3 normal = getNormal(data1.x);
 	vec2 lightmaps = getLightmaps(data1.y);
 
+	float roughness, f0, matFlag;
+
+	getRoughnessF0(data1.z, roughness, f0);
+	getMatflag(data1.w, matFlag);
+
+	bool isWater = matFlag > 2.5 && matFlag < 3.5;
+
 	float dither = bayer64(gl_FragCoord.xy);
 	
 	#ifdef TAA
@@ -268,13 +273,6 @@ void main() {
 		color += calculateMoonSpot(-vDotV) * moonColorBase * skyAbsorb;
 		color += calculateStars(worldVector, wMoonVector) * skyAbsorb;
 	}
-
-	float roughness, f0, matFlag;
-
-	getRoughnessF0(data1.z, roughness, f0);
-	getMatflag(data1.w, matFlag);
-
-	bool isWater = matFlag > 2.5 && matFlag < 3.5;
 
 	#ifdef VOLUMETRIC_CLOUDS
 		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither, vDotL, VC_QUALITY, 5, 3);
