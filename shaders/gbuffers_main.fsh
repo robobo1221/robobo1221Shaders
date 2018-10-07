@@ -37,11 +37,16 @@ void main() {
 	#endif
 
 	vec4 albedo = texture2D(tex, texcoord) * color;
-	vec3 normal = texture2D(normals, texcoord).rgb * 2.0 - 1.0;
 	vec4 specularData = texture2D(specular, texcoord);
 
 	float roughness = 1.0 - specularData.z;
 	float f0 = specularData.x;
+
+	#if !defined program_gbuffers_block && !defined program_gbuffers_entities
+		vec3 normal = texture2D(normals, texcoord).rgb * 2.0 - 1.0;
+	#else
+		vec3 normal = vec3(0.0, 0.0, 1.0);
+	#endif
 
 	#if defined program_gbuffers_water
 		bool isWater = (material == 8 || material == 9);
@@ -51,8 +56,6 @@ void main() {
 		f0 = isWater ? 0.021 : f0;
 		if (isWater) normal = calculateWaveNormals(worldPosition.xz + cameraPosition.xz);
 	#endif
-
-	normal = dot(normal, normal) <= 0.0 ? vec3(0.0, 0.0, 1.0) : normal;
 
 	normal = tbn * normal;
 
