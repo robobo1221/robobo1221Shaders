@@ -128,7 +128,28 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec2 pixelResolution, vec3 pre
 	return mix(currentCol + sharpening, previousCol, blendWeight);
 }
 
-vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution){
+vec3 calculateMotionBlur(vec2 p, vec2 velocity, float dither){
+	const int steps = 4;
+	const float rSteps = 1.0 / steps;
+
+	vec2 direction = velocity * rSteps * 0.15;
+	p += dither * direction;
+
+	vec3 color = vec3(0.0);
+	float totalWeight = 0.0;
+
+	for (int i = -steps; i < steps; i++)
+	{
+		vec2 offsetP = p + float(i) * direction;
+
+		float weight = 1.0;
+		color += sampleCurrentFrame(offsetP) * weight;
+		totalWeight += weight;
+	}
+	return color / totalWeight;
+}
+
+vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution, float dither){
 	vec3 currentCol = sampleCurrentFrame(p);
 
 	#ifndef TAA
@@ -139,8 +160,20 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution){
 	vec2 velocity = calculateVelocityVector(closest);
 
 	vec3 previousCol = samplePreviousFrame(p - velocity);
+	vec3 reprojectedColor = temporalReprojection(p, pixelSize, pixelResolution, previousCol, currentCol, velocity);
 
-	return temporalReprojection(p, pixelSize, pixelResolution, previousCol, currentCol, velocity);
+	#ifdef MOTION_BLUR
+		vec3 motionBlur = calculateMotionBlur(p, velocity, dither);
+
+		const float pixelTreshold = 100.0;
+
+		float motionTreshhold = length(velocity * vec2(viewWidth, viewHeight));
+			  motionTreshhold = clamp(motionTreshhold, 1.0, pixelTreshold) * (1.0 / pixelTreshold);
+
+		return mix(reprojectedColor, motionBlur, motionTreshhold);
+	#else
+		return reprojectedColor;
+	#endif
 }
 
 /* DRAWBUFFERS:4 */
@@ -148,8 +181,10 @@ void main() {
 	vec2 pixelResolution = vec2(viewWidth, viewHeight);
 	vec2 pixelSize = 1.0 / pixelResolution;
 
+	float dither = bayer16(gl_FragCoord.xy);
+
 	vec3 color = vec3(0.0);
-	color = calculateTAA(texcoord, pixelSize, pixelResolution);
+	color = calculateTAA(texcoord, pixelSize, pixelResolution, dither);
 
 	gl_FragData[0] = vec4(color, 1.0);
 }
