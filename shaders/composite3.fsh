@@ -132,7 +132,7 @@ vec3 calculateMotionBlur(vec2 p, vec2 velocity, float dither){
 	const int steps = 4;
 	const float rSteps = 1.0 / steps;
 
-	vec2 direction = velocity * rSteps * 0.15;
+	vec2 direction = velocity / (1.0 + length(velocity)) * rSteps * 0.15;
 	p += dither * direction;
 
 	vec3 color = vec3(0.0);
@@ -140,10 +140,8 @@ vec3 calculateMotionBlur(vec2 p, vec2 velocity, float dither){
 
 	for (int i = -steps; i < steps; i++)
 	{
-		vec2 offsetP = p + float(i) * direction;
-
 		float weight = 1.0;
-		color += sampleCurrentFrame(offsetP) * weight;
+		color += sampleCurrentFrame(float(i) * direction + p) * weight;
 		totalWeight += weight;
 	}
 	return color / totalWeight;
