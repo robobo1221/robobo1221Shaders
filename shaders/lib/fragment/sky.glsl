@@ -90,8 +90,6 @@ float calculateStars(vec3 worldVector, vec3 moonVector){
 vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, out vec3 transmittance, const int iSteps) {
 	const int jSteps = 3;
 
-	const float phaseIsotropic = 0.25 * rPI;
-
 	vec3 viewPosition = (sky_planetRadius + eyeAltitude) * upVector;
 
 	vec2 aid = rsi(viewPosition, viewVector, sky_atmosphereRadius);
@@ -128,12 +126,12 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 		scatteringMoon += sky_coefficientsScattering * (stepAirmass.xy * phaseMoon) * stepScatteringVisible * sky_transmittance(position, moonVector, jSteps);
 
 		// Nice way to fake multiple scattering.
-		scatteringAmbient += sky_coefficientsScattering * (stepAirmass.xy * phaseIsotropic) * stepScatteringVisible;
+		scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible;
 
 		transmittance *= stepTransmittance;
 	}
 
-	vec3 scattering = scatteringSun * baseSunColor + scatteringMoon * baseMoonColor + scatteringAmbient * skyColor;
+	vec3 scattering = scatteringSun * baseSunColor + scatteringMoon * baseMoonColor + scatteringAmbient * skyColor * 0.25;
 
 	return (!planetIntersected ? background * transmittance : vec3(0.0)) + scattering * PI;
 }
