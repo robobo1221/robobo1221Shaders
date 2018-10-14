@@ -17,7 +17,7 @@ uniform sampler2D tex;
 /* DRAWBUFFERS:01 */
 void main()
 {
-	if(!gl_FrontFacing) discard;
+	//if(!gl_FrontFacing) discard;
 
 	vec4 albedo = texture2D(tex, texcoord) * color;
 

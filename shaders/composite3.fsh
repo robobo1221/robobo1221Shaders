@@ -7,6 +7,8 @@ varying vec2 texcoord;
 uniform sampler2D colortex0;
 uniform sampler2D colortex4;
 uniform sampler2D depthtex0;
+uniform sampler2D depthtex1;
+uniform sampler2D depthtex2;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
@@ -161,6 +163,12 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution, float dither){
 	vec3 reprojectedColor = temporalReprojection(p, pixelSize, pixelResolution, previousCol, currentCol, velocity);
 
 	#ifdef MOTION_BLUR
+		float tansparentDepth = texture2D(depthtex1, p).r;
+		float handDepth = texture2D(depthtex2, p).r;
+
+		bool handMask = handDepth > tansparentDepth;
+		if (handMask) return reprojectedColor;
+
 		vec3 motionBlur = calculateMotionBlur(p, velocity, dither);
 
 		const float pixelTreshold = 100.0;
