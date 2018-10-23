@@ -57,7 +57,7 @@ float calculateSunSpot(float VdotL) {
 	const float sunAngularSize = 0.533333;
     const float sunRadius = radians(sunAngularSize);
     const float cosSunRadius = cos(sunRadius);
-    const float sunLuminance = 1.0 / ((1.0 - cosSunRadius) * PI);
+    const float sunLuminance = 1.0 / ((1.0 - cosSunRadius) * TAU);
 
 	return fstep(cosSunRadius, VdotL) * sunLuminance;
 }
@@ -66,7 +66,7 @@ float calculateMoonSpot(float VdotL) {
 	const float moonAngularSize = 0.516667;
     const float moonRadius = radians(moonAngularSize);
     const float cosMoonRadius = cos(moonRadius);
-	const float moonLuminance = 1.0 / ((1.0 - cosMoonRadius) * PI);
+	const float moonLuminance = 1.0 / ((1.0 - cosMoonRadius) * TAU);
 
 	return fstep(cosMoonRadius, VdotL) * moonLuminance;
 }
