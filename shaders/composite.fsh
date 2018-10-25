@@ -132,7 +132,7 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }
 
-vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float dither, vec3 sky, float skyLightmap) {
+vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVector, float dither, vec3 sky, float skyLightmap) {
 	const int rayTraceQuality = 16;
 	const float rQuality = 1.0 / rayTraceQuality;
 
@@ -144,7 +144,7 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 	float maxLength = rQuality;
     float minLength = maxLength * 0.01;
 
-	float stepLength = minLength + minLength * dither;
+	float stepLength = mix(minLength, maxLength, NoV) * dither;
 
 	float stepWeight = 1.0 / abs(direction.z);
 
@@ -175,9 +175,11 @@ vec3 rayTaceReflections(vec3 viewPosition, vec3 p, vec3 reflectedVector, float d
 		stepLength *= 0.5;
 	}
 
-	if (depth >= 1.0) return sky;
+	float sceneDepth = texture2D(depthtex0, p.xy).x;
 
-	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength && 0.96 < texture2D(depthtex0, p.xy).x;
+	if (sceneDepth >= 1.0) return sky;
+
+	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength && 0.96 < sceneDepth;
 
 	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : sky * skyLightmap;
 }
@@ -208,7 +210,7 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
 	
 	skyLightmap = clamp01(skyLightmap * 1.1);
-	vec3 reflection = rayTaceReflections(viewPosition, p, reflectVector, dither, sky, skyLightmap) * fresnel;
+	vec3 reflection = rayTaceReflections(viewPosition, NoV, p, reflectVector, dither, sky, skyLightmap) * fresnel;
 	reflection += sunReflection;
 
 	return reflection + color * (1.0 - fresnel);
