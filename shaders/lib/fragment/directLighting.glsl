@@ -47,7 +47,7 @@ float calculateTorchLightAttenuation(float lightmap){
 		const float rISteps = 1.0 / iSteps;
 		const float rJSteps = 1.0 / jSteps;
 
-		float rotateAmountI = (dither * rISteps + rISteps) * TAU;
+		float rotateAmountI = (dither * rISteps + rISteps) * PI;
 
 		vec2 pixelOffset = vec2(50.0) * rShadowMapResolution;
 		float pixelLength = inversesqrt(dot(pixelOffset, pixelOffset)) * 16.0;
