@@ -99,7 +99,7 @@ vec3 calculateLowLightDesaturation(vec3 color) {
 	const vec3 saturatedPreTint = mix(preTint, vec3(dot(preTint, lumCoeff)), -0.5);
 
 	float avg = dot(color, lumCoeff);
-	float range = exp2(-avg * 10.0);
+	float range = exp2(-avg * 17.0);
 		  range = sqrt(range);
 
 	return mix(color, avg * saturatedPreTint, range);
