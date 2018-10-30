@@ -94,6 +94,17 @@ vec3 calculateBloom(vec2 coord, float EV){
 	return decodeColor(bloom) * (1.0 / 6.0) * exp2(EV - 3.0);
 }
 
+vec3 calculateLowLightDesaturation(vec3 color) {
+	const vec3 preTint = vec3(0.55, 0.67, 1.0);
+	const vec3 saturatedPreTint = mix(preTint, vec3(dot(preTint, lumCoeff)), -0.5);
+
+	float avg = dot(color, lumCoeff);
+	float range = exp2(-avg * 10.0);
+		  range = sqrt(range);
+
+	return mix(color, avg * saturatedPreTint, range);
+}
+
 /* DRAWBUFFERS:0 */
 void main() {
 	vec4 colorSample = texture2D(colortex2, texcoord);
@@ -105,6 +116,7 @@ void main() {
 	vec3 bloom = calculateBloom(texcoord, exposureValue);
 
 	color += bloom;
+	color = calculateLowLightDesaturation(color);
 	color = exposureValue * color;
 	color = burgressTonemap(color);
 
