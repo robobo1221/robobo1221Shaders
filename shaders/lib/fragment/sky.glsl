@@ -133,5 +133,7 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 
 	vec3 scattering = scatteringSun * baseSunColor + scatteringMoon * baseMoonColor + scatteringAmbient * skyColor * 0.25;
 
-	return (!planetIntersected ? background * transmittance : vec3(0.0)) + scattering * PI;
+	transmittance = planetIntersected ? vec3(0.0) : transmittance;
+
+	return background * transmittance + scattering * PI;
 }
