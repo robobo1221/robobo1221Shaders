@@ -135,7 +135,7 @@ vec3 calculateSkySphere(vec2 p){
 
 	float vDotL = dot(viewVector, lightVector);
 
-	sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
+	sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 10);
 	color = sky;
 
 	#ifdef VOLUMETRIC_CLOUDS
