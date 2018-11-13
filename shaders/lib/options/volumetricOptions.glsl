@@ -10,6 +10,9 @@ const float volumetric_cloudScale =  1600.0 / volumetric_cloudHeight;
 const float volumetric_cloudThickness = 1500.0 / volumetric_cloudScale;
 const float volumetric_cloudMaxHeight = volumetric_cloudMinHeight + volumetric_cloudThickness;
 
+#define VOLUMETRIC_LIGHT
+#define VOLUMETRIC_LIGHT_WATER
+
 #define WATER_DENSITY 1.0
 
 const float waterScatterCoefficient = 0.025 * WATER_DENSITY;

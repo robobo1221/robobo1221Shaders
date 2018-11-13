@@ -69,25 +69,19 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     // Absorb skylight through the clouds.
-    float calculateCloudTransmittanceSkyLight(vec3 position, const vec3 direction, const int steps){
-        const float rSteps = volumetric_cloudThickness / steps;
+    float calculateCloudTransmittanceSkyLight(vec3 position){
+        const float avgHeight = (volumetric_cloudMinHeight + volumetric_cloudMaxHeight) * 0.5;
 
-        const vec3 increment = direction * rSteps;
-        position += 0.5 * increment;
+        float gradient = clamp(avgHeight - position.y, 0.0, volumetric_cloudMinHeight) * (volumetric_cloudDensity * volumetric_cloudScale);
 
-        float transmittance = 0.0;
-
-        for (int i = 0; i < steps; ++i, position += increment){
-            transmittance += calculateCloudOD(position, 2);
-        }
-        return exp2(-transmittance * 1.11 * rLOG2 * rSteps * 0.25);
+        return exp2(-gradient * 1.11 * rLOG2 * 0.05);
     }
 
     // Calculate the total energy of the clouds.
     void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float indirectScattering, const int dlSteps, const int alSteps){
         
         directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, dlSteps) * calculatePowderEffect(od, vDotL) * transmittance;
-        indirectScattering += scatterCoeff /* calculateCloudTransmittanceSkyLight(position, vec3(0.0, 1.0, 0.0), alSteps) */ * transmittance;
+        indirectScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position) * transmittance;
     }
 
     vec3 calculateVolumetricClouds(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither, float vDotL, const int steps, const int dlSteps, const int alSteps){
@@ -161,8 +155,11 @@ float calculateCloudOD(vec3 position, const int octaves){
         vec3 indirectLighting = indirectScattering * skyColor * 0.25;
         vec3 scattering = (directLighting + indirectLighting) * PI;
 
+        // Apply the scattering to the already excisting image. And gamma correct it.
+        vec3 endResult = pow(pow(backGround * transmittance, vec3(2.2)) + pow(scattering, vec3(2.2)), vec3(1.0 / 2.2));
+
         // Blend the clouds with the sky based on distance and returning the result.
-        return mix(backGround * transmittance + scattering, sky, fogDistance);
+        return mix(endResult, sky, fogDistance);
     }
 #endif
 
