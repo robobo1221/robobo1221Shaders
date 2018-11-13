@@ -144,7 +144,7 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 	float maxLength = rQuality;
     float minLength = maxLength * 0.01;
 
-	float stepLength = mix(minLength, maxLength, NoV) * dither;
+	float stepLength = mix(minLength, maxLength, NoV) * (dither + 0.1);
 
 	float stepWeight = 1.0 / abs(direction.z);
 
@@ -213,7 +213,7 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	vec3 reflection = rayTaceReflections(viewPosition, NoV, p, reflectVector, dither, sky, skyLightmap) * fresnel;
 	reflection += sunReflection;
 
-	return reflection + color * (1.0 - fresnel);
+	return color * (1.0 - fresnel) + reflection;
 }
 
 /* DRAWBUFFERS:5 */
