@@ -10,6 +10,8 @@ const float rTAU 	= 1.0 / TAU;
 const float PHI		= sqrt(5.0) * 0.5 + 0.5;
 const float rLOG2	= 1.0 / log(2.0);
 
+const float goldenAngle = TAU / PHI / PHI;
+
 #define clamp01(x) clamp(x, 0.0, 1.0)
 #define max0(x) max(x, 0.0)
 #define min0(x) min(x, 0.0)
@@ -37,6 +39,14 @@ const float rLOG2	= 1.0 / log(2.0);
 
 vec2 sincos(float x){
     return vec2(sin(x), cos(x));
+}
+
+vec2 circlemap(float i, float n){
+	return sincos(i * n * goldenAngle) * sqrt(i);
+}
+
+vec3 circlemapL(float i, float n){
+	return vec3(sincos(i * n * goldenAngle), sqrt(i));
 }
 
 vec3 clampNormal(vec3 n, vec3 v){

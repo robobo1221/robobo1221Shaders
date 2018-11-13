@@ -121,13 +121,13 @@ void getMatflag(float data, out float matFlag){
 	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 / 8.0);
 }
 
-vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float roughness, bool isWater){
+vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float dither, float roughness, bool isWater){
 	vec4 albedo = texture2D(colortex0, texcoord);
 	vec3 correctedAlbedo = srgbToLinear(albedo.rgb);
 
 	albedo.a = isWater ? 0.0 : albedo.a;
 
-	vec3 litColor = calculateDirectLighting(correctedAlbedo, position[1], normal, viewVector, lightVector, wLightVector, lightmaps, roughness, 1.0, false);
+	vec3 litColor = calculateDirectLighting(correctedAlbedo, position[1], normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false);
 
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }
@@ -285,7 +285,7 @@ void main() {
 	}
 
 	if (isTranslucent) {
-		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, roughness, isWater);
+		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, dither, roughness, isWater);
 	}
 
 	if (isWater || isEyeInWater == 1) {

@@ -1,38 +1,46 @@
-vec3 calculateShadows(vec3 shadowPosition, vec3 normal, vec3 lightVector, bool isVegitation) {
-	shadowPosition = remapShadowMap(shadowPosition);
+vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dither, bool isVegitation) {
+	const int steps = 4;
+	const float rSteps = 1.0 / steps;
 
 	float NdotL = dot(normal, lightVector);
 		  NdotL = isVegitation ? 0.5 : NdotL;
 
-	float pixelSize = rShadowMapResolution;
+	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL) * rShadowMapResolution;
+		  shadowBias = shadowBias * calculateDistFactor(rawPosition.xy) * 0.2;
 
-	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL);
-		  shadowBias = shadowBias * calculateDistFactor(shadowPosition.xy) * pixelSize * 0.2;
+	vec3 shadows = vec3(0.0);
 	
-	float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
-	float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
-	float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
+	for (int i = 0; i < steps; ++i) {
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps)) * 0.015;
+		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
+			 shadowPosition = remapShadowMap(shadowPosition);
+		
+		float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
+		float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
+		float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
+		float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
 
-	vec4 colorShadow1 = texture2DLod(shadowcolor1, shadowPosition.xy, 0);
-	float waterMask = colorShadow1.a * 2.0 - 1.0;
+		vec4 colorShadow1 = texture2DLod(shadowcolor1, shadowPosition.xy, 0);
+		float waterMask = colorShadow1.a * 2.0 - 1.0;
 
-	float surfaceDepth0 = (shadowDepth0 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
-	float surfaceDepth1 = (shadowDepth1 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
-	float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
-	waterDepth = mix(0.0, waterDepth, waterMask);
+		float surfaceDepth0 = (shadowDepth0 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+		float surfaceDepth1 = (shadowDepth1 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+		float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
+			  waterDepth = mix(0.0, waterDepth, waterMask);
 
-	vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
+		vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
 
-	#ifndef COLOURED_SHADOWS
-		return shadow1 * waterTransmittance;
-	#endif
+		#ifdef COLOURED_SHADOWS
+			vec3 colorShadow = texture2DLod(shadowcolor0, shadowPosition.xy, 0).rgb;
+			vec3 colouredShadows = mix(vec3(shadow0), colorShadow, clamp01(shadow1 - shadow0)) * waterTransmittance;
 
-	float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
-	vec3 colorShadow = texture2DLod(shadowcolor0, shadowPosition.xy, 0).rgb;
+			shadows += colouredShadows;
+		#else
+			shadows += shadow1 * waterTransmittance;
+		#endif
+	}
 
-	vec3 colouredShadows = mix(vec3(shadow0), colorShadow, clamp01(shadow1 - shadow0));
-
-    return colouredShadows * waterTransmittance;
+    return shadows * rSteps;
 }
 
 float calculateTorchLightAttenuation(float lightmap){
@@ -126,7 +134,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 
 	float cloudShadows = 1.0;
 	
-	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, isVegitation);
+	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, dither, isVegitation);
 		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
