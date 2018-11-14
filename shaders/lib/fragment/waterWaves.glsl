@@ -14,7 +14,7 @@ float calculateTrochoidalWave(vec2 coord, float waveLength, float time, vec2 wav
 float generateWaves(vec2 coord){
     float waveLength = 10.0;
     float time = TIME * 0.5;
-    float waveAmplitude = 0.07;
+    float waveAmplitude = 0.14;
     float waveSteepness = 0.7;
     vec2 waveDirection = vec2(1.0, 0.5);
 
@@ -42,13 +42,42 @@ float generateWaves(vec2 coord){
     return -waves;
 }
 
-vec3 calculateWaveNormals(vec2 coord){
+bool isRayHitWater(float rayLength, float depth){
+    return rayLength > depth * rayLength;
+}
+
+vec2 calculateParallaxWaterCoord(vec3 position, vec3 tangentVec){
+    const int steps = 4;
+    const float rSteps = inversesqrt(steps);
+
+    const float maxHeight = 2.0;
+
+    vec3 increment = rSteps * tangentVec / -tangentVec.z;
+    float height = generateWaves(position.xz);
+    vec3 offset = -height * increment;
+         height = generateWaves(position.xz + offset.xy) * maxHeight;
+
+    for (int i = 1; i < steps - 1 && height < offset.z; ++i) {
+		offset = (offset.z - height) * increment + offset;
+		height = generateWaves(position.xz + offset.xy) * maxHeight;
+	}
+
+    if (steps > 1) {
+		offset.xy = (offset.z - height) * increment.xz + offset.xy;
+	}
+
+    position.xz += offset.xy;
+
+    return position.xz;
+}
+
+vec3 calculateWaveNormals(vec3 coord){
     const float delta = 0.01;
     
     vec2 waves;
-    waves.x = generateWaves(coord + vec2(delta, -delta));
-    waves.y = generateWaves(coord + vec2(-delta, delta));
-    waves -= generateWaves(coord - vec2(delta));
+    waves.x = generateWaves(coord.xz + vec2(delta, -delta));
+    waves.y = generateWaves(coord.xz + vec2(-delta, delta));
+    waves -= generateWaves(coord.xz - vec2(delta));
 
     vec3 normal = vec3(-2.0 * delta, -2.0 * (delta * delta + delta), 4.0 * delta * delta);
     normal.xy *= waves;

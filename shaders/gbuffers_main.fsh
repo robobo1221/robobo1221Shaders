@@ -4,7 +4,9 @@ varying vec2 texcoord;
 varying vec4 color;
 
 flat varying mat3 tbn;
-flat varying vec3 tangentVec;
+
+varying vec3 tangentVec;
+varying vec3 tangentVecView;
 
 varying vec2 lightmaps;
 flat varying float material;
@@ -16,6 +18,9 @@ uniform sampler2D tex;
 uniform sampler2D normals;
 uniform sampler2D specular;
 
+uniform mat4 gbufferModelView;
+uniform mat4 gbufferProjection;
+
 #if defined program_gbuffers_water
 	uniform sampler2D noisetex;
 #endif
@@ -23,6 +28,7 @@ uniform sampler2D specular;
 uniform vec3 cameraPosition;
 
 uniform float frameTimeCounter;
+uniform int isEyeInWater;
 
 #include "/lib/utilities.glsl"
 
@@ -54,9 +60,27 @@ void main() {
 		albedo = isWater ? vec4(1.0) : albedo;
 		roughness = isWater ? 0.075 : roughness;
 		f0 = isWater ? 0.021 : f0;
-		if (isWater) normal = calculateWaveNormals(worldPosition.xz + cameraPosition.xz);
+
+		if (isWater) {
+			vec3 waveCoord = worldPosition + cameraPosition;
+
+			#ifdef PARALLAX_WATER
+				 waveCoord.xz = calculateParallaxWaterCoord(waveCoord, tangentVec);
+			#endif
+			
+			normal = calculateWaveNormals(waveCoord);
+
+		#if defined PARALLAX_WATER && defined ADVANCED_PARALLAX_WATER
+			vec3 viewSpace = transMAD(gbufferModelView, waveCoord - cameraPosition);
+			vec3 clipSpace = (diagonal3(gbufferProjection) * viewSpace + gbufferProjection[3].xyz) / -viewSpace.z * 0.5 + 0.5;
+			gl_FragDepth = isEyeInWater == 0 ? clipSpace.z : gl_FragCoord.z;
+		} else {
+			gl_FragDepth = gl_FragCoord.z;
+		#endif
+		}
 	#endif
 
+	normal = clampNormal(normal, tangentVec);
 	normal = tbn * normal;
 
 	gl_FragData[0] = albedo;

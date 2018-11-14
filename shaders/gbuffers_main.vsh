@@ -2,7 +2,9 @@ varying vec2 texcoord;
 varying vec4 color;
 
 flat varying mat3 tbn;
-flat varying vec3 tangentVec;
+
+varying vec3 tangentVec;
+varying vec3 tangentVecView;
 
 varying vec2 lightmaps;
 flat varying float material;
@@ -84,4 +86,5 @@ void main() {
 	tbn = mat3(tangent, cross(tangent, normal), normal);
 
 	tangentVec = -normalize((viewSpacePosition * gl_NormalMatrix) * tbn);
+	tangentVecView = (mat3(gbufferModelViewInverse) * viewSpacePosition) * tbn;
 }
