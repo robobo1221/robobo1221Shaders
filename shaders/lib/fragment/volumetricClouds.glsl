@@ -63,7 +63,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         float transmittance = 0.0;
 
         for (int i = 0; i < steps; ++i, position += increment){
-            transmittance += calculateCloudOD(position, 3);
+            transmittance += calculateCloudOD(position, 4);
         }
         return exp2(-transmittance * 1.11 * rLOG2 * rSteps);
     }
@@ -78,10 +78,10 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     // Calculate the total energy of the clouds.
-    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float indirectScattering, const int dlSteps, const int alSteps){
+    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float skylightScattering, const int dlSteps){
         
         directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, dlSteps) * calculatePowderEffect(od, vDotL) * transmittance;
-        indirectScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position) * transmittance;
+        skylightScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position) * transmittance;
     }
 
     vec3 calculateVolumetricClouds(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither, float vDotL, const int steps, const int dlSteps, const int alSteps){
@@ -125,7 +125,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
         float transmittance = 1.0;
         float directScattering = 0.0;
-        float indirectScattering = 0.0;
+        float skylightScattering = 0.0;
 
         // Calculate the cloud phase.
         float phase = calculateCloudPhase(vDotL);
@@ -144,7 +144,8 @@ float calculateCloudOD(vec3 position, const int octaves){
             // Scattering intergral.
             float scatterCoeff = calculateScatterIntergral(od, 1.11);
             
-            calculateCloudScattering(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, indirectScattering, dlSteps, alSteps);
+            calculateCloudScattering(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, skylightScattering, dlSteps);
+
             transmittance *= exp2(-od * 1.11 * rLOG2);
         }
 
@@ -152,8 +153,8 @@ float calculateCloudOD(vec3 position, const int octaves){
         
         // Light the scattering and sum them up.
         vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase;
-        vec3 indirectLighting = indirectScattering * skyColor * 0.25;
-        vec3 scattering = (directLighting + indirectLighting) * PI;
+        vec3 skyLighting = skylightScattering * skyColor * 0.25;
+        vec3 scattering = (directLighting + skyLighting) * PI;
 
         // Apply the scattering to the already excisting image. And gamma correct it.
         vec3 endResult = pow(pow(backGround * transmittance, vec3(2.2)) + pow(scattering, vec3(2.2)), vec3(1.0 / 2.2));
