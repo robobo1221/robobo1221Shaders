@@ -42,10 +42,6 @@ float generateWaves(vec2 coord){
     return -waves;
 }
 
-bool isRayHitWater(float rayLength, float depth){
-    return rayLength > depth * rayLength;
-}
-
 vec2 calculateParallaxWaterCoord(vec3 position, vec3 tangentVec){
     const int steps = 4;
     const float rSteps = inversesqrt(steps);

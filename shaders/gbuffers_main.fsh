@@ -80,7 +80,7 @@ void main() {
 		}
 	#endif
 
-	normal = clampNormal(normal, tangentVec);
+	normal = clampNormal(normal, -tangentVecView);
 	normal = tbn * normal;
 
 	gl_FragData[0] = albedo;
