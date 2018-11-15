@@ -90,6 +90,11 @@ vec3 calculateViewSpacePosition(vec2 coord, float depth) {
 	return projMAD(gbufferProjectionInverse, viewCoord) / (viewCoord.z * gbufferProjectionInverse[2].w + gbufferProjectionInverse[3].w);
 }
 
+vec3 calculateViewSpacePosition(vec3 coord) {
+	vec3 viewCoord = vec3(coord.xy - jitter, coord.z) * 2.0 - 1.0;
+	return projMAD(gbufferProjectionInverse, viewCoord) / (viewCoord.z * gbufferProjectionInverse[2].w + gbufferProjectionInverse[3].w);
+}
+
 vec3 ViewSpaceToScreenSpace(vec3 viewPos) {
 	return ((projMAD(gbufferProjection, viewPos) / -viewPos.z)) * 0.5 + 0.5 + vec3(jitter, 0.0);
 }
@@ -216,6 +221,29 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	return color * (1.0 - fresnel) + reflection;
 }
 
+void calculateRefraction(mat2x3 position, vec3 normal, vec3 viewVector, bool isTranslucent, inout vec2 coord, inout float backDepth, inout mat2x3 backPosition, inout vec3 refractViewVector){
+	if (isTranslucent) {
+		vec3 flatNormal = clamp(normalize(cross(dFdx(position[0]), dFdy(position[0]))), -1.0, 1.0);
+		vec3 waveDirection = normal - flatNormal;
+		vec3 refractedVector = refract(viewVector, waveDirection, 0.75);
+
+		vec3 refractedPosition = refractedVector * abs(distance(position[0], backPosition[0])) + position[0];
+			 refractedPosition = ViewSpaceToScreenSpace(refractedPosition);
+			 refractedPosition.z = texture2D(depthtex1, refractedPosition.xy).x;
+
+		if (refractedPosition.z > texture2D(depthtex0, refractedPosition.xy).x){
+			coord = refractedPosition.xy;
+			backDepth = refractedPosition.z;
+
+			backPosition[0] = calculateViewSpacePosition(refractedPosition);
+			backPosition[1] = calculateWorldSpacePosition(backPosition[0]);
+
+			float normFactor = inversesqrt(dot(backPosition[0], backPosition[0]));
+			refractViewVector = normFactor * backPosition[0];
+		}
+	}
+}
+
 /* DRAWBUFFERS:5 */
 
 void main() {
@@ -225,9 +253,6 @@ void main() {
 	bool isTranslucent = depth < backDepth;
 
 	vec4 data1 = texture2D(colortex1, texcoord);
-	vec4 data2 = texture2D(colortex2, texcoord);
-
-	vec3 color = max0(decodeRGBE8(data2));
 
 	mat2x3 position;
 		   position[0] = calculateViewSpacePosition(texcoord, depth);
@@ -238,8 +263,6 @@ void main() {
 		   backPosition[1] = calculateWorldSpacePosition(backPosition[0]);
 
 	vec3 viewVector = normalize(position[0]);
-	vec3 worldVector = mat3(gbufferModelViewInverse) * viewVector;
-	vec3 shadowLightVector = shadowLightPosition * 0.01;
 
 	vec3 normal = getNormal(data1.x);
 	vec2 lightmaps = getLightmaps(data1.y);
@@ -249,6 +272,26 @@ void main() {
 	getRoughnessF0(data1.z, roughness, f0);
 	getMatflag(data1.w, matFlag);
 
+	vec2 coord = texcoord;
+	vec3 refractViewVector = viewVector;
+	vec2 planetSphere = vec2(0.0);
+	vec3 sky = vec3(0.0);
+	vec3 skyAbsorb = vec3(0.0);
+
+	calculateRefraction(position, normal, viewVector, isTranslucent, coord, backDepth, backPosition, refractViewVector);
+
+	float ambientFogOcclusion = eyeBrightnessSmooth.y * (1.0 / 255.0);
+		  ambientFogOcclusion = pow2(ambientFogOcclusion);
+
+	float vDotL = dot(viewVector, lightVector);
+	float vDotV = dot(refractViewVector, sunVector);
+
+	vec4 data2 = texture2D(colortex2, coord.xy);
+	vec3 color = max0(decodeRGBE8(data2));
+
+	vec3 worldVector = mat3(gbufferModelViewInverse) * refractViewVector;
+	vec3 shadowLightVector = shadowLightPosition * 0.01;
+
 	bool isWater = matFlag > 2.5 && matFlag < 3.5;
 
 	float dither = bayer64(gl_FragCoord.xy);
@@ -257,18 +300,8 @@ void main() {
 		dither = fract(frameCounter * (1.0 / 7.0) + dither);
 	#endif
 
-	vec2 planetSphere = vec2(0.0);
-	vec3 sky = vec3(0.0);
-	vec3 skyAbsorb = vec3(0.0);
-
-	float ambientFogOcclusion = eyeBrightnessSmooth.y * (1.0 / 255.0);
-		  ambientFogOcclusion = pow2(ambientFogOcclusion);
-
-	float vDotL = dot(viewVector, lightVector);
-	float vDotV = dot(viewVector, sunVector);
-
 	if (backDepth >= 1.0) {
-		sky = calculateAtmosphere(vec3(0.0), viewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
+		sky = calculateAtmosphere(vec3(0.0), refractViewVector, upVector, sunVector, moonVector, planetSphere, skyAbsorb, 25);
 		color = sky;
 
 		color += calculateSunSpot(vDotV) * sunColorBase * skyAbsorb;
