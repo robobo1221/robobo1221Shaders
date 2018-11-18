@@ -120,7 +120,7 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec2 pixelResolution, vec3 pre
 
 	float blendWeight = 0.97;
 		  //Zombye's neat way to get rid of blurring and ghosting. Thanks <3
-		  blendWeight *= sqrt(pixelVelocity.x * pixelVelocity.y) * 0.5 + 0.5;
+		  blendWeight *= sqrt(pixelVelocity.x * pixelVelocity.y) * 0.25 + 0.75;
 
 	p -= velocity;
 	blendWeight = clamp01(p) != p ? 0.0 : blendWeight;
