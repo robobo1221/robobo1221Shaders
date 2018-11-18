@@ -11,7 +11,7 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 	vec3 shadows = vec3(0.0);
 	
 	for (int i = 0; i < steps; ++i) {
-		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps)) * 0.015;
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps)) * 0.0375;
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
 			 shadowPosition = remapShadowMap(shadowPosition);
 		
@@ -157,6 +157,9 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 
 	#if defined program_deferred
 		#ifdef GI
+			#ifdef TAA
+				dither = fract(frameCounter * (1.0 / 7.0) + dither);
+			#endif
 			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, lightmaps.y) * (sunColor + moonColor) * transitionFading * cloudShadows;
 		#endif
 	#endif
