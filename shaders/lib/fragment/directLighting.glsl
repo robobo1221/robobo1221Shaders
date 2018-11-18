@@ -11,7 +11,7 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 	vec3 shadows = vec3(0.0);
 	
 	for (int i = 0; i < steps; ++i) {
-		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps)) * 0.0375;
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps)) * 0.015;
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
 			 shadowPosition = remapShadowMap(shadowPosition);
 		
