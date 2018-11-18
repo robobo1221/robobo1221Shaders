@@ -14,7 +14,7 @@ float calculateTrochoidalWave(vec2 coord, float waveLength, float time, vec2 wav
 float generateWaves(vec2 coord){
     float waveLength = 10.0;
     float time = TIME * 0.5;
-    float waveAmplitude = 0.14;
+    float waveAmplitude = 0.07;
     float waveSteepness = 0.7;
     vec2 waveDirection = vec2(1.0, 0.5);
 
@@ -46,7 +46,7 @@ vec2 calculateParallaxWaterCoord(vec3 position, vec3 tangentVec){
     const int steps = 4;
     const float rSteps = inversesqrt(steps);
 
-    const float maxHeight = 2.0;
+    const float maxHeight = 4.0;
 
     vec3 increment = rSteps * tangentVec / -tangentVec.z;
     float height = generateWaves(position.xz);
