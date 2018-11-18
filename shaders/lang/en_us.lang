@@ -22,6 +22,7 @@ option.COLOURED_SHADOWS=Coloured Shadows
 option.GI=Global Illumination
 option.PARALLAX_WATER=Parallax Water
 option.ADVANCED_PARALLAX_WATER=Advanced Parallax Water
+option.PARALLAX_WATER_QUALITY=Quality
 
 option.CAM_MANUAL=Manual Camera Mode
 option.CAM_ISO=Camera ISO

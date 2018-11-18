@@ -43,7 +43,7 @@ float generateWaves(vec2 coord){
 }
 
 vec2 calculateParallaxWaterCoord(vec3 position, vec3 tangentVec){
-    const int steps = 4;
+    const int steps = PARALLAX_WATER_QUALITY;
     const float rSteps = inversesqrt(steps);
 
     const float maxHeight = 4.0;
