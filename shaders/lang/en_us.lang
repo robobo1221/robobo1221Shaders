@@ -1,0 +1,48 @@
+# Screens #
+
+screen.SCREEN_SURFACE=Surface Options
+screen.SCREEN_LIGHTING=Lighting Options
+screen.SCREEN_SHADOWS=Shadow Options
+screen.SCREEN_GI=Global Illumination Options
+screen.SCREEN_PARALLAX=Parallax Options
+
+screen.SCREEN_CAMERA=Camera Options
+screen.SCREEN_POSTPROCESS=Postprocess Options
+screen.SCREEN_TAA=TAA Options
+
+screen.SCREEN_VOLUMETRIC=Volumetric Options
+screen.SCREEN_CLOUDS=Cloud Options
+screen.SCREEN_VL=Volumetric Light Options
+
+# Options #
+
+option.REFRACTION=Refraction
+option.shadowMapResolution= Shadow Resolution
+option.COLOURED_SHADOWS=Coloured Shadows
+option.GI=Global Illumination
+option.PARALLAX_WATER=Parallax Water
+option.ADVANCED_PARALLAX_WATER=Advanced Parallax Water
+
+option.CAM_MANUAL=Manual Camera Mode
+option.CAM_ISO=Camera ISO
+option.CAM_APERTURE=Camera Aperture
+option.CAM_SHUTTER_SPEED=Camera Shutter Speed
+option.CAM_EXPOFFSET=Camera Exposure Offset
+
+option.MOTION_BLUR=Motion Blur
+option.TAA=Temporal Antialiasing
+option.TAA_SHARPENING=Sharpening
+
+option.ATMOSPHERE_SCALE=Atmosphere Scale
+option.VOLUMETRIC_CLOUDS=Volumetric Clouds
+option.VC_QUALITY=Quality
+option.volumetric_cloudHeight=Height
+option.volumetric_cloudDensity=Density
+option.VC_LOCAL_COVERAGE=Localized Coverage
+option.VOLUMETRIC_LIGHT=Volumetric Light
+option.VOLUMETRIC_LIGHT_WATER=Water Volumetric Light
+option.VL_QUALITY=Quality
+option.VL_WATER_QUALITY=Quality
+option.WATER_DENSITY=Density
+
+

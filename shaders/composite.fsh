@@ -278,7 +278,9 @@ void main() {
 	vec3 sky = vec3(0.0);
 	vec3 skyAbsorb = vec3(0.0);
 
-	calculateRefraction(position, normal, viewVector, isTranslucent, coord, backDepth, backPosition, refractViewVector);
+	#ifdef REFRACTION
+		calculateRefraction(position, normal, viewVector, isTranslucent, coord, backDepth, backPosition, refractViewVector);
+	#endif
 
 	float ambientFogOcclusion = eyeBrightnessSmooth.y * (1.0 / 255.0);
 		  ambientFogOcclusion = pow2(ambientFogOcclusion);
