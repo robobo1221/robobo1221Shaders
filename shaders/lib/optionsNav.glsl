@@ -8,7 +8,6 @@
 
 #if defined program_composite0 || defined program_deferred
     #include "/lib/options/skyOptions.glsl"
-    #include "/lib/options/lightingOptions.glsl"
     #include "/lib/options/volumetricOptions.glsl"
 #endif
 
