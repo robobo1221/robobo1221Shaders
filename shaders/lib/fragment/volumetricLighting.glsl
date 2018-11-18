@@ -70,7 +70,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
             return backGround;
         #endif
 
-        const int steps = 8;
+        const int steps = VL_QUALITY;
         const float rSteps = 1.0 / steps;
 
         vec3 increment = (endPosition - startPosition) * rSteps;
@@ -114,7 +114,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
             return backGround * exp2(-waterTransmittanceCoefficient * length(endPosition - startPosition) * rLOG2);
         #endif
 
-        const int steps = 8;
+        const int steps = VL_WATER_QUALITY;
         const float rSteps = 1.0 / steps;
 
         vec3 increment = (endPosition - startPosition) * rSteps;
