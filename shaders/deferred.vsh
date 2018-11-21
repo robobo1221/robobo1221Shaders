@@ -62,7 +62,7 @@ vec4 ToSH(float value, vec3 dir) {
 
 void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetSphere, vec3 transmittance) {
 	const int latSamples = 32;
-	const int lonSamples = 8;
+	const int lonSamples = 16;
 	const float rLatSamples = 1.0 / latSamples;
 	const float rLonSamples = 1.0 / lonSamples;
 	const float sampleCount = rLatSamples * rLonSamples;
