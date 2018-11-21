@@ -26,9 +26,9 @@ vec3 calculateWavingLeaves(vec3 pos, float t){
 
     vec3 windVolume = vec3(0.0);
 
-    windVolume.x = (cos(pos.x * 2.0 + t * 4.0) * 0.5 + 0.5) * 0.5 - cos(pos.z + t * 2.0) * 0.5;
+    windVolume.x = (cos(pos.x * 2.0 + t * 4.0) * 0.5 + 0.5) * 0.5 - cos(pos.y + t * 2.0) * 0.5;
     windVolume.y = (cos(pos.x * 4.0 - t * 3.0) * 0.5 + 0.5) * 0.8 - sin(pos.z * 2.0 + t * 2.0) * 0.5;
-    windVolume.z = cos(pos.z * 3.0 - t) * 0.5 - (sin(pos.z * 3.0 - t * 2.5) * 0.5 + 0.5) * 0.5;
+    windVolume.z = cos(pos.y * 3.0 - t) * 0.5 - (sin(pos.z * 3.0 - t * 2.5) * 0.5 + 0.5) * 0.5;
 
     return windVolume * magnitude;
 }
