@@ -61,8 +61,8 @@ vec4 ToSH(float value, vec3 dir) {
 }
 
 void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetSphere, vec3 transmittance) {
-	const int latSamples = 5;
-	const int lonSamples = 5;
+	const int latSamples = 32;
+	const int lonSamples = 8;
 	const float rLatSamples = 1.0 / latSamples;
 	const float rLonSamples = 1.0 / lonSamples;
 	const float sampleCount = rLatSamples * rLonSamples;
@@ -81,7 +81,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetS
 			float c = cos(latitude);
 			vec3 kernel = vec3(c * cos(longitude), sin(latitude), c * sin(longitude));
 
-			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel * 0.5 + 0.5), upVector, sunVector, moonVector, planetSphere, transmittance, 20);
+			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel), upVector, sunVector, moonVector, planetSphere, transmittance, 10);
 		
 			shR += ToSH(skyCol.r, kernel);
 			shG += ToSH(skyCol.g, kernel);
