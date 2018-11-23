@@ -49,6 +49,17 @@ vec3 circlemapL(float i, float n){
 	return vec3(sincos(i * n * goldenAngle), sqrt(i));
 }
 
+vec3 calculateRoughSpecular(const float i, const float alpha2, const int steps) {
+
+    float x = (alpha2 * i) / (1.0 - i);
+    float y = i * float(steps) * 64.0 * 64.0 * goldenAngle;
+
+    float c = inversesqrt(x + 1.0);
+    float s = sqrt(x) * c;
+
+    return vec3(cos(y) * s, sin(y) * s, c);
+}
+
 vec3 clampNormal(vec3 n, vec3 v){
     float NoV = clamp( dot(n, -v), 0., 1. );
     return normalize( NoV * v + n );

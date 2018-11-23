@@ -165,19 +165,26 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 
 		if (clamp01(p) != p) return sky * skyLightmap;
 
-		rayHit = depth <= p.z;
-		if (rayHit)
+		if (depth <= p.z)
             break;
 	}
 
 	float marchedDepth = depth;
 
+	vec3 rp = p;
+	float rdepth = depth;
+
 	while (--refinements > 0) {
 
-		p = direction * clamp((depth - p.z) * stepWeight, -stepLength, stepLength) + p;
-		depth = texture2D(depthtex1, p.xy).x;
+		rp = direction * clamp((depth - p.z) * stepWeight, -stepLength, stepLength) + p;
+		rdepth = texture2D(depthtex1, rp.xy).x;
+		bool rayHit = rdepth < rp.z;
+
+		p = rayHit ? rp : p;
+		depth = rayHit ? rdepth : depth;
 
 		stepLength *= 0.5;
+
 	}
 
 	float sceneDepth = texture2D(depthtex0, p.xy).x;
@@ -203,22 +210,48 @@ vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float
 vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
 	if (f0 < 0.005) return color;
 
+	const int steps = 4;
+	const float rSteps = 1.0 / steps;
+
 	float alpha2 = roughness * roughness * roughness * roughness;
 
-	float NoV = clamp01(dot(normal, -viewVector));
-	vec3 fresnel = Fresnel(f0, 1.0, NoV);
-	vec3 reflectVector = reflect(viewVector, normal);
-	vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
+	skyLightmap = clamp01(skyLightmap * 1.1);
 
+	vec3 reflection = vec3(0.0);
+	vec3 fresnel = vec3(0.0);
 	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2) * shadows * (sunColor + moonColor) * rPI;
 
-	vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
-	
-	skyLightmap = clamp01(skyLightmap * 1.1);
-	vec3 reflection = rayTaceReflections(viewPosition, NoV, p, reflectVector, dither, sky, skyLightmap) * fresnel;
-	reflection += sunReflection;
+	vec3 tangent = normalize(cross(gbufferModelView[1].xyz, normal));
+	mat3 tbn = mat3(tangent, cross(normal, tangent), normal);
 
-	return color * (1.0 - fresnel) + reflection;
+	#ifdef TAA
+		dither = fract(frameTimeCounter * (1.0 / 7.0) + dither);
+	#endif
+
+	float specularOffset = dither * rSteps;
+
+	for (int i = 0; i < steps; ++i) {
+		vec3 halfVector = tbn * calculateRoughSpecular((float(i) + specularOffset) * rSteps, alpha2, steps);
+
+		float VoH = clamp01(dot(halfVector, -viewVector));
+
+		vec3 reflectVector = (2.0 * VoH) * halfVector + viewVector;
+		vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
+
+		float NoL = clamp01(dot(normal, reflectVector));
+
+		vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
+		reflection += rayTaceReflections(viewPosition, VoH, p, reflectVector, dither, sky, skyLightmap);
+
+		fresnel += Fresnel(f0, 1.0, VoH);
+	}
+
+	reflection *= rSteps;
+	reflection += sunReflection;
+	
+	fresnel *= rSteps;
+
+	return color * (1.0 - fresnel) + reflection * fresnel;
 }
 
 void calculateRefraction(mat2x3 position, vec3 normal, vec3 viewVector, bool isTranslucent, inout vec2 coord, inout float backDepth, inout mat2x3 backPosition, inout vec3 refractViewVector){
