@@ -155,7 +155,7 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 
 	p += direction * stepLength;
 
-	float depth = texture2D(depthtex0, p.xy).x;
+	float depth = texture2D(depthtex1, p.xy).x;
 	bool rayHit = false;
 
 	while(--raySteps > 0){
@@ -246,12 +246,13 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 		fresnel += Fresnel(f0, 1.0, VoH);
 	}
 
-	reflection *= rSteps;
-	reflection += sunReflection;
-	
 	fresnel *= rSteps;
 
-	return color * (1.0 - fresnel) + reflection * fresnel;
+	reflection *= rSteps;
+	reflection *= fresnel;
+	reflection += sunReflection;
+
+	return color * (1.0 - fresnel) + reflection;
 }
 
 void calculateRefraction(mat2x3 position, vec3 normal, vec3 viewVector, bool isTranslucent, inout vec2 coord, inout float backDepth, inout mat2x3 backPosition, inout vec3 refractViewVector){
