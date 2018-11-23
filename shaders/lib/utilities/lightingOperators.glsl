@@ -51,5 +51,20 @@ vec3 ExactFresnel(const vec3 n, const vec3 k, float c) {
 }
 
 vec3 Fresnel(float f0, float f90, float LoH) {
+    /*
+    if(f0 > 0.985) {
+		const vec3 chromeIOR = vec3(3.1800, 3.1812, 2.3230);
+        const vec3 chromeK = vec3(3.3000, 3.3291, 3.1350);
+ 		return ExactFresnel(chromeIOR, chromeK, LoH);
+	} else if(f0 > 0.965) {
+        const vec3 goldIOR = vec3(0.18299, 0.42108, 1.3734);
+        const vec3 goldK = vec3(3.4242, 2.3459, 1.7704);
+         return ExactFresnel(goldIOR, goldK, LoH);
+    } else if(f0 > 0.45) {
+        const vec3 ironIOR = vec3(2.9114, 2.9497, 2.5845);
+        const vec3 ironK = vec3(3.0893, 2.9318, 2.7670);
+         return ExactFresnel(ironIOR, ironK, LoH);
+    } else { */
         return vec3(SchlickFresnel(f0, f90, LoH));
+    //}
 }
