@@ -151,7 +151,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 
 	vec3 lighting = vec3(0.0);
 
-	lighting += shadows * diffuse * (sunColor + moonColor) * transitionFading + 0.02 * (-lightmaps.y + 1.0);
+	lighting += shadows * diffuse * (sunColor + moonColor) * transitionFading + 0.01 * (-lightmaps.y + 1.0);
 	lighting += calculateSkyLighting(lightmaps.y, normal);
 	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor;
 
