@@ -139,7 +139,7 @@ vec3 calculateSkySphere(vec2 p){
 	color = sky;
 
 	#ifdef VOLUMETRIC_CLOUDS
-		color = calculateVolumetricClouds(color, sky, -positionWorld, wLightVector, positionWorld, 1.0, planetSphere, 0.5, vDotL, 10, 3, 3);
+		color = calculateVolumetricClouds(color, sky, -positionWorld, wLightVector, positionWorld, 1.0, planetSphere, 0.5, vDotL, 4, 3, 3);
 	#endif
 
 	//color += calculateSunSpot(vDotL) * sunColorBase * skyAbsorb;
