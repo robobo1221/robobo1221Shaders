@@ -65,6 +65,24 @@ vec3 clampNormal(vec3 n, vec3 v){
     return normalize( NoV * v + n );
 }
 
+vec3 srgbToLinear(vec3 srgb){
+    return mix(
+        srgb / 12.92,
+        pow(.947867 * srgb + .0521327, vec3(2.4) ),
+        step( .04045, srgb )
+    );
+}
+
+vec3 linearToSRGB(vec3 linear){
+    return mix(
+        linear * 12.92,
+        pow(linear, vec3(1./2.4) ) * 1.055 - .055,
+        step( .0031308, linear )
+    );
+}
+
+/*
+
 vec3 blackbody(float t){
     // http://en.wikipedia.org/wiki/Planckian_locus
 
@@ -87,20 +105,22 @@ vec3 blackbody(float t){
     return max0(vec3(x/y,1.,z/y) * xyzToSrgb);
 }
 
-vec3 srgbToLinear(vec3 srgb){
-    return mix(
-        srgb / 12.92,
-        pow(.947867 * srgb + .0521327, vec3(2.4) ),
-        step( .04045, srgb )
-    );
-}
+*/
 
-vec3 linearToSRGB(vec3 linear){
-    return mix(
-        linear * 12.92,
-        pow(linear, vec3(1./2.4) ) * 1.055 - .055,
-        step( .0031308, linear )
-    );
+vec3 blackbody(float Temp)
+{
+    float t = pow(Temp, -1.5);
+    float lt = log(Temp);
+
+    vec3 col = vec3(0.0);
+         col.x = 220000.0 * t + 0.58039215686;
+         col.y = 0.39231372549 * lt - 2.44549019608;
+         col.y = Temp > 6500. ? 138039.215686 * t + 0.72156862745 : col.y;
+         col.z = 0.76078431372 * lt - 5.68078431373;
+         col = clamp01(col);
+         col = Temp < 1000. ? col * Temp * 0.001 : col;
+
+    return srgbToLinear(col);
 }
 
 float calculateHardShadows(float shadowDepth, vec3 shadowPosition, float bias) {
