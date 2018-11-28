@@ -35,7 +35,7 @@ void main() {
 	material = mc_Entity.x;
 
 	texcoord = gl_MultiTexCoord0.xy;
-	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0) * gl_Color.a;
+	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0) * vec2(1.0, gl_Color.a * 0.5 + 0.5);
 	color = vec4(gl_Color.rgb, 1.0);
 
 	#if defined program_gbuffers_terrain

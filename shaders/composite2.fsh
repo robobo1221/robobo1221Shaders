@@ -64,6 +64,21 @@ vec3 hableTonemap(vec3 x){
 }
 */
 
+vec3 roboboTonemap(vec3 x) {
+
+	const vec3 tonemapCurve = vec3(5.5);
+	x *= 1.5;
+
+	x = linearToSRGB(x);
+	x = pow(x, tonemapCurve);
+	x = x / (x + 1.0);
+	x = pow(x, 1.0 / tonemapCurve);
+
+	x = mix(x, x * x * (3.0 - 2.0 * x), vec3(0.2));
+
+	return x;
+}
+
 #include "/lib/utilities/bicubic.glsl"
 
 vec3 calculateBloomTile(sampler2D textureSample, vec2 coord, const float lod){
@@ -73,8 +88,7 @@ vec3 calculateBloomTile(sampler2D textureSample, vec2 coord, const float lod){
 	return decodeRGBE8(BicubicTexture(textureSample, coord * lodScale + offset));
 }
 
-vec3 calculateBloom(vec2 coord, float EV){
-	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
+vec3 calculateBloom(vec2 coord, float EV, vec2 pixelSize){
 	vec3 bloom = vec3(0.0);
 
 	const float lods[7] = float[7](
@@ -87,11 +101,11 @@ vec3 calculateBloom(vec2 coord, float EV){
 		8.0
 	);
 
-	for (int i = 0; i < 6; ++i){
+	for (int i = 0; i < lods.length; ++i){
 		bloom += calculateBloomTile(colortex3, coord, lods[i]);
 	}
 
-	return decodeColor(bloom) * (1.0 / 6.0) * exp2(EV - 3.0);
+	return decodeColor(bloom) * (1.0 / lods.length) * exp2(EV - 3.0);
 }
 
 vec3 calculateLowLightDesaturation(vec3 color) {
@@ -106,18 +120,20 @@ vec3 calculateLowLightDesaturation(vec3 color) {
 
 /* DRAWBUFFERS:0 */
 void main() {
+	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
+
 	vec4 colorSample = texture2D(colortex2, texcoord);
 	vec3 color = decodeColor(decodeRGBE8(colorSample));
 
 	float avgLum = decodeColor(texture2D(colortex5, texcoord).a);
 	float exposureValue = calculateExposure(avgLum);
 
-	vec3 bloom = calculateBloom(texcoord, exposureValue);
+	vec3 bloom = calculateBloom(texcoord, exposureValue, pixelSize);
 
 	color += bloom;
 	color = calculateLowLightDesaturation(color);
 	color = exposureValue * color;
-	color = burgressTonemap(color);
+	color = roboboTonemap(color);
 
 	gl_FragData[0] = vec4(color, 1.0);
 }
