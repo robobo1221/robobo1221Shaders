@@ -58,7 +58,7 @@ vec3 calculateBloomTile(vec2 coord, const float lod, vec2 pixelSize){
 			float sampleLength = (1.0 - float(j) * rJSteps);
 			float weight = pow3(sampleLength);
 
-			totalBloom += texture2DLod(colortex5, bloomCoord - coordOffset * scale, lod).rgb * weight;
+			totalBloom += texture2D(colortex5, bloomCoord - coordOffset * scale).rgb * weight;
 
 			totalWeight += weight;
 		}
