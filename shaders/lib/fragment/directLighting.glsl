@@ -57,7 +57,10 @@ float calculateTorchLightAttenuation(float lightmap){
 
 		float rotateAmountI = (dither * rISteps + rISteps) * PI;
 
-		vec2 pixelOffset = vec2(50.0) * rShadowMapResolution;
+		const float offsetSize = 50.0;
+		const float rOffsetSize = 1.0 / offsetSize;
+
+		vec2 pixelOffset = vec2(offsetSize) * rShadowMapResolution;
 		float pixelLength = inversesqrt(dot(pixelOffset, pixelOffset)) * 16.0;
 
 		vec3 total = vec3(0.0);
@@ -91,7 +94,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				float LoN = clamp01(dot(sampleVector, normal));
 				if (LoN <= 0.0) continue;
 
-				float falloff = 1.0 / max(normFactor * 1024.0, 1.0);
+				float falloff = 1.0 / max(normFactor * rOffsetSize * 16384.0, 1.0);
 				/*
 				float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
 
