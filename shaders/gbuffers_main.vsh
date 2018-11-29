@@ -41,7 +41,8 @@ void main() {
 	#if defined program_gbuffers_terrain
 	    // lit block fix
 		lightmaps.x = material == 89.0 || material == 169.0 || material == 124.0
-		|| material == 51.0 || material == 10.0 || material == 11.0 ? 1.0 : lightmaps.x;
+		|| material == 51.0 || material == 10.0 || material == 11.0 || material == 138.0
+		|| material == 198.0 ? 1.0 : lightmaps.x;
 	#endif
 
 	#if defined program_gbuffers_water || defined program_gbuffers_terrain
