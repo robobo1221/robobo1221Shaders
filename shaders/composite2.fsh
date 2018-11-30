@@ -74,7 +74,7 @@ vec3 roboboTonemap(vec3 x) {
 	x = x / (x + 1.0);
 	x = pow(x, 1.0 / tonemapCurve);
 
-	x = mix(x, x * x * (3.0 - 2.0 * x), vec3(0.2));
+	//x = mix(x, x * x * (3.0 - 2.0 * x), vec3(0.2));
 
 	return x;
 }
