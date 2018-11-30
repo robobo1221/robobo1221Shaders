@@ -6,7 +6,7 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 		  NdotL = isVegitation ? 0.5 : NdotL;
 
 	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL) * rShadowMapResolution;
-		  shadowBias = shadowBias * calculateDistFactor(rawPosition.xy) * 0.1;
+		  shadowBias = shadowBias * calculateDistFactor(rawPosition.xy) * 0.15;
 
 	vec3 shadows = vec3(0.0);
 	
