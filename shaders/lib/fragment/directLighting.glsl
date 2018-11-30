@@ -108,6 +108,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				*/
 
 				vec4 albedo = texture2DLod(shadowcolor0, remappedCoord, 3);
+					 albedo.rgb = srgbToLinear(albedo.rgb);
 					 albedo.rgb = albedo.rgb /** waterTransmittance*/;
 
 				float skyLightMapShadow = albedo.a * 2.0 - 1.0;
