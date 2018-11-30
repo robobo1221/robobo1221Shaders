@@ -56,8 +56,8 @@ float calculateTorchLightAttenuation(float lightmap){
 
 #if defined program_deferred
 	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, float skyLightMap, bool isVegitation){
-		const int iSteps = 3;
-		const int jSteps = 6;
+		const int iSteps = 7;
+		const int jSteps = 32;
 		const float rISteps = 1.0 / iSteps;
 		const float rJSteps = 1.0 / jSteps;
 
@@ -101,7 +101,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				float LoN = clamp01(dot(sampleVector, normal));
 				if (LoN <= 0.0) continue;
 
-				float falloff = 1.0 / max(normFactor * rOffsetSize * 16384.0, 1.0);
+				float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + 0.25);
 				/*
 				float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
 
