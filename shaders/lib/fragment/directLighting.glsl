@@ -49,7 +49,7 @@ float calculateTorchLightAttenuation(float lightmap){
 }
 
 #if defined program_deferred
-	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, float skyLightMap){
+	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, float skyLightMap, bool isVegitation){
 		const int iSteps = 3;
 		const int jSteps = 6;
 		const float rISteps = 1.0 / iSteps;
@@ -85,6 +85,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				float normFactor = dot(samplePostion, samplePostion);
 				vec3 sampleVector = samplePostion * inversesqrt(normFactor);
 				float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
+				SoN = isVegitation ? 1.0 : SoN;
 
 				if (SoN <= 0.0) continue;
 
@@ -163,7 +164,7 @@ vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 
 			#ifdef TAA
 				dither = fract(frameCounter * (1.0 / 7.0) + dither);
 			#endif
-			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, lightmaps.y) * (sunColor + moonColor) * transitionFading * cloudShadows;
+			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, lightmaps.y, isVegitation) * (sunColor + moonColor) * transitionFading * cloudShadows;
 		#endif
 	#endif
 
