@@ -38,7 +38,7 @@ vec3 doWavingPlants(vec3 pos){
         return pos;
     #endif
 
-    float t = frameTimeCounter;
+    float t = TIME;
 
     pos += cameraPosition;
 
