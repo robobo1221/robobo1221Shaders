@@ -130,8 +130,8 @@ void main() {
 
 	vec3 bloom = calculateBloom(texcoord, exposureValue, pixelSize);
 
-	color += bloom;
 	color = calculateLowLightDesaturation(color);
+	color += bloom;
 	color = exposureValue * color;
 	color = roboboTonemap(color);
 
