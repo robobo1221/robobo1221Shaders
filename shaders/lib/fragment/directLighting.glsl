@@ -101,7 +101,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				float LoN = clamp01(dot(sampleVector, normal));
 				if (LoN <= 0.0) continue;
 
-				float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + 0.25);
+				float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + 0.5);
 				/*
 				float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
 
