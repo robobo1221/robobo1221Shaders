@@ -14,14 +14,20 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps)) * 0.015;
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
 			 shadowPosition = remapShadowMap(shadowPosition);
-		
+
 		float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
 		float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
-		float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
-		float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
 
 		vec4 colorShadow1 = texture2DLod(shadowcolor1, shadowPosition.xy, 0);
+		vec3 shadowNormal = colorShadow1.rgb * 2.0 - 1.0;
+			 shadowNormal = mat3(gbufferModelView) * shadowNormal;
+
 		float waterMask = colorShadow1.a * 2.0 - 1.0;
+
+		shadowBias = (shadowDepth0 == shadowDepth1 && !isVegitation) ? (dot(shadowNormal, normal) > 0.1 ? shadowBias : 0.0) : shadowBias;
+
+		float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
+		float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
 
 		float surfaceDepth0 = (shadowDepth0 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
 		float surfaceDepth1 = (shadowDepth1 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
