@@ -9,7 +9,7 @@ const float shadowDistance = 120.0;
 #define moonColorBase (blackbody(6000.0) * moon_illuminance)
 
 #define torchIlluminance 800.0
-#define torchColor (blackbody(2300.0) * torchIlluminance)
+#define torchColor (blackbody(2600.0) * torchIlluminance)
 
 //#define COLOURED_SHADOWS
 //#define GI        //HIGHLY WIP
