@@ -77,7 +77,7 @@ float calculateTorchLightAttenuation(float lightmap){
 		for (int i = 0; i < iSteps; ++i){
 			vec2 rotatedCoordOffset = rotate(pixelOffset, rotateAmountI * (float(i) + 1.0)) * rJSteps;
 			for (int j = 0; j < jSteps; ++j){
-				vec2 coordOffset = rotatedCoordOffset * (float(j) + rJSteps);
+				vec2 coordOffset = rotatedCoordOffset * (float(j) + 1.0);
 				float weight = 1.0;
 
 				totalWeight += weight;
