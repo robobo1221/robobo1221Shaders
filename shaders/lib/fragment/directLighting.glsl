@@ -56,14 +56,14 @@ float calculateTorchLightAttenuation(float lightmap){
 
 #if defined program_deferred
 	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, float skyLightMap, bool isVegitation){
-		const int iSteps = 3;
-		const int jSteps = 6;
+		const int iSteps = GI_QUALITY_RADIAL;
+		const int jSteps = GI_QUALITY_OUTWARD;
 		const float rISteps = 1.0 / iSteps;
 		const float rJSteps = 1.0 / jSteps;
 
 		float rotateAmountI = (dither * rISteps + rISteps) * TAU;
 
-		const float offsetSize = 50.0;
+		const float offsetSize = GI_RADIUS;
 		const float rOffsetSize = 1.0 / offsetSize;
 
 		vec2 pixelOffset = vec2(offsetSize) * rShadowMapResolution;
@@ -85,7 +85,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec2 offsetCoord = shadowPosition.xy + coordOffset;
 				vec2 remappedCoord = remapShadowMap(offsetCoord) * 0.5 + 0.5;
 
-				float shadow = texture2DLod(shadowtex1, remappedCoord, 3).x - 0.00005;
+				float shadow = texture2DLod(shadowtex1, remappedCoord, 0).x - 0.00005;
 
 				vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
 				float normFactor = dot(samplePostion, samplePostion);
