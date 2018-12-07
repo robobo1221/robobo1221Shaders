@@ -1,7 +1,7 @@
 #include "/lib/options/TAAOptions.glsl"
 #include "/lib/options/surfaceOptions.glsl"
 
-#if defined program_composite2 || defined program_composite3
+#if defined program_composite2 || defined program_composite3 || defined program_final
     #include "/lib/options/cameraOptions.glsl"
     #include "/lib/options/postProcessOptions.glsl"
 #endif

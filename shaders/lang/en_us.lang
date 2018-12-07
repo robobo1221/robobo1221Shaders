@@ -9,6 +9,7 @@ screen.SCREEN_PARALLAX=Parallax Options
 screen.SCREEN_CAMERA=Camera Options
 screen.SCREEN_POSTPROCESS=Postprocess Options
 screen.SCREEN_TAA=TAA Options
+screen.SCREEN_COLOR=Color Options
 
 screen.SCREEN_VOLUMETRIC=Volumetric Options
 screen.SCREEN_CLOUDS=Cloud Options
@@ -36,6 +37,8 @@ option.CAM_EXPOFFSET=Camera Exposure Offset
 option.MOTION_BLUR=Motion Blur
 option.TAA=Temporal Antialiasing
 option.TAA_SHARPENING=Sharpening
+option.VIBRANCE=Vibrance
+option.SATURATION=Saturation
 
 option.ATMOSPHERE_SCALE=Atmosphere Scale
 option.VOLUMETRIC_CLOUDS=Volumetric Clouds
