@@ -13,17 +13,17 @@ vec3 GeometrySmithGGX(vec3 diffuseColor, vec3 N, vec3 V, vec3 L, float r){
     return (diffuseColor * multiScattering * NdotL + GeometrySchlickGGX(NdotL, k)) * rPI;
 }
 
-float ExactCorrelatedG2(float alpha2, float NoV, float NoL) {
+float GSpecular(float alpha2, float NoV, float NoL) {
     float x = 2.0 * NoL * NoV;
     float y = (1.0 - alpha2);
 
     return x / (NoV * sqrt(alpha2 + y * (NoL * NoL)) + NoL * sqrt(alpha2 + y * (NoV * NoV)));
 }
 
-float GGX(float alpha2, float NoH) {
+float GGXDistribution(const float alpha2, const float NoH) {
 	float d = (NoH * alpha2 - NoH) * NoH + 1.0;
 
-	return alpha2 / (d * d);
+	return alpha2 / (PI * d * d);
 }
 
 float SchlickFresnel(float f0, float f90, float LoH) {

@@ -196,7 +196,7 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : sky * skyLightmap;
 }
 
-float calculateNoHSquared(float radiusTan, float NoL, float NoV, float VoL){
+float calculateNoH(float radiusTan, float NoL, float NoV, float VoL){
 	float radiusCos = inversesqrt(radiusTan * radiusTan + 1.0);
 
 	float RoL = 2.0 * NoL * NoV - VoL;
@@ -227,24 +227,24 @@ float calculateNoHSquared(float radiusTan, float NoL, float NoV, float VoL){
 	float NoH = NoV + newNol;
 	float HoH = 2.0 * newVol + 2.0;
 	
-	return max0(NoH * NoH / HoH);
+	return sqrt(max0(NoH * NoH / HoH));
 }
 
-vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float f0, float alpha2){
+vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float f0, float alpha2, const float tanSunRadius){
 	vec3 H = normalize(lightVector - viewVector);
-
-	const float sunRadius = radians(sunAngularSize);
-	const float tanSunRadius = tan(sunRadius);
 	
 	float VoH = clamp01(dot(H, lightVector));
 	float NoL = clamp01(dot(normal, lightVector));
 	float NoV = clamp01(dot(normal, -viewVector));
 	float VoL = (dot(lightVector, -viewVector));
-	float NoH = sqrt(calculateNoHSquared(tanSunRadius, NoL, NoV, VoL));
-
+	float NoH = calculateNoH(tanSunRadius, NoL, NoV, VoL);
 	//float NoH = clamp01(dot(normal, H));
 
-	return max0((Fresnel(f0, 1.0, VoH) * GGX(alpha2, NoH)) * ExactCorrelatedG2(alpha2, NoV, NoL) / (4.0 /** NoL * NoV*/)) /** NoL*/;
+	float D = GGXDistribution(alpha2, NoH);
+	float G = GSpecular(alpha2, NoV, NoL);
+	vec3 F = Fresnel(f0, 1.0, VoH);
+
+	return max0(F * D * G /*/ (4.0 * NoL * NoV)*/) * NoL;
 }
 
 vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
@@ -257,9 +257,12 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 
 	skyLightmap = clamp01(skyLightmap * 1.1);
 
+	const float sunRadius = radians(sunAngularSize);
+	const float tanSunRadius = tan(sunRadius);
+
 	vec3 reflection = vec3(0.0);
 	vec3 fresnel = vec3(0.0);
-	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2) * shadows * (sunColor + moonColor) * rPI;
+	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * shadows * (sunColor + moonColor);
 
 	vec3 tangent = normalize(cross(gbufferModelView[1].xyz, normal));
 	mat3 tbn = mat3(tangent, cross(normal, tangent), normal);
