@@ -407,7 +407,7 @@ void main() {
 	if (depth < 1.0 && isEyeInWater == 0)
 	{
 		vec3 shadowPosition = remapShadowMap(transMAD(shadowMatrix, position[1]));
-		float hardShadows = float(texture2DLod(shadowtex0, shadowPosition.xy, 0).x > shadowPosition.z - 0.001) * transitionFading;
+		float hardShadows = float(texture2DLod(shadowtex0, shadowPosition.xy, 0).x > shadowPosition.z - rShadowMapResolution) * transitionFading;
 		color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, normal, dither, depth, roughness, f0, lightmaps.y, hardShadows);
 	}
 
