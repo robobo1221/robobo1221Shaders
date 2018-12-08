@@ -54,7 +54,6 @@ vec3 sky_transmittance(vec3 position, vec3 direction, const float steps) {
 }
 
 float calculateSunSpot(float VdotL) {
-	const float sunAngularSize = 0.533333;
     const float sunRadius = radians(sunAngularSize);
     const float cosSunRadius = cos(sunRadius);
     const float sunLuminance = 1.0 / ((1.0 - cosSunRadius) * TAU);
@@ -63,7 +62,6 @@ float calculateSunSpot(float VdotL) {
 }
 
 float calculateMoonSpot(float VdotL) {
-	const float moonAngularSize = 0.516667;
     const float moonRadius = radians(moonAngularSize);
     const float cosMoonRadius = cos(moonRadius);
 	const float moonLuminance = 1.0 / ((1.0 - cosMoonRadius) * TAU);

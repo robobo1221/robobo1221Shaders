@@ -1,3 +1,6 @@
+const float sunAngularSize = 0.533333;
+const float moonAngularSize = 0.516667;
+
 //Sky coefficients and heights
 
 #define airNumberDensity 2.5035422e25 // m^3

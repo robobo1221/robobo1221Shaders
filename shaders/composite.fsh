@@ -196,15 +196,55 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : sky * skyLightmap;
 }
 
+float calculateNoHSquared(float radiusTan, float NoL, float NoV, float VoL){
+	float radiusCos = inversesqrt(radiusTan * radiusTan + 1.0);
+
+	float RoL = 2.0 * NoL * NoV - VoL;
+	if (RoL >= radiusCos)
+		return 1.0;
+
+	float rOverLengthT = radiusCos * radiusTan * inversesqrt(1.0 - RoL * RoL);
+	float NoTr = rOverLengthT * (NoV - RoL * NoL);
+	float VoTr = rOverLengthT * (2.0 * NoV * NoV - 1.0 - RoL * VoL);
+
+	float triple = sqrt(clamp01(1.0 - NoL * NoL - NoV * NoV - VoL * VoL + 2.0 * NoL * NoV * VoL));
+
+	float NoBr = rOverLengthT * triple, VoBr = rOverLengthT * (2.0 * triple * NoV);
+	float NoLVTr = NoL * radiusCos + NoV + NoTr, VoLVTr = VoL * radiusCos + 1.0 + VoTr;
+	float p = NoBr * VoLVTr, q = NoLVTr * VoLVTr, s = VoBr * NoLVTr;
+	float xNum = q * (-0.5 * p + 0.25 * VoBr * NoLVTr);
+	float xDenom = p * p + s * (s - 2.0 * p) + NoLVTr * ((NoL * radiusCos + NoV) * VoLVTr * VoLVTr +
+				   q * (-0.5 * (VoLVTr + VoL * radiusCos) - 0.5));
+	float twoX1 = 2.0 * xNum / (xDenom * xDenom + xNum * xNum);
+	float sinTheta = twoX1 * xDenom;
+	float cosTheta = 1.0 - twoX1 * xNum;
+
+	NoTr = cosTheta * NoTr + sinTheta * NoBr;
+	VoTr = cosTheta * VoTr + sinTheta * VoBr;
+
+	float newNol = NoL * radiusCos + NoTr;
+	float newVol = VoL * radiusCos + VoTr;
+	float NoH = NoV + newNol;
+	float HoH = 2.0 * newVol + 2.0;
+	
+	return max0(NoH * NoH / HoH);
+}
+
 vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float f0, float alpha2){
 	vec3 H = normalize(lightVector - viewVector);
 
-	float NoL = clamp01(dot(normal, lightVector));
+	const float sunRadius = radians(sunAngularSize);
+	const float tanSunRadius = tan(sunRadius);
+	
 	float VoH = clamp01(dot(H, lightVector));
-	float NoH = clamp01(dot(H, normal));
+	float NoL = clamp01(dot(normal, lightVector));
 	float NoV = clamp01(dot(normal, -viewVector));
+	float VoL = (dot(lightVector, -viewVector));
+	float NoH = sqrt(calculateNoHSquared(tanSunRadius, NoL, NoV, VoL));
 
-	return max0((Fresnel(f0, 1.0, VoH) * GGX(alpha2, NoH)) * ExactCorrelatedG2(alpha2, NoV, NoL) / (4.0 * NoL * NoV)) * NoL;
+	//float NoH = clamp01(dot(normal, H));
+
+	return max0((Fresnel(f0, 1.0, VoH) * GGX(alpha2, NoH)) * ExactCorrelatedG2(alpha2, NoV, NoL) / (4.0 /** NoL * NoV*/)) /** NoL*/;
 }
 
 vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
