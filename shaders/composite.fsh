@@ -237,14 +237,14 @@ vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float
 	float NoL = clamp01(dot(normal, lightVector));
 	float NoV = clamp01(dot(normal, -viewVector));
 	float VoL = (dot(lightVector, -viewVector));
-	float NoH = calculateNoH(tanSunRadius, NoL, NoV, VoL);
-	//float NoH = clamp01(dot(normal, H));
+	//float NoH = calculateNoH(tanSunRadius, NoL, NoV, VoL);
+	float NoH = clamp01(dot(normal, H));
 
 	float D = GGXDistribution(alpha2, NoH);
 	float G = GSpecular(alpha2, NoV, NoL);
 	vec3 F = Fresnel(f0, 1.0, VoH);
 
-	return max0(F * D * G /*/ (4.0 * NoL * NoV)*/) * NoL;
+	return max0(F * D * G / (4.0 * NoL * NoV)) * NoL;
 }
 
 vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
