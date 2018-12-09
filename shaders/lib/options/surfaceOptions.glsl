@@ -12,6 +12,7 @@ const float shadowDistance = 120.0;
 #define torchColor (blackbody(2600.0) * torchIlluminance)
 
 //#define COLOURED_SHADOWS
+#define SHADOW_PENUMBRA
 
 //#define GI        //HIGHLY WIP
 #define GI_RADIUS 50.0          //[25.0 50.0 75.0 100.0 125.0 150.0 175.0 200.0]        // How far will the bounced light reach.

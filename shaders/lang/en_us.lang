@@ -20,6 +20,7 @@ screen.SCREEN_VL=Volumetric Light Options
 option.REFRACTION=Refraction
 option.shadowMapResolution= Shadow Resolution
 option.COLOURED_SHADOWS=Coloured Shadows
+option.SHADOW_PENUMBRA=Penumbra Shadows
 option.GI=Global Illumination
 option.GI_RADIUS=Radius
 option.GI_QUALITY_RADIAL=Radial Quality

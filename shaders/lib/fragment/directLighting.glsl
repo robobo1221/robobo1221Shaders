@@ -1,3 +1,21 @@
+float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpread, float angle, const int steps, const float rSteps){
+	float blockerDepth = 0.0;
+	
+	for (int i = 0; i < steps; ++i) {
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
+			 offset.z *= maxSpread * rShadowMapResolution;
+
+		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
+			 shadowPosition = remapShadowMap(shadowPosition);
+
+		float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
+
+		blockerDepth = max(blockerDepth, (shadowPosition.z - shadowBias) - shadowDepth0);
+	}
+
+	return min(blockerDepth * angle, maxSpread * rShadowMapResolution);
+}
+
 vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dither, bool isVegitation) {
 	const int steps = 4;
 	const float rSteps = 1.0 / steps;
@@ -9,9 +27,22 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 		  shadowBias = shadowBias * calculateDistFactor(rawPosition.xy) * 0.15;
 
 	vec3 shadows = vec3(0.0);
+
+	const float sunCosAngle = radians(sunAngularSize);
+
+	const float angle = sunCosAngle * 4.0;
+	const float maxSpread = 10.0;
+
+	#ifdef SHADOW_PENUMBRA
+		float shadowBlur = findBlocker(rawPosition, shadowBias, dither, maxSpread, angle, steps, rSteps);
+	#else
+		float shadowBlur = rShadowMapResolution * 0.5;
+	#endif
 	
 	for (int i = 0; i < steps; ++i) {
-		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps)) * 0.015;
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
+			 offset.z *= shadowBlur;
+
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
 			 shadowPosition = remapShadowMap(shadowPosition);
 
