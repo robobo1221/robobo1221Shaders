@@ -153,7 +153,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         
         // Light the scattering and sum them up.
         vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase;
-        vec3 skyLighting = skylightScattering * skyColor * 0.25;
+        vec3 skyLighting = skylightScattering * skyColor * 0.25 * hPI;
         vec3 scattering = (directLighting + skyLighting) * PI;
 
         // Apply the scattering to the already excisting image. And gamma correct it.
