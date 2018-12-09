@@ -109,7 +109,7 @@ vec3 calculateBloom(vec2 coord, float EV, vec2 pixelSize){
 }
 
 vec3 calculateLowLightDesaturation(vec3 color) {
-	const vec3 preTint = vec3(0.55, 0.67, 1.0);
+	const vec3 preTint = vec3(0.25, 0.75, 2.0);
 	const vec3 saturatedPreTint = mix(preTint, vec3(dot(preTint, lumCoeff)), -0.5);
 
 	float avg = dot(color, lumCoeff);
