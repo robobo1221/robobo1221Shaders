@@ -248,16 +248,16 @@ vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float
 }
 
 vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
+	if (f0 < 0.005) return color;
+
+	const int steps = 4;
+	const float rSteps = 1.0 / steps;
+
 	const float sunRadius = radians(sunAngularSize);
 	const float tanSunRadius = tan(sunRadius);
 	
 	float alpha2 = roughness * roughness * roughness * roughness;
 	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * shadows * (sunColor + moonColor);
-	
-	if (f0 < 0.005) return color + sunReflection;
-
-	const int steps = 4;
-	const float rSteps = 1.0 / steps;
 
 	skyLightmap = clamp01(skyLightmap * 1.1);
 

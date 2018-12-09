@@ -134,7 +134,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
         // Raymarching.
         for (int i = 0; i < steps; ++i, cloudPosition += increment){
-            float od = calculateCloudOD(cloudPosition, 4) * rayLength;
+            float od = calculateCloudOD(cloudPosition, 4) * PI * rayLength;
             // Early out.
             if (od <= 0.0) continue;
 
