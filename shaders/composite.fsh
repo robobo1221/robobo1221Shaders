@@ -83,7 +83,7 @@ const float eyeBrightnessHalfLife = 10.0;
 #include "/lib/fragment/sky.glsl"
 #include "/lib/fragment/volumetricClouds.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
-#include "/lib/fragment/directLighting.glsl"
+#include "/lib/fragment/diffuseLighting.glsl"
 
 vec3 calculateViewSpacePosition(vec2 coord, float depth) {
 	vec3 viewCoord = vec3(coord - jitter, depth) * 2.0 - 1.0;
