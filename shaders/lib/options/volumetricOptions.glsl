@@ -21,4 +21,4 @@ const float volumetric_cloudMaxHeight = volumetric_cloudMinHeight + volumetric_c
 const float waterScatterCoefficient = 0.06 * WATER_DENSITY;
 const vec3 waterTransmittanceCoefficient = vec3(0.996078, 0.406863, 0.25098) * 0.25 * WATER_DENSITY + waterScatterCoefficient;
 
-#define ATMOSPHERE_SCALE 14.0   //[1.0 2.0 4.0 6.0 8.0 10.0 12.0 14.0] //Higher numbers result in more thicker atmosphere (VL). Keep at 1.0 for correct result
+#define ATMOSPHERE_SCALE 28.0   //[1.0 2.0 4.0 6.0 8.0 10.0 12.0 14.0 15.0 16.0 17.0 18.0 19.0 20.0 21.0 22.0 23.0 24.0 25.0 26.0 27.0 28.0 29.0 30.0] //Higher numbers result in more thicker atmosphere (VL). Keep at 1.0 for correct result
