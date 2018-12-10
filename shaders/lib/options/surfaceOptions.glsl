@@ -2,7 +2,7 @@ const int shadowMapResolution = 2048; //[512 1024 2048 4096]
 const float rShadowMapResolution = 1.0 / float(shadowMapResolution);
 const float shadowDistance = 120.0;
 
-#define sun_illuminance 100000.0
+#define sun_illuminance 128000.0
 #define moon_illuminance 2.0
 
 #define sunColorBase (blackbody(5778.0) * sun_illuminance)
