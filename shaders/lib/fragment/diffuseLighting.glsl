@@ -153,11 +153,14 @@ float calculateTorchLightAttenuation(float lightmap){
 					  bleedingMask = pow6(bleedingMask);
 					  bleedingMask = clamp01(0.005 / (max(bleedingMask, 0.005)));
 
+				SoN = sqrt(SoN);
+				LoN = sqrt(LoN);
+
 				total += albedo.rgb * LoN * SoN * falloff * bleedingMask * weight;
 			}
 		}
 
-		return total / totalWeight;
+		return total / totalWeight * rPI;
 	}
 #endif
 
