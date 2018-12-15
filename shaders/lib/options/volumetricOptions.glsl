@@ -2,6 +2,9 @@
 #define VC_QUALITY 10 //[5 10 15 20 24 32 64 128 256 512]
 #define VC_LOCAL_COVERAGE
 
+//#define VC_MULTISCAT    //Simulates multiscattering. Very performance intensive!
+#define VC_MULTISCAT_QUALITY 3  //[1 2 3 4 5 6]
+
 #define volumetric_cloudDensity 0.0125  //[0.005 0.075 0.01 0.0125 0.015 0.0175 0.02 0.025 0.03 0.035 0.04 0.045 0.05]
 #define volumetric_cloudHeight 1600.0   //[100.0 110.0 120.0 130.0 140.0 160.0 180.0 200.0 220.0 240.0 260.0 280.0 300.0 400.0 500.0 600.0 700.0 800.0 900.0 1000.0 1200.0 1400.0 1600.0 1800.0 2000.0]
 #define volumetric_cloudMinHeight volumetric_cloudHeight

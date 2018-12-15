@@ -1,4 +1,4 @@
-#define TIME_MULT 1.0
+#define TIME_MULT 0.0
 #define TIME (frameTimeCounter * TIME_MULT)
 
 const float PI 		= acos(-1.0);

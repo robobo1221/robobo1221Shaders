@@ -1,3 +1,7 @@
+const float a = 0.5;
+const float b = 0.3;
+const float c = 0.96;
+
 // Maps a range of values to an different range of values.
 float remap(float value, const float originalMin, const float originalMax, const float newMin, const float newMax) {
     return (((value - originalMin) / (originalMax - originalMin)) * (newMax - newMin)) + newMin;
@@ -54,7 +58,7 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     // Absorb sunlight through the clouds.
-    float calculateCloudTransmittance(vec3 position, vec3 direction, const int steps){
+    float calculateCloudTransmittance(vec3 position, vec3 direction, float bn, const int steps){
         const float rSteps = volumetric_cloudThickness / steps;
 
         vec3 increment = direction * rSteps;
@@ -65,29 +69,48 @@ float calculateCloudOD(vec3 position, const int octaves){
         for (int i = 0; i < steps; ++i, position += increment){
             transmittance += calculateCloudOD(position, 4);
         }
-        return exp2(-transmittance * 1.11 * rLOG2 * rSteps);
+        return exp2(-transmittance * 1.11 * rLOG2 * rSteps * bn);
     }
 
     // Absorb skylight through the clouds.
-    float calculateCloudTransmittanceSkyLight(vec3 position){
+    float calculateCloudTransmittanceSkyLight(vec3 position, float bn){
         const float avgHeight = (volumetric_cloudMinHeight + volumetric_cloudMaxHeight) * 0.5;
 
-        float gradient = clamp(avgHeight - position.y, 0.0, volumetric_cloudMinHeight) * (volumetric_cloudDensity * volumetric_cloudScale);
+        float gradient = clamp(avgHeight - position.y, 0.0, volumetric_cloudMinHeight) * volumetric_cloudScale * 0.01;
 
-        return exp2(-gradient * 1.11 * rLOG2 * 0.05);
+        return exp2(-gradient * 1.11 * rLOG2 * 0.05 * bn);
     }
 
     // Calculate the total energy of the clouds.
-    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, inout float directScattering, inout float skylightScattering, const int dlSteps){
-        
-        directScattering += scatterCoeff * calculateCloudTransmittance(position, wLightVector, dlSteps) * calculatePowderEffect(od, vDotL) * transmittance;
-        skylightScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position) * transmittance;
+    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, float bn, float phase, float powder, inout float directScattering, inout float skylightScattering, const int dlSteps){
+    
+        directScattering += scatterCoeff * powder * phase * calculateCloudTransmittance(position, wLightVector, bn, dlSteps) * transmittance;
+        skylightScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position, bn) * transmittance;
+    }
+
+    void calculateCloudScatteringMulti(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, float powder, inout float directScattering, inout float skylightScattering, const int dlSteps, const int msSteps){
+        for (int i = 0; i < msSteps; ++i) {
+            
+            float n = float(i);
+
+            float an = pow(a, n);
+            float bn = pow(b, n);
+            float cn = pow(c, n);
+
+            // Calculate the cloud phase.
+            float phase = calculateCloudPhase(vDotL * cn);
+            scatterCoeff = scatterCoeff * an;
+
+            calculateCloudScattering(position, wLightVector, scatterCoeff, od, vDotL, transmittance, bn, phase, powder, directScattering, skylightScattering, dlSteps);
+        }
     }
 
     vec3 calculateVolumetricClouds(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither, float vDotL, const int steps, const int dlSteps, const int alSteps){
         
         // Marches per pixel.
         const float rSteps = 1.0 / steps;
+
+        const int msSteps = VC_MULTISCAT_QUALITY;
 
         // Early out when the clouds are behind the horizon or not visible.
         if ((eyeAltitude < volumetric_cloudMinHeight && planetSphere.y > 0.0) ||
@@ -128,7 +151,11 @@ float calculateCloudOD(vec3 position, const int octaves){
         float skylightScattering = 0.0;
 
         // Calculate the cloud phase.
-        float phase = calculateCloudPhase(vDotL);
+        #ifdef VC_MULTISCAT
+            float phase = 1.0;
+        #else
+            float phase = calculateCloudPhase(vDotL);
+        #endif
 
         float cloudDepth = 0.0;
 
@@ -143,8 +170,13 @@ float calculateCloudOD(vec3 position, const int octaves){
 
             // Scattering intergral.
             float scatterCoeff = calculateScatterIntergral(od, 1.11);
-            
-            calculateCloudScattering(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, directScattering, skylightScattering, dlSteps);
+            float powder = calculatePowderEffect(od, vDotL);
+
+            #ifdef VC_MULTISCAT
+                calculateCloudScatteringMulti(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, powder, directScattering, skylightScattering, dlSteps, msSteps);
+            #else
+                calculateCloudScattering(cloudPosition, wLightVector, scatterCoeff, od, vDotL, transmittance, 1.0, 1.0, powder, directScattering, skylightScattering, dlSteps);
+            #endif
 
             transmittance *= exp2(-od * 1.11 * rLOG2);
         }
@@ -152,7 +184,12 @@ float calculateCloudOD(vec3 position, const int octaves){
         float fogDistance = 1.0 - clamp01(exp2(-cloudDepth * 0.000025 * volumetric_cloudScale));
         
         // Light the scattering and sum them up.
-        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading * phase;
+        vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading;
+
+        #ifndef VC_MULTISCAT
+            directLighting *= phase;
+        #endif
+
         vec3 skyLighting = skylightScattering * skyColor * 0.25 * hPI;
         vec3 scattering = (directLighting + skyLighting) * PI;
 
