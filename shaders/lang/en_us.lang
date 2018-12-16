@@ -45,6 +45,7 @@ option.SATURATION=Saturation
 option.ATMOSPHERE_SCALE=Atmosphere Scale
 option.VOLUMETRIC_CLOUDS=Volumetric Clouds
 option.VC_QUALITY=Quality
+option.VC_SUNLIGHT_QUALITY=Sunlighting Quality
 option.volumetric_cloudHeight=Height
 option.volumetric_cloudDensity=Density
 option.VC_LOCAL_COVERAGE=Localized Coverage

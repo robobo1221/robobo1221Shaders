@@ -389,7 +389,7 @@ void main() {
 	}
 
 	#ifdef VOLUMETRIC_CLOUDS
-		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither, vDotL, VC_QUALITY, 5, 3);
+		color = calculateVolumetricClouds(color, sky, worldVector, wLightVector, backPosition[1], backDepth, planetSphere, dither, vDotL, VC_QUALITY, VC_SUNLIGHT_QUALITY, 3);
 	#endif
 	
 	if (isTranslucent && (!isWater || isEyeInWater == 1)){

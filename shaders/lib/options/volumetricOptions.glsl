@@ -1,8 +1,8 @@
 //#define VOLUMETRIC_CLOUDS
 #define VC_QUALITY 10 //[5 10 15 20 24 32 64 128 256 512]
+#define VC_SUNLIGHT_QUALITY 5 //[2 3 4 5 6 7 8 9 10 12 14 16 18 20]
 #define VC_LOCAL_COVERAGE
 //#define VC_SHADOWS
-
 //#define VC_MULTISCAT    //Simulates multiscattering. Very performance intensive!
 #define VC_MULTISCAT_QUALITY 3  //[1 2 3 4 5 6]
 
