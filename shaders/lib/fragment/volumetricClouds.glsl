@@ -1,6 +1,6 @@
-const float a = 0.5;
+const float a = 0.65;
 const float b = 0.3;
-const float c = 0.9;
+const float c = 0.85;
 
 // Maps a range of values to an different range of values.
 float remap(float value, const float originalMin, const float originalMax, const float newMin, const float newMax) {
@@ -161,7 +161,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
         // Raymarching.
         for (int i = 0; i < steps; ++i, cloudPosition += increment){
-            float od = calculateCloudOD(cloudPosition, 4) * PI * rayLength;
+            float od = calculateCloudOD(cloudPosition, 4) * rayLength;
             // Early out.
             if (od <= 0.0) continue;
 
@@ -190,7 +190,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             directLighting *= phase;
         #endif
 
-        vec3 skyLighting = skylightScattering * skyColor * 0.25;
+        vec3 skyLighting = skylightScattering * skyColor * 0.25 * rPI;
         vec3 scattering = (directLighting + skyLighting) * PI;
 
         // Apply the scattering to the already excisting image. And gamma correct it.
