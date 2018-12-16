@@ -13,7 +13,8 @@ screen.SCREEN_COLOR=Color Options
 
 screen.SCREEN_VOLUMETRIC=Volumetric Options
 screen.SCREEN_CLOUDS=Cloud Options
-screen.SCREEN_VC_M_SETTINGS=Multiscattering Settings
+screen.SCREEN_VC_SHAPE_SETTINGS=Shape Options
+screen.SCREEN_VC_M_SETTINGS=Multiscattering Options
 screen.SCREEN_VL=Volumetric Light Options
 
 # Options #
@@ -46,6 +47,8 @@ option.ATMOSPHERE_SCALE=Atmosphere Scale
 option.VOLUMETRIC_CLOUDS=Volumetric Clouds
 option.VC_QUALITY=Quality
 option.VC_SUNLIGHT_QUALITY=Sunlighting Quality
+option.VC_NOISE_OCTAVES=Noise Octaves
+option.volumetric_cloudThicknessMult=Cloud Thickness
 option.volumetric_cloudHeight=Height
 option.volumetric_cloudDensity=Density
 option.VC_LOCAL_COVERAGE=Localized Coverage
