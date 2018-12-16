@@ -194,7 +194,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         vec3 scattering = (directLighting + skyLighting) * PI;
 
         // Apply the scattering to the already excisting image. And gamma correct it.
-        vec3 endResult = pow(pow(backGround, vec3(2.2)) * transmittance + pow(scattering, vec3(2.2)), vec3(1.0 / 2.2));
+        vec3 endResult = backGround * transmittance + scattering;
 
         // Blend the clouds with the sky based on distance and returning the result.
         return mix(endResult, sky, fogDistance);

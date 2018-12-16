@@ -106,7 +106,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         vec3 indirectLighting = indirectScattering * skyColor * ambientOcclusion;
         vec3 scattering = directLighting + indirectLighting;
 
-        return pow(pow(backGround, vec3(2.2)) * transmittance + pow(scattering, vec3(2.2)), vec3(1.0 / 2.2));
+        return backGround * transmittance + scattering;
     }
 
     vec3 calculateVolumetricLightWater(vec3 backGround, vec3 startPosition, vec3 endPosition, vec3 wLightVector, vec3 worldVector, float dither, float ambientOcclusion, float vDotL){
@@ -147,6 +147,6 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         vec3 indirectLighting = 0.25 * indirectScattering * skyColor * ambientOcclusion;
         vec3 scattering = (directLighting + indirectLighting) * scatterCoeff;
 
-        return pow(pow(backGround, vec3(2.2)) * transmittance + pow(scattering, vec3(2.2)), vec3(1.0 / 2.2));
+        return backGround * transmittance + scattering;
     }
 #endif
