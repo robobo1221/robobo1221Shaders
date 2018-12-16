@@ -190,7 +190,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             directLighting *= phase;
         #endif
 
-        vec3 skyLighting = skylightScattering * skyColor * 0.25 * hPI;
+        vec3 skyLighting = skylightScattering * skyColor * 0.25;
         vec3 scattering = (directLighting + skyLighting) * PI;
 
         // Apply the scattering to the already excisting image. And gamma correct it.
@@ -203,6 +203,10 @@ float calculateCloudOD(vec3 position, const int octaves){
 
 // Absorb sunlight through the clouds.
 float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
+    #ifndef VC_SHADOWS
+        return 1.0;
+    #endif
+
     const float rSteps = volumetric_cloudThickness / steps;
     float stepSize = rSteps / abs(direction.y);
 

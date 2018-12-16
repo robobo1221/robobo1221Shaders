@@ -48,6 +48,7 @@ option.VC_QUALITY=Quality
 option.volumetric_cloudHeight=Height
 option.volumetric_cloudDensity=Density
 option.VC_LOCAL_COVERAGE=Localized Coverage
+option.VC_SHADOWS=Cloud Shadows
 option.VC_MULTISCAT=Multiscattering
 option.VC_MULTISCAT_QUALITY=Quality
 option.VOLUMETRIC_LIGHT=Volumetric Light
