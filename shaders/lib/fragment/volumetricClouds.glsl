@@ -1,6 +1,6 @@
 const float a = 0.5;
 const float b = 0.3;
-const float c = 0.96;
+const float c = 0.9;
 
 // Maps a range of values to an different range of values.
 float remap(float value, const float originalMin, const float originalMax, const float newMin, const float newMax) {
