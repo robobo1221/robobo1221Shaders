@@ -132,7 +132,7 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 
 	albedo.a = isWater ? 0.0 : albedo.a;
 
-	vec3 litColor = calculateDirectLighting(correctedAlbedo, position[1], normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false);
+	vec3 litColor = calculateDirectLighting(correctedAlbedo, position[1], normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false, false);
 
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }

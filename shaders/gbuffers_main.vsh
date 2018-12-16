@@ -48,7 +48,7 @@ void main() {
 	#if defined program_gbuffers_water || defined program_gbuffers_terrain
 		matFlag = 1.0;
 
-		//Plants/ Vegitation : 1.0
+		//Plants/ Vegitation : 2.0
 			matFlag = (
 			material == 18 ||
 			material == 161 ||
@@ -71,6 +71,12 @@ void main() {
 			material == 8 ||
 			material == 9
 		) ? 3.0 : matFlag;
+
+		//Lava : 4.0
+			matFlag = (
+			material == 10 ||
+			material == 11
+			) ? 4.0 : matFlag;
 
 		matFlag = floor(matFlag) * (1.0 / 32.0);
 	#endif

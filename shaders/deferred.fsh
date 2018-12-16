@@ -183,6 +183,7 @@ void main() {
 	getMatflag(data1.w, matFlag);
 
 	bool isVegitation = (matFlag > 1.99 && matFlag < 2.01);
+	bool isLava = (matFlag > 3.98 && matFlag < 4.02);
 
 	float dither = bayer64(gl_FragCoord.xy);
 	
@@ -190,7 +191,7 @@ void main() {
 		dither = fract(frameTimeCounter * (1.0 / 7.0) + dither);
 	#endif
 
-	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation);
+	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation, isLava);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	gl_FragData[1] = vec4(0.0);

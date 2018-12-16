@@ -16,7 +16,7 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 	return min(blockerDepth * angle, maxSpread * rShadowMapResolution);
 }
 
-vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dither, bool isVegitation) {
+vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dither, bool isVegitation, bool isLava) {
 	const int steps = 4;
 	const float rSteps = 1.0 / steps;
 
@@ -55,7 +55,7 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 
 		float waterMask = colorShadow1.a * 2.0 - 1.0;
 
-		shadowBias = (shadowDepth0 == shadowDepth1 && !isVegitation) ? (dot(shadowNormal, normal) > 0.1 ? shadowBias : 0.0) : shadowBias;
+		shadowBias = (shadowDepth0 == shadowDepth1 && !(isVegitation || isLava)) ? (dot(shadowNormal, normal) > 0.1 ? shadowBias : 0.0) : shadowBias;
 
 		float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
 		float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
@@ -174,12 +174,12 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 	return skyCol * lightmap;
 }
 
-vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation) {
+vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation, bool isLava) {
 	vec3 shadowPosition = transMAD(shadowMatrix, worldPosition);
 
 	float cloudShadows = 1.0;
 	
-	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, dither, isVegitation);
+	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, dither, isVegitation, isLava);
 		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
