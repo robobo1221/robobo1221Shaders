@@ -79,9 +79,9 @@ float calculateCloudOD(vec3 position, const int octaves){
     float calculateCloudTransmittanceSkyLight(vec3 position, float bn){
         const float avgHeight = (volumetric_cloudMinHeight + volumetric_cloudMaxHeight) * 0.5;
 
-        float gradient = clamp(avgHeight - position.y, 0.0, volumetric_cloudMinHeight) * volumetric_cloudScale * 0.01;
+        float gradient = min(avgHeight - position.y, volumetric_cloudMinHeight) * volumetric_cloudScale * 0.02;
 
-        return exp2(-gradient * 1.11 * rLOG2 * 0.05 * bn);
+        return exp2(-gradient * 1.11 * rLOG2 * 0.11 * bn);
     }
 
     // Calculate the total energy of the clouds.
