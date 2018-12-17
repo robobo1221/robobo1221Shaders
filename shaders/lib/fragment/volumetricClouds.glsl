@@ -33,7 +33,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         localCoverage = clamp01(localCoverage * 5.0 - 1.5);
     #endif
 
-    float wind = TIME * 0.05;
+    float wind = TIME * 0.025;
     vec3 windDirection = vec3(wind, 0.0, wind);
 
     vec3 cloudPos = position * 0.00045 * volumetric_cloudScale + windDirection;
