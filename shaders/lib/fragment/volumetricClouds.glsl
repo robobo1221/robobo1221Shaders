@@ -30,7 +30,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
     #ifdef VC_LOCAL_COVERAGE
         localCoverage = texture2D(noisetex, (TIME * 50.0 + position.xz * volumetric_cloudScale) * 0.000001).x;
-        localCoverage = clamp01(localCoverage * 5.0 - 1.5);
+        localCoverage = clamp01(localCoverage * 3.0 - 0.75) * 0.5 + 0.5;
     #endif
 
     float wind = TIME * 0.025;
