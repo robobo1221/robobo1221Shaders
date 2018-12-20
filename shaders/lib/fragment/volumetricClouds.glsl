@@ -203,8 +203,10 @@ float calculateCloudOD(vec3 position, const int octaves){
 		
 		vec3 totalFogCoeff = sky_coefficientRayleigh + sky_coefficientMie;
 
-        vec3 fogTransmittance = clamp01(exp2(-cloudDepth * totalFogCoeff));
-        float fogDistance = 1.0 - clamp01(exp2(-cloudDepth * max3(totalFogCoeff)));
+        startDistance = cloudDepth <= 0.0 ? 0.0 : startDistance;
+
+        vec3 fogTransmittance = clamp01(exp2(-startDistance * totalFogCoeff));
+        float fogDistance = 1.0 - clamp01(exp2(-startDistance * max3(totalFogCoeff)));
 
         // Blend the clouds with the sky based on distance and returning the result.
         return endResult * fogTransmittance + sky * fogDistance;
