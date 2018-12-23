@@ -96,10 +96,10 @@ vec3 FromSH(vec4 cR, vec4 cG, vec4 cB, vec3 lightDir) {
 }
 
 #include "/lib/uniform/shadowDistortion.glsl"
+#include "/lib/fragment/sky.glsl"
 #include "/lib/fragment/volumetricClouds.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
 #include "/lib/fragment/diffuseLighting.glsl"
-#include "/lib/fragment/sky.glsl"
 
 vec2 getLightmaps(float data)
 {
