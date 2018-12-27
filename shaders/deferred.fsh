@@ -78,23 +78,7 @@ vec3 ViewSpaceToScreenSpace(vec3 viewPos) {
 	return ((projMAD(gbufferProjection, viewPos) / -viewPos.z)) * 0.5 + 0.5;
 }
 
-vec3 FromSH(vec4 cR, vec4 cG, vec4 cB, vec3 lightDir) {
-    const float sqrt1OverPI = sqrt(rPI);
-    const float sqrt3OverPI = sqrt(3.0 * rPI);
-    const vec2 halfnhalf = vec2(0.5, -0.5);
-    const vec2 sqrtOverPI = vec2(sqrt1OverPI, sqrt3OverPI);
-    const vec4 foo = halfnhalf.xyxy * sqrtOverPI.xyyy;
-
-    vec4 sh = foo * vec4(1.0, lightDir.yzx);
-
-    // know to work
-    return vec3(
-        dot(sh,cR),
-        dot(sh,cG),
-        dot(sh,cB)
-    );
-}
-
+#include "/lib/utilities/sphericalHarmonics.glsl"
 #include "/lib/uniform/shadowDistortion.glsl"
 #include "/lib/fragment/sky.glsl"
 #include "/lib/fragment/volumetricClouds.glsl"

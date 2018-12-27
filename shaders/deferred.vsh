@@ -44,21 +44,9 @@ uniform int worldTime;
 uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
+#include "/lib/utilities/sphericalHarmonics.glsl"
 #include "/lib/fragment/sky.glsl"
 #include "/lib/uniform/TemporalJitter.glsl"
-
-vec4 ToSH(float value, vec3 dir) {
-    const float transferl1 = 0.3849 * PI;
-    const float sqrt1OverPI = sqrt(rPI);
-    const float sqrt3OverPI = sqrt(rPI * 3.0);
-
-    const vec2 halfnhalf = vec2(0.5, -0.5);
-    const vec2 transfer = vec2(PI * sqrt1OverPI, transferl1 * sqrt3OverPI);
-
-    const vec4 foo = halfnhalf.xyxy * transfer.xyyy;
-
-    return foo * vec4(1.0, dir.yzx) * value;
-}
 
 void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetSphere, vec3 transmittance) {
 	const int latSamples = 16;
