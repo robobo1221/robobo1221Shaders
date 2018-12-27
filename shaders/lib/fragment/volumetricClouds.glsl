@@ -1,4 +1,4 @@
-const float a = 0.65;
+const float a = 0.5;
 const float b = 0.25;
 const float c = 0.85;
 
