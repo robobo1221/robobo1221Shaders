@@ -207,7 +207,7 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 
 	float ao = clamp01(facos(d * rSteps) - 0.5);
 
-	return pow4(ao);
+	return pow2(ao);
 }
 
 vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation, bool isLava) {
