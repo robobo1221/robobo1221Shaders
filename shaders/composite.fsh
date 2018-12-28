@@ -52,6 +52,8 @@ uniform vec3 shadowLightPosition;
 uniform vec3 cameraPosition;
 uniform float eyeAltitude;
 
+uniform float aspectRatio;
+
 uniform float frameTimeCounter;
 uniform int isEyeInWater;
 uniform int frameCounter;
@@ -73,7 +75,7 @@ const bool colortex3Clear = false;
 const bool colortex4Clear = false;
 const bool colortex5Clear = false;
 
-/const float ambientOcclusionLevel = 0.0;
+const float ambientOcclusionLevel = 0.0;
 const float eyeBrightnessHalfLife = 10.0;
 
 */
@@ -83,7 +85,6 @@ const float eyeBrightnessHalfLife = 10.0;
 #include "/lib/fragment/sky.glsl"
 #include "/lib/fragment/volumetricClouds.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
-#include "/lib/fragment/diffuseLighting.glsl"
 
 vec3 calculateViewSpacePosition(vec2 coord, float depth) {
 	vec3 viewCoord = vec3(coord - jitter, depth) * 2.0 - 1.0;
@@ -94,6 +95,8 @@ vec3 calculateViewSpacePosition(vec3 coord) {
 	vec3 viewCoord = vec3(coord.xy - jitter, coord.z) * 2.0 - 1.0;
 	return projMAD(gbufferProjectionInverse, viewCoord) / (viewCoord.z * gbufferProjectionInverse[2].w + gbufferProjectionInverse[3].w);
 }
+
+#include "/lib/fragment/diffuseLighting.glsl"
 
 vec3 ViewSpaceToScreenSpace(vec3 viewPos) {
 	return ((projMAD(gbufferProjection, viewPos) / -viewPos.z)) * 0.5 + 0.5 + vec3(jitter, 0.0);
@@ -132,7 +135,7 @@ vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVecto
 
 	albedo.a = isWater ? 0.0 : albedo.a;
 
-	vec3 litColor = calculateDirectLighting(correctedAlbedo, position[1], normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false, false);
+	vec3 litColor = calculateDirectLighting(correctedAlbedo, position, normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false, false);
 
 	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
 }

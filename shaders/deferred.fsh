@@ -50,6 +50,8 @@ uniform vec3 cameraPosition;
 uniform float eyeAltitude;
 uniform float frameTimeCounter;
 
+uniform float aspectRatio;
+
 uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
@@ -175,7 +177,7 @@ void main() {
 		dither = fract(frameTimeCounter * (1.0 / 7.0) + dither);
 	#endif
 
-	vec3 finalColor = calculateDirectLighting(albedo, position[1], normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation, isLava);
+	vec3 finalColor = calculateDirectLighting(albedo, position, normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation, isLava);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	gl_FragData[1] = vec4(0.0);

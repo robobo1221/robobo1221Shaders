@@ -174,30 +174,69 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 	return skyCol * lightmap;
 }
 
-vec3 calculateDirectLighting(vec3 albedo, vec3 worldPosition, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation, bool isLava) {
-	vec3 shadowPosition = transMAD(shadowMatrix, worldPosition);
+float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
+	const int steps = 4;
+	const float rSteps = 1.0 / steps;
+
+	const float radius = 0.5;
+
+	float PdotN = dot(position[0], normal);
+	float pLength = inversesqrt(dot(position[0], position[0]));
+	pLength = min(0.4, pLength) * radius;
+	
+	float d = 0.0;
+
+	for (int i = 0; i < steps; ++i){
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
+		offset.y *= aspectRatio;
+		offset *= offset.z * pLength;
+
+		vec3 offsetCoord = vec3(texcoord + offset.xy, texture2D(depthtex1, texcoord + offset.xy).x);
+		offsetCoord = calculateViewSpacePosition(offsetCoord.xy, offsetCoord.z);
+
+		float OdotN = dot(offsetCoord, normal);
+		float tangent = PdotN / OdotN;
+              tangent = OdotN >= 0.0 ? 16.0 : tangent;
+
+        float correction = mix(tangent, min(1.0, tangent), clamp01(radius / (offsetCoord.z - position[0].z)));
+              correction = clamp01(coord) != coord ? tangent : correction;
+
+		float nDotL = dot(normal, normalize(offsetCoord * correction - position[0]));
+		d += nDotL;
+	}
+
+	float ao = clamp01(facos(d * rSteps) - 0.5);
+
+	return pow4(ao);
+}
+
+vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation, bool isLava) {
+	vec3 shadowPosition = transMAD(shadowMatrix, position[1]);
 
 	float cloudShadows = 1.0;
 	
 	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, dither, isVegitation, isLava);
-		 shadows *= calculateVolumeLightTransmittance(worldPosition, wLightVector, max3(shadows), 8);
+		 shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
-		 	cloudShadows = calculateCloudShadows(worldPosition + cameraPosition, wLightVector, 5);
+		 	cloudShadows = calculateCloudShadows(position[1] + cameraPosition, wLightVector, 5);
 			shadows *= cloudShadows;
 		#endif
 
 	#if defined program_deferred
 		vec3 diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
 			 diffuse = isVegitation ? vec3(rPI) : diffuse;
+			 
+		float ao = calculateRoboboAO(texcoord, position, normal, dither);
 	#else
 		float diffuse = clamp01(dot(normal, shadowLightVector)) * rPI;	//Lambert for stained glass
+		float ao = 1.0;
 	#endif
 
 	vec3 lighting = vec3(0.0);
 
 	lighting += shadows * diffuse * (sunColor + moonColor) * transitionFading + 0.01 * (-lightmaps.y + 1.0);
-	lighting += calculateSkyLighting(lightmaps.y, normal);
+	lighting += calculateSkyLighting(lightmaps.y, normal) * ao;
 	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor;
 
 	#if defined program_deferred

@@ -37,6 +37,15 @@ const float goldenAngle = TAU / PHI / PHI;
 
 #define lumCoeff vec3(0.2125, 0.7154, 0.0721)
 
+float facos(const float sx){
+    float x = clamp(abs( sx ),0.,1.);
+    float a = sqrt( 1. - x ) * ( -0.16882 * x + 1.56734 );
+    return sx > 0. ? a : PI - a;
+    //float c = clamp(-sx * 1e35, 0., 1.);
+    //return c * pi + a * -(c * 2. - 1.); //no conditional version
+}
+
+
 vec2 sincos(float x){
     return vec2(sin(x), cos(x));
 }
