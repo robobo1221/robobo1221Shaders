@@ -178,7 +178,7 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 	const int steps = 4;
 	const float rSteps = 1.0 / steps;
 
-	const float radius = 0.5;
+	float radius = 0.5 * length(gbufferProjection[1][1]);
 
 	float PdotN = dot(position[0], normal);
 	float pLength = inversesqrt(dot(position[0], position[0]));
@@ -188,8 +188,8 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 
 	for (int i = 0; i < steps; ++i){
 		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
-		offset.y *= aspectRatio;
-		offset *= offset.z * pLength;
+		offset.xy *= vec2(1.0, aspectRatio) * pLength;
+		offset *= offset.z;
 
 		vec3 offsetCoord = vec3(texcoord + offset.xy, texture2D(depthtex1, texcoord + offset.xy).x);
 		offsetCoord = calculateViewSpacePosition(offsetCoord.xy, offsetCoord.z);
