@@ -250,6 +250,20 @@ vec3 calculateSpecularBRDF(vec3 normal, vec3 lightVector, vec3 viewVector, float
 	return max0(F * D * G / (4.0 * NoL * NoV)) * NoL;
 }
 
+vec3 calculateSharpSunSpecular(vec3 normal, vec3 viewVector, float f0){
+	vec3 reflectedVector = reflect(viewVector, normal);
+	
+	float LoR = dot(sunVector, reflectedVector);
+	float NoV = clamp01(dot(normal, -viewVector));
+
+	vec3 F = Fresnel(f0, 1.0, NoV);
+
+	vec3 sunSpec = calculateSunSpot(LoR) * sunColor;
+	vec3 moonSpec = calculateMoonSpot(-LoR) * moonColor;
+	
+	return (sunSpec + moonSpec) * F;
+}
+
 vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
 	if (f0 < 0.005) return color;
 
@@ -260,7 +274,9 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	const float tanSunRadius = tan(sunRadius);
 	
 	float alpha2 = roughness * roughness * roughness * roughness;
-	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * shadows * (sunColor + moonColor);
+	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * (sunColor + moonColor);
+
+	if (roughness < 0.07) sunReflection = calculateSharpSunSpecular(normal, viewVector, f0);
 
 	skyLightmap = clamp01(skyLightmap * 1.1);
 
@@ -296,7 +312,7 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 
 	reflection *= rSteps;
 	reflection *= fresnel;
-	reflection += sunReflection;
+	reflection += sunReflection * shadows;
 
 	return color * (1.0 - fresnel) + reflection;
 }

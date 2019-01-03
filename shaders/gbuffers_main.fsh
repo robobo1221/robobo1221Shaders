@@ -58,7 +58,7 @@ void main() {
 		bool isWater = (material == 8 || material == 9);
 
 		albedo = isWater ? vec4(1.0) : albedo;
-		roughness = isWater ? 0.075 : roughness;
+		roughness = isWater ? 0.0 : roughness;
 		f0 = isWater ? 0.021 : f0;
 
 		if (isWater) {
