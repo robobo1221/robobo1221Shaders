@@ -25,8 +25,8 @@ void main()
 	
 	bool isWater = material == 8 || material == 9;
 
-	albedo = isWater ? vec4(1.0, 1.0, 1.0, 1.0) : albedo;
+	albedo = isWater ? vec4(1.0, 1.0, 1.0, 0.0) : albedo;
 
-	gl_FragData[0] = vec4(albedo.rgb, lightmaps.y * 0.5 + 0.5);
+	gl_FragData[0] = vec4(albedo.rgb * (1.0 - albedo.a), lightmaps.y * 0.5 + 0.5);
 	gl_FragData[1] = vec4(normals * 0.5 + 0.5, float(isWater) * 0.5 + 0.5);
 }
