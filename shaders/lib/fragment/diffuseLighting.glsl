@@ -192,16 +192,16 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 		offset *= offset.z;
 
 		vec3 offsetCoord = vec3(texcoord + offset.xy, texture2D(depthtex1, texcoord + offset.xy).x);
-		offsetCoord = calculateViewSpacePosition(offsetCoord.xy, offsetCoord.z);
+		vec3 offsetViewCoord = calculateViewSpacePosition(offsetCoord.xy, offsetCoord.z);
 
-		float OdotN = dot(offsetCoord, normal);
+		float OdotN = dot(offsetViewCoord, normal);
 		float tangent = PdotN / OdotN;
               tangent = OdotN >= 0.0 ? 16.0 : tangent;
 
-        float correction = mix(tangent, min(1.0, tangent), clamp01(radius / (offsetCoord.z - position[0].z)));
-              correction = clamp01(coord) != coord ? tangent : correction;
+        float correction = mix(tangent, min(1.0, tangent), clamp01(radius / (offsetViewCoord.z - position[0].z)));
+              correction = clamp01(offsetCoord) != offsetCoord ? 1.0 : correction;
 
-		float nDotL = dot(normal, normalize(offsetCoord * correction - position[0]));
+		float nDotL = dot(normal, normalize(offsetViewCoord * correction - position[0]));
 		d += nDotL;
 	}
 
