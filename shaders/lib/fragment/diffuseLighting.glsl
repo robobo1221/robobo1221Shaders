@@ -241,14 +241,10 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	vec3 directionalLighting = shadows * diffuse * transitionFading;
 	vec3 lighting = vec3(0.0);
 
-	lighting += calculateSkyLighting(lightmaps.y, normal) * ao;
 	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor;
 	lighting += 0.01 * (-lightmaps.y + 1.0);
 	lighting += directionalLighting * sunColor;
-	lighting *= albedo;
-
-	lighting += directionalLighting * moonColor * dot(albedo, lumCoeff); //Fake Purkinje effect
-
+	
 	#if defined program_deferred
 		#ifdef GI
 			#ifdef TAA
@@ -257,6 +253,15 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, lightmaps.y, isVegitation) * (sunColor + moonColor) * transitionFading * cloudShadows;
 		#endif
 	#endif
+	
+	lighting *= albedo;
+
+	float moonlum = dot(moonColor, lumCoeff);
+	float sunlum = dot(sunColor, lumCoeff);
+	float albedolum = dot(albedo, lumCoeff);
+
+	lighting += calculateSkyLighting(lightmaps.y, normal) * mix(albedo, vec3(albedolum), clamp01(moonlum - sunlum));
+	lighting += directionalLighting * moonColor * albedolum; //Fake Purkinje effect
 
 	return lighting;
 }
