@@ -246,7 +246,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	vec3 directionalLighting = shadows * diffuse * transitionFading;
 	vec3 lighting = vec3(0.0);
 
-	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor;
+	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor * ao;
 	lighting += 0.01 * (-lightmaps.y + 1.0);
 	lighting += directionalLighting * sunColor;
 
