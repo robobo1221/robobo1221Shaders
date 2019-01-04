@@ -250,7 +250,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	lighting += 0.01 * (-lightmaps.y + 1.0);
 	lighting += directionalLighting * sunColor;
 
-	albedo = lightmaps.x > 0.99 ? vec3(1.0) : albedo;
+	//albedo = lightmaps.x > 0.99 ? vec3(1.0) : albedo;
 
 	lighting *= albedo;
 
