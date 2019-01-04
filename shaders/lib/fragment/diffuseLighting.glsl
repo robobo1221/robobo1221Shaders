@@ -86,6 +86,9 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 }
 
 float calculateTorchLightAttenuation(float lightmap){
+	lightmap *= 1.135;
+	lightmap = clamp01(lightmap);
+
 	float dist = (1.0 - lightmap) * 16.0 + 1.0;
 	return lightmap / (dist * dist);
 }
@@ -246,6 +249,8 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor;
 	lighting += 0.01 * (-lightmaps.y + 1.0);
 	lighting += directionalLighting * sunColor;
+
+	albedo = lightmaps.x > 0.99 ? vec3(1.0) : albedo;
 
 	lighting *= albedo;
 
