@@ -143,10 +143,14 @@ vec3 calculateMotionBlur(vec2 p, vec2 velocity, float dither){
 	for (int i = -steps; i < steps; i++)
 	{
 		float weight = 1.0;
-		color += sampleCurrentFrame(float(i) * direction + p) * weight;
+		vec3 sample = sampleCurrentFrame(float(i) * direction + p) * weight;
+		color += sample / (-sample * 0.99999 + 1.0);
 		totalWeight += weight;
 	}
-	return color / totalWeight;
+
+	color /= totalWeight;
+
+	return color / (color + 1.0);
 }
 
 vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution, float dither){
