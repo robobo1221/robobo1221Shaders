@@ -260,7 +260,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	float sunlum = dot(sunColor, lumCoeff);
 	float albedolum = dot(albedo, lumCoeff);
 
-	lighting += calculateSkyLighting(lightmaps.y, normal) * mix(albedo, vec3(albedolum), clamp01(moonlum - sunlum));
+	lighting += calculateSkyLighting(lightmaps.y, normal) * mix(albedo, vec3(albedolum), clamp01(moonlum - sunlum)) * ao;
 	lighting += directionalLighting * moonColor * albedolum; //Fake Purkinje effect
 
 	return lighting;
