@@ -167,7 +167,7 @@ float calculateTorchLightAttenuation(float lightmap){
 
 		total = total / totalWeight * rPI;
 
-		return mix(total, vec3(dot(total, lumCoeff)), clamp01(moonlum - sunlum));;
+		return mix(total, vec3(dot(total, lumCoeff)), clamp01(moonlum * 2.0 - sunlum));;
 	}
 #endif
 
@@ -252,7 +252,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	float moonlum = dot(moonColor, lumCoeff);
 	float sunlum = dot(sunColor, lumCoeff);
 	float albedolum = dot(albedo, lumCoeff);
-	vec3 unsaturatedAlbedo = mix(albedo, vec3(albedolum), clamp01(moonlum - sunlum));
+	vec3 unsaturatedAlbedo = mix(albedo, vec3(albedolum), clamp01(moonlum * 2.0 - sunlum));
 	
 	#if defined program_deferred
 		#ifdef GI
