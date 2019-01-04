@@ -8,7 +8,7 @@ const float shadowDistance = 120.0;
 #define sunColorBase (blackbody(5778.0) * sun_illuminance)
 #define moonColorBase (vec3(0.36333, 0.56333, 0.92333) * moon_illuminance )    //Fake Purkinje effect
 
-#define torchIlluminance 800.0
+#define torchIlluminance 300.0
 #define torchColor (blackbody(2600.0) * torchIlluminance)
 
 //#define COLOURED_SHADOWS
