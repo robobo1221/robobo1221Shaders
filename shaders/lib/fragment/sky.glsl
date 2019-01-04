@@ -133,5 +133,5 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 
 	transmittance = planetIntersected ? vec3(0.0) : transmittance;
 
-	return background * transmittance + scattering * hPI;
+	return background * transmittance + scattering;
 }
