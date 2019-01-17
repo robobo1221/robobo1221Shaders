@@ -68,10 +68,6 @@ const int colortex3Format = RGBA8;
 const int colortex4Format = RGBA8;
 const int colortex5Format = RGBA16F;
 
-const bool colortex0Clear = false;
-const bool colortex1Clear = false;
-const bool colortex2Clear = false;
-const bool colortex3Clear = false;
 const bool colortex4Clear = false;
 const bool colortex5Clear = false;
 
@@ -130,10 +126,10 @@ void getMatflag(float data, out float matFlag){
 }
 
 vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float dither, float roughness, bool isWater){
+	if (isWater) return color;
+	
 	vec4 albedo = texture2D(colortex0, texcoord);
 	vec3 correctedAlbedo = srgbToLinear(albedo.rgb);
-
-	albedo.a = isWater ? 0.0 : albedo.a;
 
 	vec3 litColor = calculateDirectLighting(correctedAlbedo, position, normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false, false);
 
@@ -274,9 +270,14 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	const float tanSunRadius = tan(sunRadius);
 	
 	float alpha2 = roughness * roughness * roughness * roughness;
-	vec3 sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * (sunColor + moonColor);
 
-	if (roughness < 0.07) sunReflection = calculateSharpSunSpecular(normal, viewVector, f0);
+	vec3 sunReflection = vec3(0.0);
+
+	if (roughness < 0.07) {
+		sunReflection = calculateSharpSunSpecular(normal, viewVector, f0);
+	} else {
+		sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * (sunColor + moonColor);
+	}
 
 	skyLightmap = clamp01(skyLightmap * 1.1);
 
@@ -426,7 +427,7 @@ void main() {
 	if (depth < 1.0 && isEyeInWater == 0)
 	{
 		vec3 shadowPosition = remapShadowMap(transMAD(shadowMatrix, position[1]));
-		float hardShadows = float(texture2DLod(shadowtex0, shadowPosition.xy, 0).x > shadowPosition.z - rShadowMapResolution) * transitionFading;
+		float hardShadows = float(texture2D(shadowtex0, shadowPosition.xy).x > shadowPosition.z - rShadowMapResolution) * transitionFading;
 		color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, normal, dither, depth, roughness, f0, lightmaps.y, hardShadows);
 	}
 

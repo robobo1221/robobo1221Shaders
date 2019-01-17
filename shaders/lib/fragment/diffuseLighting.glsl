@@ -8,7 +8,7 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
 			 shadowPosition = remapShadowMap(shadowPosition);
 
-		float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
+		float shadowDepth0 = texture2D(shadowtex0, shadowPosition.xy).x;
 
 		blockerDepth = max(blockerDepth, (shadowPosition.z - shadowBias) - shadowDepth0);
 	}
@@ -51,10 +51,10 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
 			 shadowPosition = remapShadowMap(shadowPosition);
 
-		float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
-		float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
+		float shadowDepth0 = texture2D(shadowtex0, shadowPosition.xy).x;
+		float shadowDepth1 = texture2D(shadowtex1, shadowPosition.xy).x;
 
-		vec4 colorShadow1 = texture2DLod(shadowcolor1, shadowPosition.xy, 0);
+		vec4 colorShadow1 = texture2D(shadowcolor1, shadowPosition.xy);
 		vec3 shadowNormal = colorShadow1.rgb * 2.0 - 1.0;
 			 shadowNormal = mat3(gbufferModelView) * shadowNormal;
 
@@ -73,7 +73,7 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 		vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
 
 		#ifdef COLOURED_SHADOWS
-			vec3 colorShadow = texture2DLod(shadowcolor0, shadowPosition.xy, 0).rgb;
+			vec3 colorShadow = texture2D(shadowcolor0, shadowPosition.xy).rgb;
 			vec3 colouredShadows = mix(vec3(shadow0), colorShadow, clamp01(shadow1 - shadow0)) * waterTransmittance;
 
 			shadows += colouredShadows;
@@ -90,7 +90,7 @@ float calculateTorchLightAttenuation(float lightmap){
 	lightmap = clamp01(lightmap);
 
 	float dist = (1.0 - lightmap) * 16.0 + 1.0;
-	return lightmap / (dist * dist);
+	return lightmap * pow(dist, -2.0);
 }
 
 #if defined program_deferred
@@ -124,20 +124,21 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec2 offsetCoord = shadowPosition.xy + coordOffset;
 				vec2 remappedCoord = remapShadowMap(offsetCoord) * 0.5 + 0.5;
 
-				float shadow = texture2DLod(shadowtex1, remappedCoord, 0).x - 0.00005;
+				float shadow = texture2D(shadowtex1, remappedCoord).x - 0.00005;
 
 				vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
 				float normFactor = dot(samplePostion, samplePostion);
 				vec3 sampleVector = samplePostion * inversesqrt(normFactor);
 				float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
-				SoN = isVegitation ? 1.0 : SoN;
+					  SoN = isVegitation ? 1.0 : SoN;
 
 				if (SoN <= 0.0) continue;
 
-				vec3 normal = mat3(shadowModelView) * (texture2DLod(shadowcolor1, remappedCoord, 3).rgb * 2.0 - 1.0);
-				normal.xy = -normal.xy;
+				vec3 normal = mat3(shadowModelView) * (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
+					 normal.xy = -normal.xy;
 
 				float LoN = clamp01(dot(sampleVector, normal));
+
 				if (LoN <= 0.0) continue;
 
 				float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + rOffsetSize * 16.0);
@@ -152,7 +153,7 @@ float calculateTorchLightAttenuation(float lightmap){
 				vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
 				*/
 
-				vec4 albedo = texture2DLod(shadowcolor0, remappedCoord, 3);
+				vec4 albedo = texture2D(shadowcolor0, remappedCoord);
 					 albedo.rgb = srgbToLinear(albedo.rgb);
 					 albedo.rgb = albedo.rgb /** waterTransmittance*/;
 
@@ -226,7 +227,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	float cloudShadows = 1.0;
 	
 	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, dither, isVegitation, isLava);
-		 shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
+		 //shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
 		 	cloudShadows = calculateCloudShadows(position[1] + cameraPosition, wLightVector, 5);
@@ -234,8 +235,13 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 		#endif
 
 	#if defined program_deferred
-		vec3 diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
-			 diffuse = isVegitation ? vec3(rPI) : diffuse;
+		vec3 diffuse = vec3(1.0);
+
+		if (isVegitation) {
+			diffuse = vec3(rPI);
+		} else {
+			diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
+		}
 			 
 		float ao = calculateRoboboAO(texcoord, position, normal, dither);
 	#else

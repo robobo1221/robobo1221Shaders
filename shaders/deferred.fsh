@@ -57,10 +57,10 @@ uniform int frameCounter;
 #include "/lib/utilities.glsl"
 
 /*
-	const bool shadowcolor0Mipmap = true;
-	const bool shadowcolor1Mipmap = true;
-	const bool shadowtex0Mipmap = true;
-	const bool shadowtex1Mipmap = true;
+	//const bool shadowcolor0Mipmap = true;
+	//const bool shadowcolor1Mipmap = true;
+	//const bool shadowtex0Mipmap = true;
+	//const bool shadowtex1Mipmap = true;
 */
 
 vec3 getNormal(float data) {

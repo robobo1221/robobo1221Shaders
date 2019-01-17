@@ -1,5 +1,5 @@
 const float a = 0.5;
-const float b = 0.25;
+const float b = 0.15;
 const float c = 0.85;
 
 // Maps a range of values to an different range of values.

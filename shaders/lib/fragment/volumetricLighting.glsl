@@ -42,7 +42,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
     void calculateVolumetricLightScattering(vec3 position, vec3 shadowPosition, vec3 wLightVector, mat2x3 scatterCoeffs, vec2 phase, vec3 transmittance, inout vec3 directScattering, inout vec3 indirectScattering){
         shadowPosition = remapShadowMap(shadowPosition);
 
-        float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
+        float shadowDepth1 = texture2D(shadowtex1, shadowPosition.xy).x;
         float volumetricShadow = calculateHardShadows(shadowDepth1, shadowPosition, 0.0);
 
         directScattering += (scatterCoeffs * phase) * volumetricShadow * calculateVolumeLightTransmittance(position, wLightVector, volumetricShadow, 8) * transmittance;
@@ -52,9 +52,9 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
     void calculateVolumetricLightScatteringWater(vec3 position, vec3 shadowPosition, vec3 wLightVector, vec3 transmittance, inout vec3 directScattering, inout vec3 indirectScattering){
         shadowPosition = remapShadowMap(shadowPosition);
 
-        float shadowDepth0 = texture2DLod(shadowtex0, shadowPosition.xy, 0).x;
-        float shadowDepth1 = texture2DLod(shadowtex1, shadowPosition.xy, 0).x;
-        vec4 shadowColor1 = texture2DLod(shadowcolor1, shadowPosition.xy, 0);
+        float shadowDepth0 = texture2D(shadowtex0, shadowPosition.xy).x;
+        float shadowDepth1 = texture2D(shadowtex1, shadowPosition.xy).x;
+        vec4 shadowColor1 = texture2D(shadowcolor1, shadowPosition.xy);
 
         float shadowWaterMask = shadowColor1.a * 2.0 - 1.0;
 
