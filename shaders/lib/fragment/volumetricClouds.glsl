@@ -57,7 +57,9 @@ float calculateCloudOD(vec3 position, const int octaves){
         return mix(powder, 1.0, vDotL * 0.5 + 0.5);
     }
 
-    float calculateCloudTransmittanceDepth(vec3 position, vec3 direction, const int steps, const float rayLength){
+    float calculateCloudTransmittanceDepth(vec3 position, vec3 direction, const int steps){
+        const float rayLength = volumetric_cloudThickness / steps;
+        
         vec3 increment = direction * rayLength;
         position += 0.5 * increment;
 
@@ -67,29 +69,29 @@ float calculateCloudOD(vec3 position, const int octaves){
             od += calculateCloudOD(position, VC_NOISE_OCTAVES);
         }
 
-        return od;
+        return od * rayLength * 1.11 * rLOG2;
     }
 
-    // Absorb sunlight through the clouds.
-    float calculateCloudTransmittance(vec3 position, float bn, float transmittanceDepth, const float rayLength, const int steps){        
-        return exp2(-transmittanceDepth * 1.11 * rLOG2 * rayLength * bn);
-    }
-
-    // Absorb skylight through the clouds.
-    float calculateCloudTransmittanceSkyLight(vec3 position, float bn){
+    float calculateCloudTransmittanceDepthSky(vec3 position){
         float gradient = min(volumetric_cloudMinHeight - position.y, volumetric_cloudMinHeight) * volumetric_cloudScale * (1.0 / volumetric_cloudThicknessMult) * 0.01;
 
-        return exp2(-gradient * 1.11 * rLOG2 * 0.11 * bn);
+        return gradient * 1.11 * rLOG2 * 0.11;
+    }
+
+
+    // Absorb sunlight through the clouds.
+    float calculateCloudTransmittance(float bn, float transmittanceDepth){        
+        return exp2(-transmittanceDepth * bn);
     }
 
     // Calculate the total energy of the clouds.
-    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, float bn, float transmittanceDepth, float phase, float powder, inout float directScattering, inout float skylightScattering, const float rayLengthDirectional, const int dlSteps){
+    void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, float bn, float transmittanceDepth, float transmittanceDepthSky, float phase, float powder, inout float directScattering, inout float skylightScattering, const int dlSteps){
     
-        directScattering += scatterCoeff * powder * phase * calculateCloudTransmittance(position, bn, transmittanceDepth, rayLengthDirectional, dlSteps) * transmittance;
-        skylightScattering += scatterCoeff * calculateCloudTransmittanceSkyLight(position, bn) * transmittance;
+        directScattering += scatterCoeff * powder * phase * calculateCloudTransmittance(bn, transmittanceDepth) * transmittance;
+        skylightScattering += scatterCoeff * calculateCloudTransmittance(bn, transmittanceDepthSky) * transmittance;
     }
 
-    void calculateCloudScattering(vec3 position, vec3 wLightVector, float od, float vDotL, float transmittance, inout float directScattering, inout float skylightScattering, const float rayLengthDirectional, const int dlSteps, const int msSteps){
+    void calculateCloudScattering(vec3 position, vec3 wLightVector, float od, float vDotL, float transmittance, inout float directScattering, inout float skylightScattering, const int dlSteps, const int msSteps){
         // Scattering intergral.
         float scatterCoeff = calculateScatterIntergral(od, 1.11);
         
@@ -97,7 +99,8 @@ float calculateCloudOD(vec3 position, const int octaves){
         float powder = calculatePowderEffect(od, vDotL);
 
         // Depth for directional transmittance
-        float transmittanceDepth = calculateCloudTransmittanceDepth(position, wLightVector, dlSteps, rayLengthDirectional);
+        float transmittanceDepth = calculateCloudTransmittanceDepth(position, wLightVector, dlSteps);
+        float transmittanceDepthSky = calculateCloudTransmittanceDepthSky(position);
         
         #ifdef VC_MULTISCAT
             for (int i = 0; i < msSteps; ++i) {
@@ -112,10 +115,10 @@ float calculateCloudOD(vec3 position, const int octaves){
                 float phase = calculateCloudPhase(vDotL * cn);
                 scatterCoeff = scatterCoeff * an;
 
-                calculateCloudScattering(position, wLightVector, scatterCoeff, od, vDotL, transmittance, bn, transmittanceDepth, phase, powder, directScattering, skylightScattering, rayLengthDirectional, dlSteps);
+                calculateCloudScattering(position, wLightVector, scatterCoeff, od, vDotL, transmittance, bn, transmittanceDepth, transmittanceDepthSky, phase, powder, directScattering, skylightScattering, dlSteps);
             }
         #else
-            calculateCloudScattering(position, wLightVector, scatterCoeff, od, vDotL, transmittance, 1.0, transmittanceDepth, 1.0, powder, directScattering, skylightScattering, rayLengthDirectional, dlSteps);
+            calculateCloudScattering(position, wLightVector, scatterCoeff, od, vDotL, transmittance, 1.0, transmittanceDepth, transmittanceDepthSky, 1.0, powder, directScattering, skylightScattering, dlSteps);
         #endif
     }
 
@@ -159,7 +162,6 @@ float calculateCloudOD(vec3 position, const int octaves){
         vec3 cloudPosition = increment * dither + startPosition + cameraPosition;
 
         float rayLength = length(increment);
-        const float rayLengthDirectional = volumetric_cloudThickness / dlSteps;
 
         float transmittance = 1.0;
         float directScattering = 0.0;
@@ -183,7 +185,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             float rayDepth = length(cloudPosition);
             cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
 
-            calculateCloudScattering(cloudPosition, wLightVector, od, vDotL, transmittance, directScattering, skylightScattering, rayLengthDirectional, dlSteps, msSteps);
+            calculateCloudScattering(cloudPosition, wLightVector, od, vDotL, transmittance, directScattering, skylightScattering, dlSteps, msSteps);
 
             transmittance *= exp2(-od * 1.11 * rLOG2);
         }
