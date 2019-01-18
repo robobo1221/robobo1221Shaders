@@ -1,9 +1,8 @@
-float calculateScatterIntergral(float opticalDepth, const float coeff){
-    const float a = -coeff * rLOG2;
+float calculateScatterIntergral(float stepTransmittance, const float coeff){
     const float b = -1.0 / coeff;
     const float c =  1.0 / coeff;
 
-    return exp2(a * opticalDepth) * b + c;
+    return stepTransmittance * b + c;
 }
 
 vec3 calculateScatterIntergral(float opticalDepth, const vec3 coeff){

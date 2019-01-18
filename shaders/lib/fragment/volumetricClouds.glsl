@@ -91,9 +91,9 @@ float calculateCloudOD(vec3 position, const int octaves){
         skylightScattering += scatterCoeff * calculateCloudTransmittance(bn, transmittanceDepthSky) * transmittance;
     }
 
-    void calculateCloudScattering(vec3 position, vec3 wLightVector, float od, float vDotL, float transmittance, inout float directScattering, inout float skylightScattering, const int dlSteps, const int msSteps){
+    void calculateCloudScattering(vec3 position, vec3 wLightVector, float od, float vDotL, float transmittance, float stepTransmittance, inout float directScattering, inout float skylightScattering, const int dlSteps, const int msSteps){
         // Scattering intergral.
-        float scatterCoeff = calculateScatterIntergral(od, 1.11);
+        float scatterCoeff = calculateScatterIntergral(stepTransmittance, 1.11);
         
         // Approximate inscattering probability
         float powder = calculatePowderEffect(od, vDotL);
@@ -184,10 +184,11 @@ float calculateCloudOD(vec3 position, const int octaves){
 
             float rayDepth = length(cloudPosition);
             cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
+            
+            float stepTransmittance = exp2(-od * 1.11 * rLOG2);
+            calculateCloudScattering(cloudPosition, wLightVector, od, vDotL, transmittance, stepTransmittance, directScattering, skylightScattering, dlSteps, msSteps);
 
-            calculateCloudScattering(cloudPosition, wLightVector, od, vDotL, transmittance, directScattering, skylightScattering, dlSteps, msSteps);
-
-            transmittance *= exp2(-od * 1.11 * rLOG2);
+            transmittance *= stepTransmittance;
         }
 
         if (cloudDepth <= 0.0) return backGround;
