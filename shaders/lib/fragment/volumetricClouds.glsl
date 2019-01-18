@@ -61,7 +61,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         const float rayLength = volumetric_cloudThickness / steps;
         
         vec3 increment = direction * rayLength;
-        position += 0.5 * increment;
+        //position += 0.5 * increment;
 
         float od = 0.0;
 
