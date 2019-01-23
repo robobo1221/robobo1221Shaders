@@ -1,16 +1,14 @@
 float calculateScatterIntergral(float stepTransmittance, const float coeff){
-    const float b = -1.0 / coeff;
-    const float c =  1.0 / coeff;
+    const float a = -1.0 / coeff;
 
-    return stepTransmittance * b + c;
+    return stepTransmittance * a - a;
 }
 
 vec3 calculateScatterIntergral(float opticalDepth, const vec3 coeff){
     const vec3 a = -coeff * rLOG2;
     const vec3 b = -1.0 / coeff;
-    const vec3 c =  1.0 / coeff;
 
-    return exp2(a * opticalDepth) * b + c;
+    return exp2(a * opticalDepth) * b - b;
 }
 
 float phaseG(float cosTheta, const float g){
