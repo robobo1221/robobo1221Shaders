@@ -159,20 +159,22 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution, float dither){
 	#ifndef TAA
 		return currentCol;
 	#endif
+
+	float tansparentDepth = texture2D(depthtex1, p).r;
+	float handDepth = texture2D(depthtex2, p).r;
+
+	bool handMask = handDepth > tansparentDepth;
 	
 	vec3 closest = calculateClosestFragment(p, pixelSize);
 	vec2 velocity = calculateVelocityVector(closest);
+
+	velocity = handMask ? vec2(0.0) : velocity;
 
 	vec3 previousCol = samplePreviousFrame(p - velocity);
 	vec3 reprojectedColor = temporalReprojection(p, pixelSize, pixelResolution, previousCol, currentCol, velocity);
 
 	#ifdef MOTION_BLUR
-		float tansparentDepth = texture2D(depthtex1, p).r;
-		float handDepth = texture2D(depthtex2, p).r;
-
-		bool handMask = handDepth > tansparentDepth;
 		if (handMask) return reprojectedColor;
-
 		vec3 motionBlur = calculateMotionBlur(p, velocity, dither);
 
 		const float pixelTreshold = 100.0;
