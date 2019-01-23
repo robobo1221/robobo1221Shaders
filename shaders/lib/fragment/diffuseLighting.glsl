@@ -16,7 +16,7 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 	return min(blockerDepth * angle, maxSpread);
 }
 
-vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dither, bool isVegitation, bool isLava) {
+vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 shadowSpaceNormal, vec3 lightVector, float dither, bool isVegitation, bool isLava) {
 	vec3 earlyOutPosition = remapShadowMap(rawPosition);
 	
 	if (any(greaterThanEqual(earlyOutPosition, vec3(1.0))) ||
@@ -43,8 +43,6 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 	#else
 		float shadowBlur = rShadowMapResolution * 0.5;
 	#endif
-
-	normal = mat3(gbufferModelViewInverse) * normal;
 	
 	for (int i = 0; i < steps; ++i) {
 		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
@@ -61,7 +59,7 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 
 		float waterMask = colorShadow1.a * 2.0 - 1.0;
 
-		shadowBias = (shadowDepth0 == shadowDepth1 && !(isVegitation || isLava)) ? (dot(shadowNormal, normal) > 0.1 ? shadowBias : 0.0) : shadowBias;
+		shadowBias = (shadowDepth0 == shadowDepth1 && !(isVegitation || isLava)) ? (dot(shadowNormal, shadowSpaceNormal) > 0.1 ? shadowBias : 0.0) : shadowBias;
 
 		float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
 		float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
@@ -95,7 +93,7 @@ float calculateTorchLightAttenuation(float lightmap){
 }
 
 #if defined program_deferred
-	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 viewSpaceNormal, float dither, float skyLightMap, bool isVegitation, float sunlum, float moonlum){
+	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 shadowSpaceNormal, float dither, float skyLightMap, bool isVegitation, float sunlum, float moonlum){
 		const int iSteps = GI_QUALITY_RADIAL;
 		const int jSteps = GI_QUALITY_OUTWARD;
 		const float rISteps = 1.0 / iSteps;
@@ -112,7 +110,7 @@ float calculateTorchLightAttenuation(float lightmap){
 		vec3 total = vec3(0.0);
 		float totalWeight = 0.0;
 
-		vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * viewSpaceNormal * vec3(1.0, 1.0, -1.0);
+		shadowSpaceNormal *= vec3(1.0, 1.0, -1.0);
 
 		for (int i = 0; i < iSteps; ++i){
 			vec2 rotatedCoordOffset = rotate(pixelOffset, rotateAmountI * (float(i) + 1.0)) * rJSteps;
@@ -225,8 +223,10 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation, bool isLava) {
 	vec3 shadowPosition = transMAD(shadowMatrix, position[1]);
 
+	vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * normal;
+
 	float cloudShadows = 1.0;
-	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, dither, isVegitation, isLava);
+	vec3 shadows = calculateShadows(shadowPosition, normal, shadowSpaceNormal, shadowLightVector, dither, isVegitation, isLava);
 		 //shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
@@ -270,7 +270,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 			#ifdef TAA
 				dither = fract(frameCounter * (1.0 / 7.0) + dither);
 			#endif
-			lighting += calculateGlobalIllumination(shadowPosition, normal, dither, lightmaps.y, isVegitation, sunlum, moonlum) * (sunColor + moonColor) * transitionFading * cloudShadows * unsaturatedAlbedo;
+			lighting += calculateGlobalIllumination(shadowPosition, shadowSpaceNormal, dither, lightmaps.y, isVegitation, sunlum, moonlum) * (sunColor + moonColor) * transitionFading * cloudShadows * unsaturatedAlbedo;
 		#endif
 	#endif
 
