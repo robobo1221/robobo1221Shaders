@@ -43,6 +43,8 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 	#else
 		float shadowBlur = rShadowMapResolution * 0.5;
 	#endif
+
+	normal = mat3(gbufferModelViewInverse) * normal;
 	
 	for (int i = 0; i < steps; ++i) {
 		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
@@ -56,7 +58,6 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 
 		vec4 colorShadow1 = texture2D(shadowcolor1, shadowPosition.xy);
 		vec3 shadowNormal = colorShadow1.rgb * 2.0 - 1.0;
-			 shadowNormal = mat3(gbufferModelView) * shadowNormal;
 
 		float waterMask = colorShadow1.a * 2.0 - 1.0;
 
@@ -134,7 +135,7 @@ float calculateTorchLightAttenuation(float lightmap){
 
 				if (SoN <= 0.0) continue;
 
-				vec3 normal = mat3(shadowModelView) * (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
+				vec3 normal = (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
 					 normal.xy = -normal.xy;
 
 				float LoN = clamp01(dot(sampleVector, normal));
@@ -225,7 +226,6 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	vec3 shadowPosition = transMAD(shadowMatrix, position[1]);
 
 	float cloudShadows = 1.0;
-	
 	vec3 shadows = calculateShadows(shadowPosition, normal, shadowLightVector, dither, isVegitation, isLava);
 		 //shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
 

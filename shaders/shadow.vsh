@@ -5,10 +5,14 @@
 varying vec2 texcoord;
 varying vec4 color;
 
+flat varying mat3 tbn;
+
 varying vec2 lightmaps;
 
 flat varying vec3 normals;
 flat varying float material;
+
+varying vec3 worldPosition;
 
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
@@ -17,6 +21,7 @@ uniform vec3 cameraPosition;
 
 uniform float frameTimeCounter;
 
+attribute vec4 at_tangent;
 attribute vec3 mc_Entity;
 attribute vec2 mc_midTexCoord;
 
@@ -31,10 +36,13 @@ void main(){
 
 	material = mc_Entity.x;
 
-	normals = (gl_NormalMatrix * gl_Normal) * mat3(shadowModelView);
+	normals = (gl_NormalMatrix * gl_Normal);
+	vec3 tangent = gl_NormalMatrix * (at_tangent.xyz / at_tangent.w);
+
+	tbn = mat3(tangent, cross(tangent, normals), normals);
 
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
-	vec3 worldPosition = doWavingPlants(transMAD(shadowModelViewInverse, viewSpacePosition));
+	worldPosition = doWavingPlants(transMAD(shadowModelViewInverse, viewSpacePosition));
 	viewSpacePosition = transMAD(shadowModelView, worldPosition);
 
 	gl_Position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
