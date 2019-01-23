@@ -3,7 +3,7 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 	
 	for (int i = 0; i < steps; ++i) {
 		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
-			 offset.z *= maxSpread * rShadowMapResolution;
+			 offset.z *= maxSpread;
 
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
 			 shadowPosition = remapShadowMap(shadowPosition);
@@ -13,7 +13,7 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 		blockerDepth = max(blockerDepth, (shadowPosition.z - shadowBias) - shadowDepth0);
 	}
 
-	return min(blockerDepth * angle, maxSpread * rShadowMapResolution);
+	return min(blockerDepth * angle, maxSpread);
 }
 
 vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dither, bool isVegitation, bool isLava) {
@@ -36,7 +36,7 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 lightVector, float dit
 	const float sunCosAngle = radians(sunAngularSize);
 
 	const float angle = sunCosAngle * 4.0;
-	const float maxSpread = 10.0;
+	const float maxSpread = 10.0 * rShadowMapResolution;
 
 	#ifdef SHADOW_PENUMBRA
 		float shadowBlur = findBlocker(rawPosition, shadowBias, dither, maxSpread, angle, steps, rSteps);
