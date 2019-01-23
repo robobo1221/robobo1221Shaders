@@ -1,4 +1,4 @@
-const int shadowMapResolution = 2048; //[512 1024 2048 4096]
+const int shadowMapResolution = 2048; //[512 1024 2048 4096 8192 16384]
 const float rShadowMapResolution = 1.0 / float(shadowMapResolution);
 const float shadowDistance = 120.0;
 
