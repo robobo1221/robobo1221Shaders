@@ -120,7 +120,7 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec2 pixelResolution, vec3 pre
 
 	float blendWeight = 0.97;
 		  //Zombye's neat way to get rid of blurring and ghosting. Thanks <3
-		  blendWeight *= sqrt(pixelVelocity.x * pixelVelocity.y) * 0.25 + 0.75;
+		  blendWeight *= sqrt(pixelVelocity.x * pixelVelocity.y) * 0.125 + 0.875;
 
 	p -= velocity;
 	blendWeight = clamp01(p) != p ? 0.0 : blendWeight;
@@ -177,7 +177,7 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution, float dither){
 		if (handMask) return reprojectedColor;
 		vec3 motionBlur = calculateMotionBlur(p, velocity, dither);
 
-		const float pixelTreshold = 1.0;
+		const float pixelTreshold = 10.0;
 
 		float motionTreshhold = length(velocity * vec2(viewWidth, viewHeight));
 			  motionTreshhold = clamp(motionTreshhold, 0.0, pixelTreshold) * (1.0 / pixelTreshold);
