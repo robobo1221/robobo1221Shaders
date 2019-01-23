@@ -177,10 +177,10 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution, float dither){
 		if (handMask) return reprojectedColor;
 		vec3 motionBlur = calculateMotionBlur(p, velocity, dither);
 
-		const float pixelTreshold = 100.0;
+		const float pixelTreshold = 1.0;
 
 		float motionTreshhold = length(velocity * vec2(viewWidth, viewHeight));
-			  motionTreshhold = clamp(motionTreshhold, 1.0, pixelTreshold) * (1.0 / pixelTreshold);
+			  motionTreshhold = clamp(motionTreshhold, 0.0, pixelTreshold) * (1.0 / pixelTreshold);
 
 		return mix(reprojectedColor, motionBlur, motionTreshhold);
 	#else
