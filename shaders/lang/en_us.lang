@@ -60,5 +60,6 @@ option.VOLUMETRIC_LIGHT_WATER=Water Volumetric Light
 option.VL_QUALITY=Quality
 option.VL_WATER_QUALITY=Quality
 option.WATER_DENSITY=Density
+option.WATER_MURKYNESS=Murkyness
 
 
