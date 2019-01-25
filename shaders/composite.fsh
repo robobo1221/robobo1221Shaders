@@ -273,12 +273,6 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 
 	vec3 sunReflection = vec3(0.0);
 
-	if (roughness <= 0.01) {
-		sunReflection = calculateSharpSunSpecular(normal, viewVector, f0);
-	} else {
-		sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * (sunColor + moonColor);
-	}
-
 	skyLightmap = clamp01(skyLightmap * 1.1);
 
 	vec3 reflection = vec3(0.0);
@@ -288,7 +282,9 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 		dither = fract(frameTimeCounter * (1.0 / 7.0) + dither);
 	#endif
 
-	if (roughness >= 0.01) {
+	if (roughness >= 0.03) {
+		sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * (sunColor + moonColor);
+
 		vec3 tangent = normalize(cross(gbufferModelView[1].xyz, normal));
 		mat3 tbn = mat3(tangent, cross(normal, tangent), normal);
 
@@ -312,6 +308,8 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 		reflection *= rSteps;
 		
 	} else {
+		sunReflection = calculateSharpSunSpecular(normal, viewVector, f0);
+
 		float VoN = clamp01(dot(normal, -viewVector));
 		
 		vec3 reflectVector = (2.0 * VoN) * normal + viewVector;
