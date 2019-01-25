@@ -30,6 +30,10 @@ uniform vec3 cameraPosition;
 uniform float frameTimeCounter;
 uniform int isEyeInWater;
 
+#if defined program_gbuffers_entities
+    uniform vec4 entityColor;
+#endif
+
 #include "/lib/utilities.glsl"
 
 #if defined program_gbuffers_water
@@ -47,6 +51,10 @@ void main() {
 
 	float roughness = 1.0 - specularData.z;
 	float f0 = specularData.x;
+
+	#if defined program_gbuffers_entities
+		albedo.rgb = mix(albedo.rgb, albedo.rgb * entityColor.rgb, entityColor.a);
+	#endif
 
 	#if !defined program_gbuffers_block && !defined program_gbuffers_entities
 		vec3 normal = texture2D(normals, texcoord).rgb * 2.0 - 1.0;
