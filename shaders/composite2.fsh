@@ -82,8 +82,8 @@ vec3 roboboTonemap(vec3 x) {
 #include "/lib/utilities/bicubic.glsl"
 
 vec3 calculateBloomTile(sampler2D textureSample, vec2 coord, const float lod){
-	const float lodScale = exp2(-lod);
-	const float offset = lodScale * 1.5;
+	float lodScale = exp2(-lod);
+	float offset = lodScale * 1.5;
 
 	return decodeRGBE8(BicubicTexture(textureSample, coord * lodScale + offset));
 }
@@ -101,11 +101,11 @@ vec3 calculateBloom(vec2 coord, float EV, vec2 pixelSize){
 		8.0
 	);
 
-	for (int i = 0; i < lods.length; ++i){
+	for (int i = 0; i < 7; ++i){
 		bloom += calculateBloomTile(colortex3, coord, lods[i]);
 	}
 
-	return decodeColor(bloom) * (1.0 / lods.length) * exp2(EV - 3.0);
+	return decodeColor(bloom) * (1.0 / 7.) * exp2(EV - 3.0);
 }
 
 vec3 calculateLowLightDesaturation(vec3 color) {

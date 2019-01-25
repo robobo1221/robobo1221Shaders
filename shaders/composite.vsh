@@ -45,7 +45,7 @@ uniform int frameCounter;
 #include "/lib/uniform/TemporalJitter.glsl"
 
 void main() {
-	gl_Position.xy = gl_Vertex.xy * 2.0 - 1.0;
+	gl_Position = ftransform();
 	texcoord = gl_MultiTexCoord0.xy;
 
 	jitter = calculateTemporalJitter() * 0.5;
@@ -71,7 +71,7 @@ void main() {
 	moonColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wMoonVector, 8) * baseMoonColor;
 	sunColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wSunVector, 8) * baseSunColor;
 	moonColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wMoonVector, 8) * baseMoonColor;
-	
+
 	vec2 planetSphere = vec2(0.0);
 	vec3 transmittance = vec3(0.0);
 

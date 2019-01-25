@@ -7,7 +7,7 @@ const float rNoiseTexRes = 1.0 / noiseTextureResolution;
         vec2 id = floor(p) * rNoiseTexRes;
         vec2 f = fract(p);
         f = cubeSmooth(f);
-        
+
         float a = texture2D(noisetex, id).x;
         float b = texture2D(noisetex, id + vec2(1.0, 0.0) * rNoiseTexRes).x;
         float c = texture2D(noisetex, id + vec2(0.0, 1.0) * rNoiseTexRes).x;
@@ -18,7 +18,7 @@ const float rNoiseTexRes = 1.0 / noiseTextureResolution;
 
         return mix(x1, x2, f.y);
     }
-    
+
     float calculate3DNoise(vec3 position){
         float yTile = floor(position.y);
         float yRep  = position.y - yTile;
@@ -41,7 +41,7 @@ const float rNoiseTexRes = 1.0 / noiseTextureResolution;
         const mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
 
         for (int i = 0; i < oct; ++i) {
-            v += a * texture2D(noisetex, x).xy;
+            v += a * texture2D(noisetex, x).y;
             x = rot * x * m + shift;
             a *= d;
         }

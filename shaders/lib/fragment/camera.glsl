@@ -1,6 +1,6 @@
 //https://docs.unrealengine.com/en-us/Engine/Rendering/PostProcessEffects/AutomaticExposure
 
-const float calculateEV100(const float apertureSquared, const float shutterSpeed, const float ISO) {
+float calculateEV100(const float apertureSquared, const float shutterSpeed, const float ISO) {
     return log2(apertureSquared / shutterSpeed * 100.0 / ISO);
 }
 

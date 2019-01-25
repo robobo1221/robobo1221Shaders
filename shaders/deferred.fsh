@@ -56,12 +56,6 @@ uniform int frameCounter;
 
 #include "/lib/utilities.glsl"
 
-/*
-	//const bool shadowcolor0Mipmap = true;
-	//const bool shadowcolor1Mipmap = true;
-	//const bool shadowtex0Mipmap = true;
-	//const bool shadowtex1Mipmap = true;
-*/
 
 vec3 getNormal(float data) {
 	return decodeNormal(data, gbufferModelView);
@@ -95,7 +89,7 @@ vec2 getLightmaps(float data)
 
 void getRoughnessF0(float data, out float roughness, out float f0){
 	vec2 decodedData = decodeVec2(data);
-	
+
 	roughness = decodedData.x;
 	f0 = decodedData.y;
 }
@@ -172,7 +166,7 @@ void main() {
 	bool isLava = (matFlag > 3.98 && matFlag < 4.02);
 
 	float dither = bayer64(gl_FragCoord.xy);
-	
+
 	#ifdef TAA
 		dither = fract(frameTimeCounter * (1.0 / 7.0) + dither);
 	#endif

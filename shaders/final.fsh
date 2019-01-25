@@ -33,8 +33,8 @@ vec3 vibranceSaturation(vec3 color){
 void main() {
 	vec4 colorSample = texture2D(colortex4, texcoord);
 	vec3 color = colorSample.rgb;
-	
+
 	color = vibranceSaturation(color);
-		 
+
 	gl_FragColor = vec4(color, 1.0);
 }

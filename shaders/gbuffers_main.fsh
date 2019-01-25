@@ -75,7 +75,7 @@ void main() {
 			#ifdef PARALLAX_WATER
 				 waveCoord.xz = calculateParallaxWaterCoord(waveCoord, tangentVec);
 			#endif
-			
+
 			normal = calculateWaveNormals(waveCoord);
 
 		#if defined PARALLAX_WATER && defined ADVANCED_PARALLAX_WATER

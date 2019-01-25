@@ -70,7 +70,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetS
 			vec3 kernel = vec3(c * cos(longitude), sin(latitude), c * sin(longitude));
 
 			vec3 skyCol = calculateAtmosphere(vec3(0.0), normalize(kernel + vec3(0.0, 0.1, 0.0)), upVector, sunVector, moonVector, planetSphere, transmittance, 10);
-		
+
 			shR += ToSH(skyCol.r, kernel);
 			shG += ToSH(skyCol.g, kernel);
 			shB += ToSH(skyCol.b, kernel);
@@ -81,7 +81,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetS
 }
 
 void main() {
-	gl_Position.xy = gl_Vertex.xy * 2.0 - 1.0;
+	gl_Position = ftransform();
 	texcoord = gl_MultiTexCoord0.xy;
 
 	jitter = calculateTemporalJitter() * 0.5;
@@ -107,10 +107,10 @@ void main() {
 	moonColor = sky_transmittance(vec3(0.0, sky_planetRadius, 0.0), wMoonVector, 8) * baseMoonColor;
 	sunColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wSunVector, 8) * baseSunColor;
 	moonColorClouds = sky_transmittance(vec3(0.0, sky_planetRadius + volumetric_cloudMaxHeight, 0.0), wMoonVector, 8) * baseMoonColor;
-	
+
 	vec2 planetSphere = vec2(0.0);
 	vec3 transmittance = vec3(0.0);
-	
+
 	skyColor = vec3(0.0);
 	skyColor = calculateAtmosphere(vec3(0.0), vec3(0.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), wSunVector, wMoonVector, planetSphere, transmittance, 10);
 

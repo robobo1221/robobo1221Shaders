@@ -15,7 +15,7 @@ uniform int frameCounter;
 #include "/lib/uniform/TemporalJitter.glsl"
 
 void main() {
-	gl_Position.xy = gl_Vertex.xy * 2.0 - 1.0;
+	gl_Position = ftransform();
 	texcoord = gl_MultiTexCoord0.xy;
 
 	jitter = calculateTemporalJitter() * 0.5;

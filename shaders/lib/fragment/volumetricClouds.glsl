@@ -11,13 +11,13 @@ float remap(float value, const float originalMin, const float originalMax, const
 float calculateCloudShape(vec3 position, vec3 windDirection, const int octaves){
     const float d = 0.5;
     const float m = 3.0;
-    const float h = (d / m) / octaves;
+    float h = (d / m) / octaves;
 
     vec3 shiftMult = -windDirection * 0.013;
 
     float noise = fbm(position, shiftMult, d, m, octaves);
           noise += h;
-    
+
     return noise;
 }
 
@@ -25,7 +25,7 @@ float calculateCloudShape(vec3 position, vec3 windDirection, const int octaves){
 float calculateCloudOD(vec3 position, const int octaves){
     // Early out.
     if (position.y > volumetric_cloudMaxHeight || position.y < volumetric_cloudMinHeight) return 0.0;
-    
+
     float localCoverage = 1.0;
 
     #ifdef VC_LOCAL_COVERAGE
@@ -58,8 +58,8 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     float calculateCloudTransmittanceDepth(vec3 position, vec3 direction, const int steps){
-        const float rayLength = volumetric_cloudThickness / steps;
-        
+        float rayLength = volumetric_cloudThickness / steps;
+
         vec3 increment = direction * rayLength;
         position += 0.5 * increment;
 
@@ -80,13 +80,13 @@ float calculateCloudOD(vec3 position, const int octaves){
 
 
     // Absorb sunlight through the clouds.
-    float calculateCloudTransmittance(float bn, float transmittanceDepth){        
+    float calculateCloudTransmittance(float bn, float transmittanceDepth){
         return exp2(-transmittanceDepth * bn);
     }
 
     // Calculate the total energy of the clouds.
     void calculateCloudScattering(vec3 position, vec3 wLightVector, float scatterCoeff, float od, float vDotL, float transmittance, float bn, float transmittanceDepth, float transmittanceDepthSky, float phase, float powder, inout float directScattering, inout float skylightScattering, const int dlSteps){
-    
+
         directScattering += scatterCoeff * powder * phase * calculateCloudTransmittance(bn, transmittanceDepth) * transmittance;
         skylightScattering += scatterCoeff * calculateCloudTransmittance(bn, transmittanceDepthSky) * transmittance;
     }
@@ -94,17 +94,17 @@ float calculateCloudOD(vec3 position, const int octaves){
     void calculateCloudScattering(vec3 position, vec3 wLightVector, float od, float vDotL, float transmittance, float stepTransmittance, inout float directScattering, inout float skylightScattering, const int dlSteps, const int msSteps){
         // Scattering intergral.
         float scatterCoeff = calculateScatterIntergral(stepTransmittance, 1.11);
-        
+
         // Approximate inscattering probability
         float powder = calculatePowderEffect(od, vDotL);
 
         // Depth for directional transmittance
         float transmittanceDepth = calculateCloudTransmittanceDepth(position, wLightVector, dlSteps);
         float transmittanceDepthSky = calculateCloudTransmittanceDepthSky(position);
-        
+
         #ifdef VC_MULTISCAT
             for (int i = 0; i < msSteps; ++i) {
-                
+
                 float n = float(i);
 
                 float an = pow(a, n);
@@ -123,9 +123,9 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     vec3 calculateVolumetricClouds(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightVector, vec3 worldPosition, float depth, vec2 planetSphere, float dither, float vDotL, const int steps, const int dlSteps, const int alSteps){
-        
+
         // Marches per pixel.
-        const float rSteps = 1.0 / steps;
+        float rSteps = 1.0 / steps;
 
         const int msSteps = VC_MULTISCAT_QUALITY;
 
@@ -184,7 +184,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
             float rayDepth = length(cloudPosition);
             cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
-            
+
             float stepTransmittance = exp2(-od * 1.11 * rLOG2);
             calculateCloudScattering(cloudPosition, wLightVector, od, vDotL, transmittance, stepTransmittance, directScattering, skylightScattering, dlSteps, msSteps);
 
@@ -193,7 +193,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
         if (cloudDepth <= 0.0) return backGround;
         startDistance = mix(startDistance, 0.0, marchRange);
-        
+
         // Light the scattering and sum them up.
         vec3 directLighting = directScattering * (sunColorClouds + moonColorClouds) * transitionFading;
 
@@ -206,7 +206,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
         // Apply the scattering to the already excisting image. And gamma correct it.
         vec3 endResult = backGround * transmittance + scattering;
-		
+
 		vec3 totalFogCoeff = sky_coefficientRayleigh + sky_coefficientMie;
 
         vec3 fogTransmittance = clamp01(exp2(-startDistance * totalFogCoeff));
@@ -223,7 +223,7 @@ float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
         return 1.0;
     #endif
 
-    const float rSteps = volumetric_cloudThickness / steps;
+    float rSteps = volumetric_cloudThickness / steps;
     float stepSize = rSteps / abs(direction.y);
 
     vec3 increment = direction * stepSize;
