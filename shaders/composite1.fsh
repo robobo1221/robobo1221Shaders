@@ -46,14 +46,13 @@ vec3 calculateBloomTile(vec2 coord, const float lod, vec2 pixelSize){
 	const float rotateAmountI = rISteps * TAU;
 	const float rotateAmountJ = PI * 0.5;
 
-	const vec2 pixelOffset = vec2(2.0);
-	const float pixelLength = 1.0 / length(pixelOffset);
+	vec2 pixelOffset = vec2(aspectRatio, 1.0);
 
 	for (int i = 0; i < iSteps; ++i){
 		vec2 rotatedCoordOffset = rotate(pixelOffset, rotateAmountI * float(i));
 		
 		for (int j = 0; j < jSteps; ++j){
-			vec2 coordOffset = rotate(rotatedCoordOffset * rJSteps * (float(j) + 0.5), rotateAmountJ * float(j));
+			vec2 coordOffset = rotate(rotatedCoordOffset * rJSteps * (float(j) + rJSteps), rotateAmountJ * float(j));
 
 			float sampleLength = (1.0 - float(j) * rJSteps);
 			float weight = pow3(sampleLength);
@@ -80,7 +79,10 @@ vec3 calculateBloomTiles(vec2 coord){
 		8.0
 	);
 
+	float lodcorrection = pixelSize.x * (0.5 / lods.length);
+
 	for (int i = 0; i < lods.length; i++){
+		coord += vec2(lodcorrection, 0.0);
 		bloomTiles += calculateBloomTile(coord, lods[i], pixelSize);
 	}
 
