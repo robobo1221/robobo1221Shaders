@@ -182,8 +182,8 @@ float calculateCloudOD(vec3 position, const int octaves){
             // Early out.
             if (od <= 0.0) continue;
 
-            float rayDepth = length(cloudPosition);
-            cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
+            //float rayDepth = length(cloudPosition);
+            //cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
 
             float stepTransmittance = exp2(-od * 1.11 * rLOG2);
             calculateCloudScattering(cloudPosition, wLightVector, od, vDotL, transmittance, stepTransmittance, directScattering, skylightScattering, dlSteps, msSteps);
@@ -191,7 +191,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             transmittance *= stepTransmittance;
         }
 
-        if (cloudDepth <= 0.0) return backGround;
+        //if (cloudDepth <= 0.0) return backGround;
         startDistance = mix(startDistance, 0.0, marchRange);
 
         // Light the scattering and sum them up.
