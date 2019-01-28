@@ -164,7 +164,7 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 
 		if (clamp01(p) != p) return sky * skyLightmap;
 
-		if (depth < p.z)
+		if (depth <= p.z)
             break;
 	}
 
