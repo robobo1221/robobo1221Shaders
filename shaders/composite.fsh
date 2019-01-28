@@ -164,7 +164,7 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 
 		if (clamp01(p) != p) return sky * skyLightmap;
 
-		if (depth <= p.z)
+		if (depth < p.z)
             break;
 	}
 
@@ -293,9 +293,11 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 		for (int i = 0; i < steps; ++i) {
 			vec3 halfVector = tbn * calculateRoughSpecular((float(i) + specularOffset) * rSteps, alpha2, steps);
 
-			float VoH = clamp01(dot(halfVector, -viewVector));
+			float VoH = abs(dot(halfVector, -viewVector));
 
 			vec3 reflectVector = (2.0 * VoH) * halfVector + viewVector;
+				 reflectVector = (dot(reflectVector, normal) <= 0.0) ? reflect(reflectVector, normal) : reflectVector;
+
 			vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
 
 			vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
