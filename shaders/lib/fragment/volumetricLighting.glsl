@@ -103,7 +103,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         }
 
         vec3 directLighting = directScattering * (sunColor + moonColor) * transitionFading;
-        vec3 indirectLighting = indirectScattering * skyColor * ambientOcclusion;
+        vec3 indirectLighting = indirectScattering * skyColor * ambientOcclusion * PI;
         vec3 scattering = directLighting + indirectLighting;
 
         return backGround * transmittance + scattering;
@@ -144,7 +144,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         }
 
         vec3 directLighting = phase * directScattering * (sunColor + moonColor) * transitionFading;
-        vec3 indirectLighting = 0.25 * indirectScattering * skyColor * ambientOcclusion;
+        vec3 indirectLighting = 0.25 * indirectScattering * skyColor * ambientOcclusion * PI;
         vec3 scattering = (directLighting + indirectLighting) * scatterCoeff;
 
         return backGround * transmittance + scattering;
