@@ -68,7 +68,7 @@ vec2 calculateParallaxWaterCoord(vec3 position, vec3 tangentVec){
 }
 
 vec3 calculateWaveNormals(vec3 coord){
-    const float delta = 0.03;
+    const float delta = 0.1;
     
     vec2 waves;
     waves.x = generateWaves(coord.xz + vec2(delta, -delta));
