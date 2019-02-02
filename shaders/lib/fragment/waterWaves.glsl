@@ -27,8 +27,8 @@ float generateWaves(vec2 coord){
     const mat2 rot = mat2(sc.y, -sc.x, sc.x, sc.y);
 
     for (int i = 0; i < 10; ++i){
-        vec2 addNoise = (texture2D(noisetex, anpos * inversesqrt(waveLength)).xy * 2.0 - 1.0) * sqrt(waveLength);
-        waves += calculateTrochoidalWave(coord + addNoise, waveLength, time, waveDirection, waveAmplitude, waveSteepness);
+        //vec2 addNoise = (texture2D(noisetex, anpos * inversesqrt(waveLength)).xy * 2.0 - 1.0) * sqrt(waveLength);
+        waves += calculateTrochoidalWave(coord, waveLength, time, waveDirection, waveAmplitude, waveSteepness);
 
         waveLength *= 0.7;
         waveAmplitude *= 0.62;
