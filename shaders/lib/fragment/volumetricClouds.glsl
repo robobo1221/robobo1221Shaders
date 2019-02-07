@@ -52,16 +52,15 @@ float calculateCloudOD(vec3 position, const int octaves){
 
 #if defined program_composite0 || defined program_deferred
     // Approximation for in-scattering probability.
-    float calculatePowderEffect(float od, float vDotL){
-        float powder = 1.0 - exp2(-od * 2.0);
-        return mix(powder, 1.0, vDotL * 0.5 + 0.5);
+    float calculatePowderEffect(float od){
+        return 1.0 - exp2(-od * 2.0);
     }
 
     float calculateCloudTransmittanceDepth(vec3 position, vec3 direction, const int steps){
         float rayLength = volumetric_cloudThickness / steps;
 
         vec3 increment = direction * rayLength;
-        position += 0.5 * increment;
+        //position += 0.5 * increment;
 
         float od = 0.0;
 
@@ -95,12 +94,12 @@ float calculateCloudOD(vec3 position, const int octaves){
         // Scattering intergral.
         float scatterCoeff = calculateScatterIntergral(stepTransmittance, 1.11);
 
-        // Approximate inscattering probability
-        float powder = calculatePowderEffect(od, vDotL);
-
         // Depth for directional transmittance
         float transmittanceDepth = calculateCloudTransmittanceDepth(position, wLightVector, dlSteps);
         float transmittanceDepthSky = calculateCloudTransmittanceDepthSky(position);
+
+        // Approximate inscattering probability
+        float powder = calculatePowderEffect(transmittanceDepth);
 
         #ifdef VC_MULTISCAT
             for (int i = 0; i < msSteps; ++i) {
@@ -213,7 +212,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         float fogDistance = 1.0 - clamp01(exp2(-startDistance * max3(totalFogCoeff)));
 
         // Blend the clouds with the sky based on distance and returning the result.
-        return endResult * fogTransmittance + sky * fogDistance;
+        return endResult * fogTransmittance  + sky * fogDistance;
     }
 #endif
 
