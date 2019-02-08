@@ -1,11 +1,6 @@
-const float a = 0.5;
-const float b = 0.15;
-const float c = 0.85;
-
-// Maps a range of values to an different range of values.
-float remap(float value, const float originalMin, const float originalMax, const float newMin, const float newMax) {
-    return (((value - originalMin) / (originalMax - originalMin)) * (newMax - newMin)) + newMin;
-}
+#define a 0.5
+#define b 0.15
+#define c 0.85
 
 // Calculate cloud noise using FBM.
 float calculateCloudShape(vec3 position, vec3 windDirection, const int octaves){
@@ -99,7 +94,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         float transmittanceDepthSky = calculateCloudTransmittanceDepthSky(position);
 
         // Approximate inscattering probability
-        float powder = calculatePowderEffect(transmittanceDepth);
+        float powder = calculatePowderEffect(transmittanceDepth * (1.0 / 1.11));
 
         #ifdef VC_MULTISCAT
             for (int i = 0; i < msSteps; ++i) {
@@ -239,3 +234,7 @@ float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
     }
     return exp2(-transmittance * 1.11 * rLOG2 * stepSize) * (1.0 - fade) + fade;
 }
+
+#undef a
+#undef b
+#undef c

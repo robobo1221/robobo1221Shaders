@@ -45,7 +45,6 @@ float facos(const float sx){
     //return c * pi + a * -(c * 2. - 1.); //no conditional version
 }
 
-
 vec2 sincos(float x){
     return vec2(sin(x), cos(x));
 }
@@ -88,6 +87,10 @@ vec3 linearToSRGB(vec3 linear){
         pow(linear, vec3(1./2.4) ) * 1.055 - .055,
         step( .0031308, linear )
     );
+}
+
+float remap(float value, const float originalMin, const float originalMax, const float newMin, const float newMax) {
+    return (((value - originalMin) / (originalMax - originalMin)) * (newMax - newMin)) + newMin;
 }
 
 /*
