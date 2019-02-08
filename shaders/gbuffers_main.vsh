@@ -92,7 +92,7 @@ void main() {
 	vec3 tangent = at_tangent.xyz / at_tangent.w;
 	vec3 normal = gl_Normal;
 
-	#if !defined program_gbuffers_terrain && !defined program_gbuffers_water && !defined program_gbuffers_hand
+	#if !defined program_gbuffers_terrain && !defined program_gbuffers_water
 		normal = (gl_NormalMatrix * normal) * mat3(gbufferModelView);
 		tangent = (gl_NormalMatrix * tangent) * mat3(gbufferModelView);
 	#endif
