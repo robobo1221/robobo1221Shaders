@@ -4,7 +4,7 @@ const float moonAngularSize = 0.516667;
 //Sky coefficients and heights
 
 #define airNumberDensity 2.5035422e25 // m^3
-#define ozoneConcentrationPeak 8e-6;
+#define ozoneConcentrationPeak 8e-6
 const float ozoneNumberDensity = airNumberDensity * ozoneConcentrationPeak;
 const vec3 ozoneCrossSection = vec3(4.51103766177301E-21, 3.2854797958699E-21, 1.96774621921165E-22); // cm^2 | single-wavelength values.
 
