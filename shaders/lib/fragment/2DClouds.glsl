@@ -1,4 +1,4 @@
-#define a 0.67
+#define a 0.5
 #define b 0.25
 #define c 0.7
 
@@ -10,17 +10,17 @@ float calculateCloudShape2D(vec2 cloudPosition, float wind, const int octaves){
 
     vec2 offsetPos = cloudPosition;
     
-    float noise = texture2D(noisetex, cloudPosition * vec2(1.0, 3.0)).x * 0.5;
-          noise += texture2D(noisetex, cloudPosition * vec2(2.0, 5.0) - offsetMult).x * 0.25;
-          noise += texture2D(noisetex, cloudPosition * vec2(6.0, 10.0)).x * 0.25;
-          noise += texture2D(noisetex, cloudPosition * vec2(12.0, 15.0) * 3.0 - offsetMult).x * 0.125;
-          noise += texture2D(noisetex, cloudPosition * vec2(1.0, 25.0) * 4.0).x * 0.0675;
+    float noise = texture2D(noisetex, cloudPosition).x * 0.5;
+          noise += texture2D(noisetex, cloudPosition * 3.0).x * 0.25;
+          noise += texture2D(noisetex, cloudPosition * 9.0).x * 0.25;
+          noise += texture2D(noisetex, cloudPosition * 27.0).x * 0.125;
+          noise += texture2D(noisetex, cloudPosition * 81.0).x * 0.0675;
 
     return noise;
 }
 
 float calculateCloudOD2D(vec3 position){
-    float wind = TIME * 50.0;
+    float wind = TIME * 25.0;
 
     vec2 cloudPosition = (position.xz - wind) * 0.0002;
 
@@ -29,7 +29,7 @@ float calculateCloudOD2D(vec3 position){
     float heightAttenuation = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0) * remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
 
     float clouds = calculateCloudShape2D(cloudPosition, wind, 8);
-          clouds = clamp01(clouds * heightAttenuation - 0.6);
+          clouds = clamp01(clouds * heightAttenuation - 0.7);
 
     return clouds * clouds2D_cloudDensity;
 }
@@ -53,8 +53,8 @@ float calculateCloudTransmittanceDepthSky2D(vec3 position){
     return gradient * 1.11 * rLOG2 * 0.11;
 }
 
-void calculateCloudScattering2D(vec3 position, float scatterCoeff, float transmittanceDepth, float transmittanceDepthSky, float phase, float bn, inout float directScattering, inout float skylightScattering){
-    directScattering += scatterCoeff * phase * calculateCloudTransmittance(bn, transmittanceDepth);
+void calculateCloudScattering2D(vec3 position, float scatterCoeff, float powder, float transmittanceDepth, float transmittanceDepthSky, float phase, float bn, inout float directScattering, inout float skylightScattering){
+    directScattering += scatterCoeff * phase * powder * calculateCloudTransmittance(bn, transmittanceDepth);
     skylightScattering += scatterCoeff * calculateCloudTransmittance(bn, transmittanceDepthSky);
 }
 
@@ -63,6 +63,8 @@ void calculateCloudScattering2D(vec3 position, vec3 wLightVector, float transmit
 
     float transmittanceDepth = calculateTransmittanceDepth2D(position, wLightVector, dlSteps);
     float transmittanceDepthSky = calculateCloudTransmittanceDepthSky2D(position);
+
+    float powder = 1.0;//calculatePowderEffect(transmittanceDepth * (1.0 / 1.11));
 
     for (int i = 0; i < C2D_MULTISCAT_QUALITY; ++i) {
         float n = float(i);
@@ -74,7 +76,7 @@ void calculateCloudScattering2D(vec3 position, vec3 wLightVector, float transmit
         float phase = calculateCloudPhaseCirrus(vDotL * cn);
         scatterCoeff = scatterCoeff * an;
 
-        calculateCloudScattering2D(position, scatterCoeff, transmittanceDepth, transmittanceDepthSky, phase, bn, directScattering, skylightScattering);
+        calculateCloudScattering2D(position, scatterCoeff, powder, transmittanceDepth, transmittanceDepthSky, phase, bn, directScattering, skylightScattering);
     }
 }
 
