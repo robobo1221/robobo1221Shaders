@@ -18,9 +18,11 @@ varying vec3 wLightVector;
 varying vec3 baseSunColor;
 varying vec3 sunColor;
 varying vec3 sunColorClouds;
+varying vec3 sunColorClouds2D;
 varying vec3 baseMoonColor;
 varying vec3 moonColor;
 varying vec3 moonColorClouds;
+varying vec3 moonColorClouds2D;
 varying vec3 skyColor;
 
 varying float transitionFading;
@@ -81,6 +83,7 @@ const float eyeBrightnessHalfLife = 10.0;
 #include "/lib/fragment/sky.glsl"
 #include "/lib/fragment/volumetricClouds.glsl"
 #include "/lib/fragment/volumetricLighting.glsl"
+#include "/lib/fragment/2DClouds.glsl"
 
 vec3 calculateViewSpacePosition(vec2 coord, float depth) {
 	vec3 viewCoord = vec3(coord - jitter, depth) * 2.0 - 1.0;
@@ -418,6 +421,8 @@ void main() {
 		color += calculateSunSpot(vDotV) * sunColorBase * skyAbsorb;
 		color += calculateMoonSpot(-vDotV) * moonColorBase * skyAbsorb;
 		color += calculateStars(worldVector, wMoonVector) * skyAbsorb;
+		
+		//color = calculateClouds2D(color, sky, worldVector, wLightVector, dither, vDotL, 10);
 	}
 
 	#ifdef VOLUMETRIC_CLOUDS

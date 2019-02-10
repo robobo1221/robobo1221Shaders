@@ -16,6 +16,11 @@ const float volumetric_cloudScale =  1600.0 / volumetric_cloudHeight;
 const float volumetric_cloudThickness = 1500.0 / volumetric_cloudScale * volumetric_cloudThicknessMult;
 const float volumetric_cloudMaxHeight = volumetric_cloudMinHeight + volumetric_cloudThickness;
 
+#define C2D_MULTISCAT_QUALITY 6
+#define clouds2D_cloudHeight 6000.0
+#define clouds2D_cloudDensity 0.0025
+#define clouds2D_cloudThickness 500.0
+
 #define VOLUMETRIC_LIGHT
 #define VOLUMETRIC_LIGHT_WATER
 

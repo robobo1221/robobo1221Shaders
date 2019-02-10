@@ -30,3 +30,12 @@ float calculateCloudPhase(float vDotL){
 
     return mix(g2, g1, mixer);
 }
+
+float calculateCloudPhaseCirrus(float vDotL){
+    const float mixer = 0.5;
+
+    float g1 = phaseG(vDotL, 0.8);
+    float g2 = phaseG(vDotL, -0.2);
+
+    return mix(g2, g1, mixer);
+}
