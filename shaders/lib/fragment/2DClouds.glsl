@@ -12,9 +12,9 @@ float calculateCloudShape2D(vec2 cloudPosition, float wind, const int octaves){
     
     float noise = texture2D(noisetex, cloudPosition).x * 0.5;
           noise += texture2D(noisetex, cloudPosition * 3.0).x * 0.25;
-          noise += texture2D(noisetex, cloudPosition * 9.0).x * 0.25;
-          noise += texture2D(noisetex, cloudPosition * 27.0).x * 0.125;
-          noise += texture2D(noisetex, cloudPosition * 81.0).x * 0.0675;
+          noise += texture2D(noisetex, cloudPosition * 9.0).x * 0.125;
+          noise += texture2D(noisetex, cloudPosition * 27.0).x * 0.0675;
+          noise += texture2D(noisetex, cloudPosition * 81.0).x * 0.03375;
 
     return noise;
 }
@@ -29,14 +29,16 @@ float calculateCloudOD2D(vec3 position){
     float heightAttenuation = clamp01(remap(normalizedHeight, 0.0, 0.4, 0.0, 1.0) * remap(normalizedHeight, 0.6, 1.0, 1.0, 0.0));
 
     float clouds = calculateCloudShape2D(cloudPosition, wind, 8);
-          clouds = clamp01(clouds * heightAttenuation - 0.7);
+          clouds = clamp01(clouds * heightAttenuation * 4.0 - 2.25);
 
     return clouds * clouds2D_cloudDensity;
 }
 
-float calculateTransmittanceDepth2D(vec3 position, vec3 direction, const int steps){
-    float rayLength = 1000.0 / steps;
+float calculateTransmittanceDepth2D(vec3 position, vec3 direction, float dither, const int steps){
+    float rayLength = 7500.0 / steps;
     vec3 increment = direction * rayLength;
+
+    position += increment * dither;
 
     float od = 0.0;
 
@@ -58,10 +60,10 @@ void calculateCloudScattering2D(vec3 position, float scatterCoeff, float powder,
     skylightScattering += scatterCoeff * calculateCloudTransmittance(bn, transmittanceDepthSky);
 }
 
-void calculateCloudScattering2D(vec3 position, vec3 wLightVector, float transmittance, float vDotL, inout float directScattering, inout float skylightScattering, const int dlSteps){
+void calculateCloudScattering2D(vec3 position, vec3 wLightVector, float transmittance, float vDotL, float dither, inout float directScattering, inout float skylightScattering, const int dlSteps){
     float scatterCoeff = calculateScatterIntergral(transmittance, 1.11);
 
-    float transmittanceDepth = calculateTransmittanceDepth2D(position, wLightVector, dlSteps);
+    float transmittanceDepth = calculateTransmittanceDepth2D(position, wLightVector, dither, dlSteps);
     float transmittanceDepthSky = calculateCloudTransmittanceDepthSky2D(position);
 
     float powder = 1.0;//calculatePowderEffect(transmittanceDepth * (1.0 / 1.11));
@@ -90,13 +92,13 @@ vec3 calculateClouds2D(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightV
     float skylightScattering = 0.0;
 
     float od = calculateCloudOD2D(position);
-    if (od <= 0.0) return backGround;
+    //if (od <= 0.0) return backGround;
 
     float transmittance = exp2(-od * 1.11 * rLOG2 * clouds2D_cloudThickness);
 
     vec3 lightingDir = normalize(wLightVector - wLightVector * dot(wLightVector, worldVector));
 
-    calculateCloudScattering2D(position, lightingDir, transmittance, vDotL, directScattering, skylightScattering, dlSteps);
+    calculateCloudScattering2D(position, lightingDir, transmittance, vDotL, dither, directScattering, skylightScattering, dlSteps);
 
     vec3 directLighting = directScattering * (sunColorClouds2D + moonColorClouds2D) * transitionFading;
     vec3 skyLighting = skylightScattering * skyColor * 0.25 * rPI;

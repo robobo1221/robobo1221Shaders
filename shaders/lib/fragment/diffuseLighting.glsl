@@ -181,7 +181,7 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 		vec3 skyCol = skyColor;
 	#endif
 
-	return skyCol * lightmap;
+	return skyCol * lightmap * anisotropicMultibounceConst;
 }
 
 float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){

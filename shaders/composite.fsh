@@ -422,7 +422,7 @@ void main() {
 		color += calculateMoonSpot(-vDotV) * moonColorBase * skyAbsorb;
 		color += calculateStars(worldVector, wMoonVector) * skyAbsorb;
 		
-		//color = calculateClouds2D(color, sky, worldVector, wLightVector, dither, vDotL, 10);
+		//color = calculateClouds2D(color, sky, worldVector, wLightVector, dither, vDotL, 24);
 	}
 
 	#ifdef VOLUMETRIC_CLOUDS
