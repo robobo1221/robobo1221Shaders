@@ -104,7 +104,7 @@ float calculateTorchLightAttenuation(float lightmap){
 		const float offsetSize = GI_RADIUS;
 		const float rOffsetSize = 1.0 / offsetSize;
 
-		vec2 pixelOffset = vec2(offsetSize) * rShadowMapResolution;
+		vec2 pixelOffset = vec2(offsetSize) * (1.0 / 2048.0);
 		float pixelLength = inversesqrt(dot(pixelOffset, pixelOffset)) * 16.0;
 
 		vec3 total = vec3(0.0);
