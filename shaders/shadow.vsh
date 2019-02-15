@@ -30,6 +30,16 @@ attribute vec2 mc_midTexCoord;
 #include "/lib/vertex/vertexDisplacement.glsl"
 
 void main(){
+	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
+
+	worldPosition = doWavingPlants(transMAD(shadowModelViewInverse, viewSpacePosition));
+	viewSpacePosition = transMAD(shadowModelView, worldPosition);
+
+	vec4 position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
+		 position.xyz = distortShadowMap(position.xyz);
+
+	gl_Position = position;
+
 	texcoord = gl_MultiTexCoord0.xy;
 	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
 	color = gl_Color;
@@ -40,11 +50,4 @@ void main(){
 	vec3 tangent = gl_NormalMatrix * (at_tangent.xyz / at_tangent.w);
 
 	tbn = mat3(tangent, cross(tangent, normals), normals);
-
-	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
-	worldPosition = doWavingPlants(transMAD(shadowModelViewInverse, viewSpacePosition));
-	viewSpacePosition = transMAD(shadowModelView, worldPosition);
-
-	gl_Position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
-	gl_Position.xyz = distortShadowMap(gl_Position.xyz);
 }

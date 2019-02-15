@@ -32,6 +32,16 @@ attribute vec2 mc_midTexCoord;
 #include "/lib/vertex/vertexDisplacement.glsl"
 
 void main() {
+	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
+
+	worldPosition = doWavingPlants(transMAD(gbufferModelViewInverse, viewSpacePosition));
+	viewSpacePosition = transMAD(gbufferModelView, worldPosition);
+
+	vec4 position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
+		 position.xy += calculateTemporalJitter() * position.w;
+
+	gl_Position = position;
+
 	material = mc_Entity.x;
 
 	texcoord = gl_MultiTexCoord0.xy;
@@ -80,14 +90,6 @@ void main() {
 
 		matFlag = floor(matFlag) * (1.0 / 32.0);
 	#endif
-
-	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
-
-	worldPosition = doWavingPlants(transMAD(gbufferModelViewInverse, viewSpacePosition));
-	viewSpacePosition = transMAD(gbufferModelView, worldPosition);
-
-	gl_Position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
-	gl_Position.xy += calculateTemporalJitter() * gl_Position.w;
 
 	vec3 tangent = at_tangent.xyz / at_tangent.w;
 	vec3 normal = gl_Normal;
