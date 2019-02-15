@@ -92,7 +92,11 @@ void main() {
 	normal = tbn * normal;
 
 	vec2 ditheredLightmaps = bayer16(gl_FragCoord.xy) * (1.0 / 255.0) + (1.0 / 255.0) + lightmaps;
-	ditheredLightmaps = clamp01(ditheredLightmaps);
+		 ditheredLightmaps = clamp01(ditheredLightmaps);
+
+	#ifdef WHITE_WORLD
+		albedo.rgb = vec3(1.0);
+	#endif
 
 	gl_FragData[0] = albedo;
 	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(ditheredLightmaps), encodeVec2(roughness, f0), encodeVec2(1.0, 1.0 - matFlag));

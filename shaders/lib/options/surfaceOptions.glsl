@@ -24,3 +24,5 @@ const float shadowDistance = 120.0;
 #define PARALLAX_WATER_QUALITY 4 //[2 4 8 16 32 64]
 
 #define REFRACTION
+
+//#define WHITE_WORLD

@@ -17,6 +17,8 @@ screen.SCREEN_VC_SHAPE_SETTINGS=Shape Options
 screen.SCREEN_VC_M_SETTINGS=Multiscattering Options
 screen.SCREEN_VL=Volumetric Light Options
 
+screen.SCREEN_MISC=Misc
+
 # Options #
 
 option.REFRACTION=Refraction

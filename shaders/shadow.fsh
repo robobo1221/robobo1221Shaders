@@ -43,6 +43,10 @@ void main()
 		normal = calculateWaveNormals(waveCoord);
 	}*/
 
+	#ifdef WHITE_WORLD
+		albedo.rgb = vec3(1.0);
+	#endif
+
 	gl_FragData[0] = vec4(albedo.rgb * (albedo.a < 1.0 ? (1.0 - albedo.a) : 1.0), lightmaps.y * 0.5 + 0.5);
 	gl_FragData[1] = vec4((tbn * normal) * 0.5 + 0.5, float(isWater) * 0.5 + 0.5);
 }
