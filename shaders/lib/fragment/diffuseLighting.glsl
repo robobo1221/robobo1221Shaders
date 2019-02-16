@@ -179,11 +179,11 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 	const int steps = 4;
 	const float rSteps = 1.0 / steps;
 
-	float radius = 0.5 * length(gbufferProjection[1][1]);
+	const float radius = 0.5;
 
 	float PdotN = dot(position[0], normal);
 	float pLength = inversesqrt(dot(position[0], position[0]));
-		  pLength = min(0.4, pLength) * radius;
+		  pLength = min(0.4, pLength) * radius * length(gbufferProjection[1][1]);
 
 	vec3 offsetMul = vec3(vec2(1.0, aspectRatio) * pLength, 1.0);
 	
@@ -211,7 +211,7 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 
 	float ao = clamp01(facos(d * rSteps) - 0.5);
 
-	return pow2(ao);
+	return pow8(ao);
 }
 
 vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation, bool isLava) {
