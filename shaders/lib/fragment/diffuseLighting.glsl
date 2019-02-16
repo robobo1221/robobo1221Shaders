@@ -94,12 +94,8 @@ float calculateTorchLightAttenuation(float lightmap){
 
 #if defined program_deferred
 	vec3 calculateGlobalIllumination(vec3 shadowPosition, vec3 shadowSpaceNormal, float dither, float skyLightMap, bool isVegitation, float sunlum, float moonlum){
-		const int iSteps = GI_QUALITY_RADIAL;
-		const int jSteps = GI_QUALITY_OUTWARD;
-		const float rISteps = 1.0 / iSteps;
-		const float rJSteps = 1.0 / jSteps;
-
-		float rotateAmountI = (dither * rISteps + rISteps) * TAU;
+		const int steps = GI_STEPS;
+		const float rSteps = 1.0 / steps;
 
 		const float offsetSize = GI_RADIUS;
 		const float rOffsetSize = 1.0 / offsetSize;
@@ -112,63 +108,58 @@ float calculateTorchLightAttenuation(float lightmap){
 
 		shadowSpaceNormal *= vec3(1.0, 1.0, -1.0);
 
-		for (int i = 0; i < iSteps; ++i){
-			vec2 rotatedCoordOffset = rotate(pixelOffset, rotateAmountI * (float(i) + 1.0)) * rJSteps;
-			for (int j = 0; j < jSteps; ++j){
-				vec2 coordOffset = rotatedCoordOffset * (float(j) + 1.0);
-				float weight = 1.0;
+		for (int i = 0; i < steps; ++i){
+			vec2 coordOffset = circlemap((float(i) + dither) * rSteps, 256.0 * float(steps)) * pixelOffset;
+			float weight = 1.0;
 
-				totalWeight += weight;
+			vec2 offsetCoord = shadowPosition.xy + coordOffset;
+			vec2 remappedCoord = remapShadowMap(offsetCoord) * 0.5 + 0.5;
 
-				vec2 offsetCoord = shadowPosition.xy + coordOffset;
-				vec2 remappedCoord = remapShadowMap(offsetCoord) * 0.5 + 0.5;
+			float shadow = texture2D(shadowtex1, remappedCoord).x - 0.00005;
 
-				float shadow = texture2D(shadowtex1, remappedCoord).x - 0.00005;
+			vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
+			float normFactor = dot(samplePostion, samplePostion);
+			vec3 sampleVector = samplePostion * inversesqrt(normFactor);
+			float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
+					SoN = isVegitation ? 1.0 : SoN;
 
-				vec3 samplePostion = vec3(offsetCoord.xy, shadow * 8.0 - 4.0) - shadowPosition;
-				float normFactor = dot(samplePostion, samplePostion);
-				vec3 sampleVector = samplePostion * inversesqrt(normFactor);
-				float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
-					  SoN = isVegitation ? 1.0 : SoN;
+			if (SoN <= 0.0) continue;
 
-				if (SoN <= 0.0) continue;
+			vec3 normal = (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
+					normal.xy = -normal.xy;
 
-				vec3 normal = (texture2D(shadowcolor1, remappedCoord).rgb * 2.0 - 1.0);
-					 normal.xy = -normal.xy;
+			float LoN = clamp01(dot(sampleVector, normal));
 
-				float LoN = clamp01(dot(sampleVector, normal));
+			if (LoN <= 0.0) continue;
 
-				if (LoN <= 0.0) continue;
+			float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + rOffsetSize * 16.0);
+			/*
+			float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
 
-				float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + rOffsetSize * 16.0);
-				/*
-				float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
+			float surfaceDepth0 = (texture2DLod(shadowtex0, remappedCoord, 3).x * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+			float surfaceDepth1 = (shadow * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+			float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
+			waterDepth = mix(0.0, waterDepth, waterMask);
 
-				float surfaceDepth0 = (texture2DLod(shadowtex0, remappedCoord, 3).x * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
-				float surfaceDepth1 = (shadow * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
-				float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
-				waterDepth = mix(0.0, waterDepth, waterMask);
+			vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
+			*/
 
-				vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
-				*/
+			vec4 albedo = texture2D(shadowcolor0, remappedCoord);
+					albedo.rgb = srgbToLinear(albedo.rgb);
+					albedo.rgb = albedo.rgb /** waterTransmittance*/;
 
-				vec4 albedo = texture2D(shadowcolor0, remappedCoord);
-					 albedo.rgb = srgbToLinear(albedo.rgb);
-					 albedo.rgb = albedo.rgb /** waterTransmittance*/;
+			float skyLightMapShadow = albedo.a * 2.0 - 1.0;
+			float bleedingMask = skyLightMapShadow - skyLightMap;
+					bleedingMask = pow6(bleedingMask);
+					bleedingMask = clamp01(0.005 / (max(bleedingMask, 0.005)));
 
-				float skyLightMapShadow = albedo.a * 2.0 - 1.0;
-				float bleedingMask = skyLightMapShadow - skyLightMap;
-					  bleedingMask = pow6(bleedingMask);
-					  bleedingMask = clamp01(0.005 / (max(bleedingMask, 0.005)));
+			SoN = sqrt(SoN);
+			LoN = sqrt(LoN);
 
-				SoN = sqrt(SoN);
-				LoN = sqrt(LoN);
-
-				total += albedo.rgb * LoN * SoN * falloff * bleedingMask * weight;
-			}
+			total += albedo.rgb * LoN * SoN * falloff * bleedingMask;
 		}
 
-		total = total / totalWeight * rPI;
+		total = total * rSteps * rPI;
 
 		return mix(total, vec3(dot(total, lumCoeff)), clamp01(moonlum * 2.0 - sunlum));;
 	}
