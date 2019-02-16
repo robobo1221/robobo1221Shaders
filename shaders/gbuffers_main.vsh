@@ -32,6 +32,13 @@ attribute vec2 mc_midTexCoord;
 #include "/lib/vertex/vertexDisplacement.glsl"
 
 void main() {
+
+	material = mc_Entity.x;
+
+	texcoord = gl_MultiTexCoord0.xy;
+	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
+	color = vec4(gl_Color.rgb, 1.0);
+
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 
 	worldPosition = doWavingPlants(transMAD(gbufferModelViewInverse, viewSpacePosition));
@@ -41,12 +48,6 @@ void main() {
 		 position.xy += calculateTemporalJitter() * position.w;
 
 	gl_Position = position;
-
-	material = mc_Entity.x;
-
-	texcoord = gl_MultiTexCoord0.xy;
-	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
-	color = vec4(gl_Color.rgb, 1.0);
 
 	#if defined program_gbuffers_terrain
 	    // lit block fix

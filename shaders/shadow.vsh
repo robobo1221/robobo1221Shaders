@@ -30,6 +30,10 @@ attribute vec2 mc_midTexCoord;
 #include "/lib/vertex/vertexDisplacement.glsl"
 
 void main(){
+	texcoord = gl_MultiTexCoord0.xy;
+	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
+	color = gl_Color;
+
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 
 	worldPosition = doWavingPlants(transMAD(shadowModelViewInverse, viewSpacePosition));
@@ -39,10 +43,6 @@ void main(){
 		 position.xyz = distortShadowMap(position.xyz);
 
 	gl_Position = position;
-
-	texcoord = gl_MultiTexCoord0.xy;
-	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
-	color = gl_Color;
 
 	material = mc_Entity.x;
 
