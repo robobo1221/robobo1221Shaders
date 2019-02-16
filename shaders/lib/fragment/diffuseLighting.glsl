@@ -259,7 +259,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	#if defined program_deferred
 		#ifdef GI
 			#ifdef TAA
-				dither = fract(frameCounter * (1.0 / 7.0) + dither);
+				dither = fract(frameTimeCounter * (1.0 / 16.0) + dither);
 			#endif
 			lighting += calculateGlobalIllumination(shadowPosition, shadowSpaceNormal, dither, lightmaps.y, isVegitation, sunlum, moonlum) * (sunColor + moonColor) * transitionFading * cloudShadows * unsaturatedAlbedo;
 		#endif
