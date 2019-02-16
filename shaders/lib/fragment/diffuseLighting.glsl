@@ -200,8 +200,10 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 		float tangent = PdotN / OdotN;
               tangent = OdotN >= 0.0 ? 16.0 : tangent;
 
-        float correction = mix(tangent, min(1.0, tangent), clamp01(radius / (offsetViewCoord.z - position[0].z)));
-              correction = clamp01(offsetCoord) != offsetCoord ? 1.0 : correction;
+		float depthAware = smoothstep(0.0, 1.0, radius / abs(offsetViewCoord.z - position[0].z));
+
+        float correction = mix(tangent, min(1.0, tangent), depthAware);
+              correction = clamp01(coord) != coord ? 1.0 : correction;
 
 		float nDotL = dot(normal, normalize(offsetViewCoord * correction - position[0]));
 		d += nDotL;
