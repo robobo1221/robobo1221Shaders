@@ -108,16 +108,6 @@ vec3 calculateBloom(vec2 coord, float EV, vec2 pixelSize){
 	return decodeColor(bloom) * (1.0 / 7.) * exp2(EV - 3.0);
 }
 
-vec3 calculateLowLightDesaturation(vec3 color) {
-	const vec3 preTint = vec3(0.25, 0.75, 2.0);
-	const vec3 saturatedPreTint = mix(preTint, vec3(dot(preTint, lumCoeff)), -0.5);
-
-	float avg = dot(color, lumCoeff);
-	float range = exp2(-avg * 17.0);
-
-	return mix(color, avg * saturatedPreTint, range);
-}
-
 /* DRAWBUFFERS:0 */
 void main() {
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
@@ -130,7 +120,6 @@ void main() {
 
 	vec3 bloom = calculateBloom(texcoord, exposureValue, pixelSize);
 
-	//color = calculateLowLightDesaturation(color);
 	color += bloom;
 	color = exposureValue * color;
 	color = roboboTonemap(color);
