@@ -150,7 +150,7 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 	float maxLength = rQuality;
     float minLength = maxLength * 0.01;
 
-	float stepLength = mix(minLength, maxLength, NoV) /** (dither + 1.0)*/;
+	float stepLength = mix(minLength, maxLength, NoV) * (dither + 1.0);
 
 	float stepWeight = 1.0 / abs(direction.z);
 
