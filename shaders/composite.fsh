@@ -128,15 +128,14 @@ void getMatflag(float data, out float matFlag){
 	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 / 8.0);
 }
 
-vec3 renderTranslucents(vec3 color, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float dither, float roughness, bool isWater){
+vec3 renderTranslucents(vec3 color, vec4 data0, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float dither, float roughness, bool isWater){
 	if (isWater) return color;
 	
-	vec4 albedo = texture2D(colortex0, texcoord);
-	vec3 correctedAlbedo = srgbToLinear(albedo.rgb);
+	vec3 correctedAlbedo = srgbToLinear(data0.rgb);
 
 	vec3 litColor = calculateDirectLighting(correctedAlbedo, position, normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false, false);
 
-	return mix(color * mix(vec3(1.0), albedo.rgb, fsign(albedo.a)), litColor, albedo.a);
+	return mix(color * mix(vec3(1.0), data0.rgb, fsign(data0.a)), litColor, data0.a);
 }
 
 vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVector, float dither, vec3 sky, float skyLightmap) {
@@ -263,7 +262,7 @@ vec3 calculateSharpSunSpecular(vec3 normal, vec3 viewVector, float f0){
 	return (sunSpec + moonSpec) * F;
 }
 
-vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
+vec3 specularReflections(vec3 color, vec3 diffuseColor, vec3 viewPosition, vec3 p, vec3 viewVector, vec3 normal, float dither, float originalDepth, float roughness, float f0, float skyLightmap, float shadows){
 	if (f0 < 0.005) return color;
 
 	const int steps = 4;
@@ -335,7 +334,7 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	reflection *= fresnel;
 	reflection += sunReflection * shadows;
 
-	return color * (1.0 - fresnel) + reflection;
+	return blendMetallicDielectric(color, fresnel, reflection, diffuseColor, f0);
 }
 
 void calculateRefraction(mat2x3 position, vec3 normal, vec3 viewVector, bool isTranslucent, inout vec2 coord, inout float backDepth, inout mat2x3 backPosition, inout vec3 refractViewVector){
@@ -369,7 +368,10 @@ void main() {
 
 	bool isTranslucent = depth < backDepth;
 
+	vec4 data0 = texture2D(colortex0, texcoord);
 	vec4 data1 = texture2D(colortex1, texcoord);
+
+	vec3 albedo = srgbToLinear(data0.rgb);
 
 	mat2x3 position;
 		   position[0] = calculateViewSpacePosition(texcoord, depth);
@@ -439,7 +441,7 @@ void main() {
 	}
 
 	if (isTranslucent) {
-		color = renderTranslucents(color, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, dither, roughness, isWater);
+		color = renderTranslucents(color, data0, position, normal, -viewVector, shadowLightVector, wLightVector, lightmaps, dither, roughness, isWater);
 	}
 
 	if (isWater || isEyeInWater == 1) {
@@ -450,7 +452,7 @@ void main() {
 	{
 		vec3 shadowPosition = remapShadowMap(transMAD(shadowMatrix, position[1]));
 		float hardShadows = float(texture2D(shadowtex0, shadowPosition.xy).x > shadowPosition.z - rShadowMapResolution) * transitionFading;
-		color = specularReflections(color, position[0], vec3(texcoord, depth), viewVector, normal, dither, depth, roughness, f0, lightmaps.y, hardShadows);
+		color = specularReflections(color, albedo, position[0], vec3(texcoord, depth), viewVector, normal, dither, depth, roughness, f0, lightmaps.y, hardShadows);
 	}
 
 	if (isEyeInWater == 0) {

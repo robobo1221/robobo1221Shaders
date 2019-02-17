@@ -68,3 +68,13 @@ vec3 Fresnel(float f0, float f90, float LoH) {
         return vec3(SchlickFresnel(f0, f90, LoH));
     //}
 }
+
+vec3 blendMetallicDielectric(vec3 Kdiff, vec3 Fresnel, vec3 Kspec, vec3 diffuseColor, float f0) {
+	if(f0 < 0.004) return Kdiff;
+	
+    float scRange = smoothstep(0.25, 0.45, f0);
+    vec3  dielectric = Kdiff * (1.0 - Fresnel) + Kspec;
+    vec3  metal = diffuseColor * Kspec;
+
+    return mix(dielectric, metal, scRange);
+}

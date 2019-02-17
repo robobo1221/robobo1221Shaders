@@ -129,13 +129,13 @@ vec3 calculateSkySphere(vec2 p){
 	return color;
 }
 
-/* DRAWBUFFERS:203 */
+/* DRAWBUFFERS:23 */
 
 void main() {
 	float depth = texture2D(depthtex1, texcoord).x;
 	vec3 skySphere = calculateSkySphere(texcoord);
 
-	gl_FragData[2] = encodeRGBE8(max0(skySphere));
+	gl_FragData[1] = encodeRGBE8(max0(skySphere));
 
 	if (depth >= 1.0) {
 		return;
@@ -174,5 +174,5 @@ void main() {
 	vec3 finalColor = calculateDirectLighting(albedo, position, normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation, isLava);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
-	gl_FragData[1] = vec4(0.0);
+	//gl_FragData[1] = vec4(0.0);
 }
