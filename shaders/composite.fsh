@@ -288,6 +288,8 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 	if (roughness >= 0.03) {
 		sunReflection = calculateSpecularBRDF(normal, lightVector, viewVector, f0, alpha2, sunRadius) * (sunColor + moonColor);
 
+		float NoV = clamp01(dot(normal, -viewVector));
+
 		vec3 tangent = normalize(cross(gbufferModelView[1].xyz, normal));
 		mat3 tbn = mat3(tangent, cross(normal, tangent), normal);
 
@@ -303,8 +305,11 @@ vec3 specularReflections(vec3 color, vec3 viewPosition, vec3 p, vec3 viewVector,
 
 			vec3 reflectVectorWorld = mat3(gbufferModelViewInverse) * reflectVector;
 
+			float NoL = clamp01(dot(normal, reflectVector));
+			float G = GSpecular(alpha2, NoV, NoL);
+
 			vec3 sky = decodeRGBE8(texture2D(colortex3, sphereToCart(-reflectVectorWorld) * 0.5));
-			reflection += rayTaceReflections(viewPosition, VoH, p, reflectVector, dither, sky, skyLightmap);
+			reflection += rayTaceReflections(viewPosition, VoH, p, reflectVector, dither, sky, skyLightmap) * G;
 
 			fresnel += Fresnel(f0, 1.0, VoH);
 		}
