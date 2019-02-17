@@ -168,7 +168,7 @@ void main() {
 	float dither = bayer64(gl_FragCoord.xy);
 
 	#ifdef TAA
-		dither = fract(frameTimeCounter * (1.0 / 7.0) + dither);
+		dither = fract(frameTimeCounter * (1.0 / 16.0) + dither);
 	#endif
 
 	vec3 finalColor = calculateDirectLighting(albedo, position, normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation, isLava);
