@@ -51,6 +51,10 @@ float calculateCloudOD(vec3 position, const int octaves){
         return 1.0 - exp2(-od * 2.0);
     }
 
+    float calculatePowderEffect(float od, float vDotL){
+        return mix(calculatePowderEffect(od), 1.0, vDotL * 0.5 + 0.5);
+    }
+
     float calculateCloudTransmittanceDepth(vec3 position, vec3 direction, const int steps){
         float rayLength = volumetric_cloudThickness / steps;
 
@@ -94,7 +98,7 @@ float calculateCloudOD(vec3 position, const int octaves){
         float transmittanceDepthSky = calculateCloudTransmittanceDepthSky(position);
 
         // Approximate inscattering probability
-        float powder = calculatePowderEffect(transmittanceDepth * (1.0 / 1.11));
+        float powder = calculatePowderEffect(od, vDotL);
 
         #ifdef VC_MULTISCAT
             for (int i = 0; i < msSteps; ++i) {
