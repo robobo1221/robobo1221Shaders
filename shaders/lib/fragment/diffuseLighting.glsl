@@ -16,7 +16,7 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 	return min(blockerDepth * angle, maxSpread);
 }
 
-vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 shadowSpaceNormal, vec3 lightVector, float dither, bool isVegitation, bool isLava) {
+vec3 calculateShadows(vec3 rawPosition, mat2x3 position, vec3 normal, vec3 shadowSpaceNormal, vec3 lightVector, float dither, bool isVegitation, bool isLava) {
 	vec3 earlyOutPosition = remapShadowMap(rawPosition);
 	
 	if (any(greaterThanEqual(earlyOutPosition, vec3(1.0))) ||
@@ -43,6 +43,8 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 shadowSpaceNormal, vec
 	#else
 		float shadowBlur = rShadowMapResolution * 0.5;
 	#endif
+
+	float shadowSurfaceDepth = transMAD(shadowModelView, position[1]).z;
 	
 	for (int i = 0; i < steps; ++i) {
 		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
@@ -64,9 +66,8 @@ vec3 calculateShadows(vec3 rawPosition, vec3 normal, vec3 shadowSpaceNormal, vec
 		float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
 		float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
 
-		float surfaceDepth0 = (shadowDepth0 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
-		float surfaceDepth1 = (shadowDepth1 * 2.0 - 1.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
-		float waterDepth = (surfaceDepth0 - surfaceDepth1) * 4.0;
+		float surfaceDepth0 = (shadowDepth0 * 8.0 - 4.0) * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
+		float waterDepth = max0(surfaceDepth0 - shadowSurfaceDepth);
 			  waterDepth = mix(0.0, waterDepth, waterMask);
 
 		vec3 waterTransmittance = exp2(-waterTransmittanceCoefficient * waterDepth * rLOG2);
@@ -220,7 +221,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * normal;
 
 	float cloudShadows = 1.0;
-	vec3 shadows = calculateShadows(shadowPosition, normal, shadowSpaceNormal, shadowLightVector, dither, isVegitation, isLava);
+	vec3 shadows = calculateShadows(shadowPosition, position, normal, shadowSpaceNormal, shadowLightVector, dither, isVegitation, isLava);
 		 //shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS

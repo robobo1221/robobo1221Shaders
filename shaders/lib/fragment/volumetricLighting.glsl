@@ -26,7 +26,7 @@ vec3 calculateVolumeLightTransmittance(vec3 position, vec3 direction, float shad
     return exp2(-mat2x3(sky_coefficientsAttenuation) * od * rLOG2 * rayLength);
 }
 
-vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, float depth0, float depth1){
+vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, float depth0){
     float waterDepth = (depth0 * 8.0 - 4.0);
           waterDepth = waterDepth * shadowProjectionInverse[2].z + shadowProjectionInverse[3].z;
 		  waterDepth = (waterDepth - transMAD(shadowModelView, worldPosition).z);
@@ -59,7 +59,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         float shadowWaterMask = shadowColor1.a * 2.0 - 1.0;
 
         float volumetricShadow = calculateHardShadows(shadowDepth1, shadowPosition, 0.0);
-        vec3 waterTransmittance = calculateWaterTransmittance(position, shadowWaterMask, shadowDepth0, shadowDepth1);
+        vec3 waterTransmittance = calculateWaterTransmittance(position, shadowWaterMask, shadowDepth0);
 
         directScattering += volumetricShadow * transmittance * waterTransmittance;
         indirectScattering += transmittance;
