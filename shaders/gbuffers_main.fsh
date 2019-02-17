@@ -88,7 +88,7 @@ void main() {
 		}
 	#endif
 
-	normal = clampNormal(normal, -tangentVecView);
+	//normal = clampNormal(normal, -tangentVecView);
 	normal = tbn * normal;
 
 	vec2 ditheredLightmaps = bayer16(gl_FragCoord.xy) * (1.0 / 255.0) + (1.0 / 255.0) + lightmaps;
