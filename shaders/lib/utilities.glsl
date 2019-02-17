@@ -121,7 +121,7 @@ vec3 blackbody(float t){
 
 */
 
-vec3 blackbody(float Temp)
+vec3 blackbody(const float Temp)
 {
     float t = pow(Temp, -1.5);
     float lt = log(Temp);
