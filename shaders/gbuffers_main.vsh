@@ -37,7 +37,7 @@ void main() {
 
 	texcoord = gl_MultiTexCoord0.xy;
 	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
-	color = vec4(gl_Color.rgb, 1.0);
+	color = gl_Color;
 
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 
