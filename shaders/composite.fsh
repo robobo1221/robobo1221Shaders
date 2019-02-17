@@ -150,7 +150,7 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 	float maxLength = rQuality;
     float minLength = maxLength * 0.01;
 
-	float stepLength = mix(minLength, maxLength, NoV) * (dither + 1.0);
+	float stepLength = mix(minLength, maxLength, NoV) /** (dither + 1.0)*/;
 
 	float stepWeight = 1.0 / abs(direction.z);
 
@@ -292,10 +292,8 @@ vec3 specularReflections(vec3 color, vec3 diffuseColor, vec3 viewPosition, vec3 
 		vec3 tangent = normalize(cross(gbufferModelView[1].xyz, normal));
 		mat3 tbn = mat3(tangent, cross(normal, tangent), normal);
 
-		float specularOffset = dither * rSteps;
-
 		for (int i = 0; i < steps; ++i) {
-			vec3 halfVector = tbn * calculateRoughSpecular((float(i) + specularOffset) * rSteps, alpha2, steps);
+			vec3 halfVector = tbn * calculateRoughSpecular((float(i) + dither) * rSteps, alpha2, steps);
 
 			float VoH = abs(dot(halfVector, -viewVector));
 
