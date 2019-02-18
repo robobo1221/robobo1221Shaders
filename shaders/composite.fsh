@@ -60,6 +60,9 @@ uniform float frameTimeCounter;
 uniform int isEyeInWater;
 uniform int frameCounter;
 
+uniform float near;
+uniform float far;
+
 /*
 const float sunPathRotation = -45.0;
 
@@ -145,7 +148,11 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 	int raySteps = rayTraceQuality + 4;
 	int refinements = 4;
 
-	vec3 direction = normalize(ViewSpaceToScreenSpace(viewPosition + reflectedVector) - p);
+
+	float rayLength = ((viewPosition.z + reflectedVector.z * far * sqrt(3.)) > -near) ?
+      	 			  (-near -viewPosition.z) / reflectedVector.z : far * sqrt(3.);
+
+	vec3 direction = normalize(ViewSpaceToScreenSpace(reflectedVector * rayLength + viewPosition) - p);
 
 	float maxLength = rQuality;
     float minLength = maxLength * 0.01;
@@ -188,11 +195,11 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 
 	}
 
-	float sceneDepth = texture2D(depthtex0, p.xy).x;
+	float sceneDepth = texture2D(depthtex1, p.xy).x;
 
 	if (sceneDepth >= 1.0) return sky;
 
-	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength && 0.96 < sceneDepth;
+	bool visible = abs(p.z - marchedDepth) * min(stepWeight, 400.0) <= maxLength;
 
 	return visible ? decodeRGBE8(texture2D(colortex2, p.xy)) : sky * skyLightmap;
 }
