@@ -39,6 +39,16 @@ void main() {
 	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
 	color = gl_Color;
 
+	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
+
+	worldPosition = doWavingPlants(transMAD(gbufferModelViewInverse, viewSpacePosition));
+	viewSpacePosition = transMAD(gbufferModelView, worldPosition);
+
+	vec4 position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
+		 position.xy += calculateTemporalJitter() * position.w;
+
+	gl_Position = position;
+
 	#if defined program_gbuffers_terrain
 	    // lit block fix
 		lightmaps.x = material == 89.0 || material == 169.0 || material == 124.0
@@ -89,16 +99,6 @@ void main() {
 		normal = (gl_NormalMatrix * normal) * mat3(gbufferModelView);
 		tangent = (gl_NormalMatrix * tangent) * mat3(gbufferModelView);
 	#endif
-
-	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
-
-	worldPosition = doWavingPlants(transMAD(gbufferModelViewInverse, viewSpacePosition));
-	viewSpacePosition = transMAD(gbufferModelView, worldPosition);
-
-	vec4 position = viewSpacePosition.xyzz * diagonal4(gl_ProjectionMatrix) + gl_ProjectionMatrix[3];
-		 position.xy += calculateTemporalJitter() * position.w;
-
-	gl_Position = position;
 
 	tbn = mat3(tangent, cross(tangent, normal), normal);
 
