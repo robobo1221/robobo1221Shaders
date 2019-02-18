@@ -40,6 +40,20 @@ uniform int isEyeInWater;
 	#include "/lib/fragment/waterWaves.glsl"
 #endif
 
+float calculateOldf0(float metalness) {
+	float f0 = 1.0;
+
+	switch(int(material)) {
+		case 147:
+		case 41: f0 = 0.97; break; // Gold
+		case 142:
+		case 48: f0 = 0.46; break; // Iron
+		default: break;
+	}
+
+	return f0 * metalness;
+}
+
 /* DRAWBUFFERS:01 */
 void main() {
 	#if defined program_gbuffers_water
@@ -49,8 +63,13 @@ void main() {
 	vec4 albedo = texture2D(tex, texcoord) * color;
 	vec4 specularData = texture2D(specular, texcoord);
 
-	float roughness = 1.0 - specularData.z;
-	float f0 = specularData.x;
+	#if SPECULAR_FORMAT == SPEC_OLD
+		float roughness = 1.0 - specularData.x;
+		float f0 = calculateOldf0(specularData.y);
+	#else
+		float roughness = 1.0 - specularData.z;
+		float f0 = specularData.x;
+	#endif
 
 	#if defined program_gbuffers_entities
 		albedo.rgb = mix(albedo.rgb, albedo.rgb * entityColor.rgb, entityColor.a);

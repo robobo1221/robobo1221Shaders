@@ -25,3 +25,8 @@ const float shadowDistance = 120.0;
 #define REFRACTION
 
 //#define WHITE_WORLD
+
+#define SPEC_NEW 0
+#define SPEC_OLD 1
+
+#define SPECULAR_FORMAT SPEC_NEW //[SPEC_NEW SPEC_OLD]
