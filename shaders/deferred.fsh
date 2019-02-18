@@ -97,7 +97,7 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 void getMatflag(float data, out float matFlag){
 	vec2 decodedData = decodeVec2(data);
 
-	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 / 8.0);
+	matFlag = (1.0 - decodedData.x) * 32.0;
 }
 
 vec3 calculateSkySphere(vec2 p){

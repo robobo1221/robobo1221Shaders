@@ -99,5 +99,5 @@ void main() {
 	#endif
 
 	gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(ditheredLightmaps), encodeVec2(roughness, f0), encodeVec2(1.0, 1.0 - matFlag));
+	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(ditheredLightmaps), encodeVec2(roughness, f0), encodeVec2(1.0 - matFlag, 1.0));
 }

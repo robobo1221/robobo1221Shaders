@@ -125,7 +125,7 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 void getMatflag(float data, out float matFlag){
 	vec2 decodedData = decodeVec2(data);
 
-	matFlag = (1.0 - decodedData.y) * 32.0 + (1.0 / 8.0);
+	matFlag = (1.0 - decodedData.x) * 32.0;
 }
 
 vec3 renderTranslucents(vec3 color, vec4 data0, mat2x3 position, vec3 normal, vec3 viewVector, vec3 lightVector, vec3 wLightVector, vec2 lightmaps, float dither, float roughness, bool isWater){
