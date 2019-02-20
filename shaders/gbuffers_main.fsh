@@ -22,6 +22,8 @@ uniform sampler2D tex;
 uniform sampler2D normals;
 uniform sampler2D specular;
 
+uniform vec3 shadowLightPosition;
+
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferProjection;
 
@@ -66,12 +68,12 @@ float calculatePomDepth(vec2 coord, mat2 texD){
 	return texture2DGrad(normals, calculateWrapCoord(coord), texD[0], texD[1]).a * pomDepth - pomDepth;
 }
 
-vec2 calculatePom(vec2 coord, mat2 texD){
-	vec3 increment = tangentVecView * inversesqrt(dot(tangentVecView,tangentVecView));
+vec2 calculatePom(vec2 coord, mat2 texD, inout float shadow){
+	vec3 increment = tangentVecView * inversesqrt(dot(tangentVecView.xy,tangentVecView.xy));
 		 increment = length(increment.xy * texD) * increment;
 
 	float l = length(increment);
-		  l = max(l, 1e-4) / sqrt(dot(increment, increment));
+		  l = max(l, 1e-4) * inversesqrt(dot(increment, increment));
 	
 	increment = increment * l;
 
@@ -81,6 +83,24 @@ vec2 calculatePom(vec2 coord, mat2 texD){
 	while(calculatePomDepth(pomcoord.xy, texD) < pomcoord.z && limit){
  		pomcoord += increment;
 	}
+
+	vec3 shadowIncrement = (shadowLightPosition * mat3(gbufferModelView)) * tbn;
+		 shadowIncrement = shadowIncrement * inversesqrt(dot(shadowIncrement.xy, shadowIncrement.xy));
+		 shadowIncrement = length(shadowIncrement.xy * texD) * shadowIncrement;
+
+	float lightL = length(shadowIncrement);
+		  lightL = max(lightL, 1e-4) * inversesqrt(dot(shadowIncrement, shadowIncrement));
+
+	shadowIncrement = shadowIncrement * lightL;
+
+	bool limitLight = shadowIncrement.z > 1e-5;
+	vec3 shadowCoord = vec3(pomcoord.xy, calculatePomDepth(pomcoord.xy, texD));
+
+	while(calculatePomDepth(shadowCoord.xy, texD) <= shadowCoord.z && limitLight && shadowCoord.z < 0.0) {
+		shadowCoord += shadowIncrement;
+	}
+
+	shadow = shadowCoord.z < -1e-5 ? 0.0 : 1.0;
 
 	return pomcoord.xy;
 }
@@ -93,8 +113,10 @@ void main() {
 
 	mat2 texD = mat2(dFdx(texcoord), dFdy(texcoord));
 
+	float pomShadow = 1.0;
+
 	#if defined program_gbuffers_terrain
-		vec2 pomcoord = calculatePom(texcoord, texD);
+		vec2 pomcoord = calculatePom(texcoord, texD, pomShadow);
 		vec2 wrapcoord = calculateWrapCoord(pomcoord);
 	#else
 		vec2 pomcoord = texcoord;
@@ -161,5 +183,5 @@ void main() {
 	//albedo.rgb = vec3(wrapcoord, 0.0);
 
 	gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(ditheredLightmaps), encodeVec2(roughness, f0), encodeVec2(1.0 - matFlag, 1.0));
+	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(ditheredLightmaps), encodeVec2(roughness, f0), encodeVec2(1.0 - matFlag, clamp01(pomShadow + 0.5)));
 }

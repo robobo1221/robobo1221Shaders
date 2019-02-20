@@ -136,7 +136,7 @@ vec3 renderTranslucents(vec3 color, vec4 data0, mat2x3 position, vec3 normal, ve
 	
 	vec3 correctedAlbedo = srgbToLinear(data0.rgb);
 
-	vec3 litColor = calculateDirectLighting(correctedAlbedo, position, normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, false, false);
+	vec3 litColor = calculateDirectLighting(correctedAlbedo, position, normal, viewVector, lightVector, wLightVector, lightmaps, roughness, dither, 1.0, false, false);
 
 	return mix(color * mix(vec3(1.0), data0.rgb, fsign(data0.a)), litColor, data0.a);
 }

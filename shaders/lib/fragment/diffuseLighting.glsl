@@ -214,13 +214,13 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 	return pow2(ao);
 }
 
-vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, bool isVegitation, bool isLava) {
+vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 viewVector, vec3 shadowLightVector, vec3 wLightVector, vec2 lightmaps, float roughness, float dither, float pomShadow, bool isVegitation, bool isLava) {
 	vec3 shadowPosition = transMAD(shadowMatrix, position[1]);
 
 	vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * normal;
 
 	float cloudShadows = 1.0;
-	vec3 shadows = calculateShadows(shadowPosition, position, normal, shadowSpaceNormal, shadowLightVector, dither, isVegitation, isLava);
+	vec3 shadows = calculateShadows(shadowPosition, position, normal, shadowSpaceNormal, shadowLightVector, dither, isVegitation, isLava) * pomShadow;
 		 //shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS

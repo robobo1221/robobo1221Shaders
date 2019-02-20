@@ -94,10 +94,11 @@ void getRoughnessF0(float data, out float roughness, out float f0){
 	f0 = decodedData.y;
 }
 
-void getMatflag(float data, out float matFlag){
+void getMatflagPomShadow(float data, out float matFlag, out float pomShadow){
 	vec2 decodedData = decodeVec2(data);
 
 	matFlag = (1.0 - decodedData.x) * 32.0;
+	pomShadow = decodedData.y * 2.0 - 1.0;
 }
 
 vec3 calculateSkySphere(vec2 p){
@@ -152,7 +153,7 @@ void main() {
 	vec3 worldVector = mat3(gbufferModelViewInverse) * viewVector;
 	vec3 shadowLightVector = shadowLightPosition * 0.01;
 
-	float roughness, f0, matFlag;
+	float roughness, f0, matFlag, pomShadow;
 	vec4 data1 = texture2D(colortex1, texcoord);
 
 	vec3 albedo = srgbToLinear(data0.rgb);
@@ -160,7 +161,7 @@ void main() {
 	vec2 lightmaps = getLightmaps(data1.y);
 
 	getRoughnessF0(data1.z, roughness, f0);
-	getMatflag(data1.w, matFlag);
+	getMatflagPomShadow(data1.w, matFlag, pomShadow);
 
 	bool isVegitation = (matFlag > 1.99 && matFlag < 2.01);
 	bool isLava = (matFlag > 3.98 && matFlag < 4.02);
@@ -171,7 +172,7 @@ void main() {
 		dither = fract(frameTimeCounter * (1.0 / 7.0) + dither);
 	#endif
 
-	vec3 finalColor = calculateDirectLighting(albedo, position, normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, isVegitation, isLava);
+	vec3 finalColor = calculateDirectLighting(albedo, position, normal, viewVector, shadowLightVector, wLightVector, lightmaps, roughness, dither, pomShadow, isVegitation, isLava);
 
 	gl_FragData[0] = encodeRGBE8(max0(finalColor));
 	//gl_FragData[1] = vec4(0.0);
