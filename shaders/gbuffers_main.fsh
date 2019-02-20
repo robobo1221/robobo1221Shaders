@@ -1,7 +1,11 @@
 #extension GL_EXT_gpu_shader4 : enable
 
 varying vec2 texcoord;
+varying vec2 midcoord;
+varying vec2 tileSize;
 varying vec4 color;
+
+varying float pomDepth;
 
 flat varying mat3 tbn;
 
@@ -54,14 +58,51 @@ float calculateOldf0(float metalness) {
 	return f0 * metalness;
 }
 
+vec2 calculateWrapCoord(vec2 coord){
+	return (round((midcoord - coord) / tileSize) * tileSize + coord);
+}
+
+float calculatePomDepth(vec2 coord, mat2 texD){
+	return texture2DGrad(normals, calculateWrapCoord(coord), texD[0], texD[1]).a * pomDepth - pomDepth;
+}
+
+vec2 calculatePom(vec2 coord, mat2 texD){
+	vec3 increment = tangentVecView * inversesqrt(dot(tangentVecView,tangentVecView));
+		 increment = length(increment.xy * texD) * increment;
+
+	float l = length(increment);
+		  l = max(l, 5e-4) / sqrt(dot(increment, increment));
+	
+	increment = increment * l;
+
+	bool limit = increment.z < -1e-5;
+	vec3 pomcoord = vec3(coord, 0.0);
+
+	while(calculatePomDepth(pomcoord.xy, texD) < pomcoord.z && limit){
+ 		pomcoord += increment;
+	}
+
+	return pomcoord.xy;
+}
+
 /* DRAWBUFFERS:01 */
 void main() {
 	#if defined program_gbuffers_water
 		if(!gl_FrontFacing) discard;
 	#endif
 
-	vec4 albedo = texture2D(tex, texcoord) * color;
-	vec4 specularData = texture2D(specular, texcoord);
+	mat2 texD = mat2(dFdx(texcoord), dFdy(texcoord));
+
+	#if defined program_gbuffers_terrain
+		vec2 pomcoord = calculatePom(texcoord, texD);
+		vec2 wrapcoord = calculateWrapCoord(pomcoord);
+	#else
+		vec2 pomcoord = texcoord;
+		vec2 wrapcoord = texcoord;
+	#endif
+
+	vec4 albedo = texture2DGrad(tex, wrapcoord, texD[0], texD[1]) * color;
+	vec4 specularData = texture2DGrad(specular, wrapcoord, texD[0], texD[1]);
 
 	#if SPECULAR_FORMAT == SPEC_OLD
 		float roughness = 1.0 - specularData.x;
@@ -76,7 +117,7 @@ void main() {
 	#endif
 
 	#if !defined program_gbuffers_block && !defined program_gbuffers_entities
-		vec3 normal = texture2D(normals, texcoord).rgb * 2.0 - 1.0;
+		vec3 normal = texture2DGrad(normals, wrapcoord, texD[0], texD[1]).rgb * 2.0 - 1.0;
 	#else
 		vec3 normal = vec3(0.0, 0.0, 1.0);
 	#endif
@@ -116,6 +157,8 @@ void main() {
 	#ifdef WHITE_WORLD
 		albedo.rgb = vec3(1.0);
 	#endif
+
+	//albedo.rgb = vec3(wrapcoord, 0.0);
 
 	gl_FragData[0] = albedo;
 	gl_FragData[1] = vec4(encodeNormal(normal), encodeVec2(ditheredLightmaps), encodeVec2(roughness, f0), encodeVec2(1.0 - matFlag, 1.0));

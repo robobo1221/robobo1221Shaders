@@ -1,5 +1,11 @@
+#extension GL_EXT_gpu_shader4 : enable
+
 varying vec2 texcoord;
+varying vec2 midcoord;
+varying vec2 tileSize;
 varying vec4 color;
+
+varying float pomDepth;
 
 flat varying mat3 tbn;
 
@@ -20,6 +26,8 @@ uniform vec3 cameraPosition;
 uniform float viewWidth;
 uniform float viewHeight;
 
+uniform sampler2D texture;
+
 uniform float frameTimeCounter;
 uniform int frameCounter;
 
@@ -37,7 +45,11 @@ void main() {
 
 	texcoord = gl_MultiTexCoord0.xy;
 	lightmaps = gl_MultiTexCoord1.xy * (1.0 / 255.0);
+	midcoord = mc_midTexCoord.xy;
+	tileSize = abs(texcoord - midcoord) * 2.0;
 	color = gl_Color;
+
+	pomDepth = length(tileSize) * 0.2;
 
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 
@@ -102,6 +114,10 @@ void main() {
 
 	tbn = mat3(tangent, cross(tangent, normal), normal);
 
-	tangentVec = -normalize((viewSpacePosition * gl_NormalMatrix) * tbn);
-	tangentVecView = (mat3(gbufferModelViewInverse) * viewSpacePosition) * tbn;
+	vec2 atlasSize = vec2(textureSize2D(texture, 0));
+
+	mat3 tbnFix = mat3(tbn[0] * atlasSize.y / atlasSize.x, tbn[1], tbn[2]);
+
+	tangentVec = -normalize((viewSpacePosition * gl_NormalMatrix) * tbnFix);
+	tangentVecView = (viewSpacePosition * gl_NormalMatrix) * tbnFix;
 }
