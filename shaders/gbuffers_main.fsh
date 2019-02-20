@@ -71,7 +71,7 @@ vec2 calculatePom(vec2 coord, mat2 texD){
 		 increment = length(increment.xy * texD) * increment;
 
 	float l = length(increment);
-		  l = max(l, 5e-4) / sqrt(dot(increment, increment));
+		  l = max(l, 1e-4) / sqrt(dot(increment, increment));
 	
 	increment = increment * l;
 
