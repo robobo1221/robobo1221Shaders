@@ -218,9 +218,11 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	vec3 shadowPosition = transMAD(shadowMatrix, position[1]);
 
 	vec3 shadowSpaceNormal = mat3(shadowModelView) * mat3(gbufferModelViewInverse) * normal;
+	vec3 flatNormal = clamp(normalize(cross(dFdx(position[1]), dFdy(position[1]))), -1.0, 1.0);
+	vec3 shadowSpaceFlatNormal = mat3(shadowModelView) * flatNormal;
 
 	float cloudShadows = 1.0;
-	vec3 shadows = calculateShadows(shadowPosition, position, normal, shadowSpaceNormal, shadowLightVector, dither, isVegitation, isLava) * pomShadow;
+	vec3 shadows = calculateShadows(shadowPosition, position, normal, shadowSpaceFlatNormal, shadowLightVector, dither, isVegitation, isLava) * pomShadow;
 		 //shadows *= calculateVolumeLightTransmittance(position[1], wLightVector, max3(shadows), 8);
 
 		#ifdef VOLUMETRIC_CLOUDS
