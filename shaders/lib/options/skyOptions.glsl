@@ -16,7 +16,7 @@ const vec2 sky_scaleHeights = vec2(8.0e3, 1.2e3);
 const float sky_mieg = 0.80;
 
 const vec3 sky_coefficientRayleigh = vec3(5.8000e-6, 1.3500e-5, 3.3100e-5);
-const vec3 sky_coefficientMie = vec3(3.0000e-6, 3.0000e-6, 3.0000e-6); // Should be >= 2e-6
+const vec3 sky_coefficientMie = vec3(8.0000e-6, 8.0000e-6, 8.0000e-6); // Should be >= 2e-6
 const vec3 sky_coefficientOzone = ozoneCrossSection * ozoneNumberDensity; // ozone cross section * (ozone number density * (cm ^ 3))
 
 const vec2 sky_inverseScaleHeights = 1.0 / sky_scaleHeights;
