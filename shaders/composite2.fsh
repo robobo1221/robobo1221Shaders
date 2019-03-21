@@ -108,6 +108,36 @@ vec3 calculateBloom(vec2 coord, float EV, vec2 pixelSize){
 	return decodeColor(bloom) * (1.0 / 7.) * exp2(EV - 3.0);
 }
 
+// https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ACES.hlsl
+const mat3 ACESInputMat = mat3(
+    0.59719, 0.35458, 0.04823,
+    0.07600, 0.90834, 0.01566,
+    0.02840, 0.13383, 0.83777
+);
+
+const mat3 ACESOutputMat = mat3(
+     1.60475, -0.53108, -0.07367,
+    -0.10208,  1.10813, -0.00605,
+    -0.00327, -0.07276,  1.07602
+);
+
+vec3 RRTAndODTFit( in vec3 v ) {
+    vec3 a = v * (v + 0.0245786) - 0.000090537;
+    vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081;
+    return a / b;
+}
+
+vec3 ACESFitted( in vec3 color ) {
+	color *= 2.25;
+    color = color * ACESInputMat;
+	//color *= 1.5;
+    color = RRTAndODTFit(color);
+    color = color * ACESOutputMat;
+    color = clamp(color, 0.0, 1.0);
+	color = linearToSRGB(color);
+    return color;
+}
+
 /* DRAWBUFFERS:0 */
 void main() {
 	vec2 pixelSize = 1.0 / vec2(viewWidth, viewHeight);
@@ -122,7 +152,7 @@ void main() {
 
 	color += bloom;
 	color = exposureValue * color;
-	color = roboboTonemap(color);
+	color = ACESFitted(color);
 
 	gl_FragData[0] = vec4(color, 1.0);
 }
