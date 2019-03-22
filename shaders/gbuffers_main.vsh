@@ -86,7 +86,9 @@ void main() {
 			material == 104 ||
 			material == 105 ||
 			material == 83 ||
-			material == 115
+			material == 115 ||
+			material == 141 ||
+			material == 207
 		) ? 2.0 : matFlag;
 
 		//Water : 3.0
