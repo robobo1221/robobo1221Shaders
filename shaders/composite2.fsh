@@ -67,7 +67,6 @@ vec3 hableTonemap(vec3 x){
 vec3 roboboTonemap(vec3 x) {
 
 	const vec3 tonemapCurve = vec3(5.5);
-	x *= 1.5;
 
 	x = linearToSRGB(x);
 	x = pow(x, tonemapCurve);
