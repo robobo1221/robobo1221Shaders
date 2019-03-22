@@ -121,7 +121,7 @@ float calculateTorchLightAttenuation(float lightmap){
 			float normFactor = dot(samplePostion, samplePostion);
 			vec3 sampleVector = samplePostion * inversesqrt(normFactor);
 			float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
-					SoN = isVegitation ? 1.0 : SoN;
+				  SoN = isVegitation ? 1.0 : SoN;
 
 			if (SoN <= 0.0) continue;
 
@@ -129,10 +129,12 @@ float calculateTorchLightAttenuation(float lightmap){
 					normal.xy = -normal.xy;
 
 			float LoN = clamp01(dot(sampleVector, normal));
+			float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + rOffsetSize * 16.0);
+
+			SoN = sqrt(SoN);
 
 			if (LoN <= 0.0) continue;
 
-			float falloff = 1.0 / (normFactor * rOffsetSize * 16384.0 + rOffsetSize * 16.0);
 			/*
 			float waterMask = texture2DLod(shadowcolor1, remappedCoord, 3).a * 2.0 - 1.0;
 
@@ -153,7 +155,6 @@ float calculateTorchLightAttenuation(float lightmap){
 					bleedingMask = pow6(bleedingMask);
 					bleedingMask = clamp01(0.005 / (max(bleedingMask, 0.005)));
 
-			//SoN = sqrt(SoN);
 			//LoN = sqrt(LoN);
 
 			total += albedo.rgb * LoN * SoN * falloff * bleedingMask;
