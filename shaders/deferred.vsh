@@ -55,7 +55,7 @@ void CalculateSkySH(vec3 sunVector, vec3 moonVector, vec3 upVector, vec2 planetS
 	const float rLonSamples = 1.0 / lonSamples;
 	const float sampleCount = rLatSamples * rLonSamples;
 
-	const float latitudeSize = rLatSamples * PI;
+	const float latitudeSize = rLatSamples * TAU;
 	const float longitudeSize = rLonSamples * TAU;
 
 	vec4 shR = vec4(0.0), shG = vec4(0.0), shB = vec4(0.0);
