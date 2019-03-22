@@ -250,7 +250,7 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 	vec3 lighting = vec3(0.0);
 
 	lighting += calculateTorchLightAttenuation(lightmaps.x) * torchColor * ao;
-	lighting += 0.01 * (-lightmaps.y + 1.0);
+	lighting += 0.03 * (-lightmaps.y + 1.0);
 	lighting += directionalLighting * sunColor;
 
 	//albedo = lightmaps.x > 0.99 ? vec3(1.0) : albedo;

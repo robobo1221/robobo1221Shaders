@@ -184,7 +184,7 @@ void main() {
 		normal = vec3(0.0, 1.0, 0.0);
 	#endif
 
-	vec2 ditheredLightmaps = bayer16(gl_FragCoord.xy) * (1.0 / 255.0) + (1.0 / 255.0) + lightmaps;
+	vec2 ditheredLightmaps = bayer16(gl_FragCoord.xy) * (1.0 / 255.0) + lightmaps;
 		 ditheredLightmaps = clamp01(ditheredLightmaps);
 
 	#ifdef WHITE_WORLD
