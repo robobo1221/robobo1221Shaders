@@ -2,7 +2,7 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 	float blockerDepth = 0.0;
 	
 	for (int i = 0; i < steps; ++i) {
-		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 4096.0 * float(steps));
 			 offset.z *= maxSpread;
 
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
@@ -47,7 +47,7 @@ vec3 calculateShadows(vec3 rawPosition, mat2x3 position, vec3 normal, vec3 shado
 	float shadowSurfaceDepth = transMAD(shadowModelView, position[1]).z;
 	
 	for (int i = 0; i < steps; ++i) {
-		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 4096.0 * float(steps));
 			 offset.z *= shadowBlur;
 
 		vec3 shadowPosition = vec3(offset.xy, -shadowBias) * offset.z + rawPosition;
@@ -109,7 +109,7 @@ float calculateTorchLightAttenuation(float lightmap){
 		shadowSpaceNormal *= vec3(1.0, 1.0, -1.0);
 
 		for (int i = 0; i < steps; ++i){
-			vec2 coordOffset = circlemap((float(i) + dither) * rSteps, 256.0 * float(steps)) * pixelOffset;
+			vec2 coordOffset = circlemap((float(i) + dither) * rSteps, 4096.0 * float(steps)) * pixelOffset;
 			float weight = 1.0;
 
 			vec2 offsetCoord = shadowPosition.xy + coordOffset;
@@ -190,7 +190,7 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 	float d = 0.0;
 
 	for (int i = 0; i < steps; ++i){
-		vec3 offset = circlemapL((dither + float(i)) * rSteps, 256.0 * float(steps));
+		vec3 offset = circlemapL((dither + float(i)) * rSteps, 4096.0 * float(steps));
 		offset *= offsetMul * offset.z;
 
 		vec3 offsetCoord = vec3(texcoord + offset.xy, texture2D(depthtex1, texcoord + offset.xy).x);

@@ -62,7 +62,7 @@ vec3 circlemapL(float i, float n){
 vec3 calculateRoughSpecular(const float i, const float alpha2, const int steps) {
 
     float x = (alpha2 * i) / (1.0 - i);
-    float y = i * float(steps) * 64.0 * 64.0 * goldenAngle;
+    float y = i * float(steps) * 4096.0 * goldenAngle;
 
     float c = inversesqrt(x + 1.0);
     float s = sqrt(x) * c;
