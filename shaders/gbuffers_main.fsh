@@ -60,6 +60,10 @@ float calculateOldf0(float metalness) {
 	return f0 * metalness;
 }
 
+float calculateGrayscalef0(float roughness){
+	return roughness >= 0.99 ? 0.0 : 0.021;
+}
+
 vec2 calculateWrapCoord(vec2 coord){
 	return (round((midcoord - coord) / tileSize) * tileSize + coord);
 }
@@ -129,6 +133,9 @@ void main() {
 	#if SPECULAR_FORMAT == SPEC_OLD
 		float roughness = 1.0 - specularData.x;
 		float f0 = calculateOldf0(specularData.y);
+	#elif SPECULAR_FORMAT == SPEC_GRAYSCALE
+		float roughness = 1.0 - specularData.x;
+		float f0 = calculateGrayscalef0(roughness);
 	#else
 		float roughness = 1.0 - specularData.z;
 		float f0 = specularData.x;

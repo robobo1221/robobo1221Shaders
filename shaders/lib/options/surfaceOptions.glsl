@@ -28,5 +28,6 @@ const float shadowDistance = 120.0;
 
 #define SPEC_NEW 0
 #define SPEC_OLD 1
+#define SPEC_GRAYSCALE 2
 
-#define SPECULAR_FORMAT SPEC_NEW //[SPEC_NEW SPEC_OLD]
+#define SPECULAR_FORMAT SPEC_NEW //[SPEC_NEW SPEC_OLD SPEC_GRAYSCALE]
