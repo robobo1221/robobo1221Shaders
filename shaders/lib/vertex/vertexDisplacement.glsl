@@ -34,7 +34,7 @@ vec3 calculateWavingLeaves(vec3 pos, float t){
 }
 
 vec3 doWavingPlants(vec3 pos){
-    #if !defined program_gbuffers_terrain && !defined program_shadow
+    #if !defined program_gbuffers_terrain && !defined program_shadow || !defined WAVING_PLANTS
         return pos;
     #endif
 

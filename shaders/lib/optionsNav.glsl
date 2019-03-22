@@ -1,5 +1,6 @@
 #include "/lib/options/TAAOptions.glsl"
 #include "/lib/options/surfaceOptions.glsl"
+#include "/lib/options/miscOptions.glsl"
 
 #if defined program_composite2 || defined program_composite3 || defined program_final
     #include "/lib/options/cameraOptions.glsl"
@@ -12,4 +13,7 @@
 #endif
 
 #ifdef ADVANCED_PARALLAX_WATER
+#endif
+
+#ifdef WAVING_PLANTS
 #endif
