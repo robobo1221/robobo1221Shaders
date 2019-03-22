@@ -128,7 +128,6 @@ vec3 RRTAndODTFit( in vec3 v ) {
 }
 
 vec3 ACESFitted( in vec3 color ) {
-	color *= 2.25;
     color = color * ACESInputMat;
 	//color *= 1.5;
     color = RRTAndODTFit(color);
