@@ -138,7 +138,7 @@ void main() {
 		albedo.rgb = mix(albedo.rgb, albedo.rgb * entityColor.rgb, entityColor.a);
 	#endif
 
-	#if !defined program_gbuffers_block && !defined program_gbuffers_entities
+	#if !defined program_gbuffers_block && !defined program_gbuffers_entities && !defined program_gbuffers_textured
 		vec3 normal = texture2DGrad(normals, wrapcoord, texD[0], texD[1]).rgb * 2.0 - 1.0;
 	#else
 		vec3 normal = vec3(0.0, 0.0, 1.0);
@@ -172,6 +172,10 @@ void main() {
 
 	//normal = clampNormal(normal, -tangentVecView);
 	normal = tbn * normal;
+
+	#if defined program_gbuffers_textured
+		normal = vec3(0.0, 1.0, 0.0);
+	#endif
 
 	vec2 ditheredLightmaps = bayer16(gl_FragCoord.xy) * (1.0 / 255.0) + (1.0 / 255.0) + lightmaps;
 		 ditheredLightmaps = clamp01(ditheredLightmaps);
