@@ -111,7 +111,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
 
     vec3 calculateVolumetricLightWater(vec3 backGround, vec3 startPosition, vec3 endPosition, vec3 wLightVector, vec3 worldVector, float dither, float ambientOcclusion, float vDotL){
         #ifndef VOLUMETRIC_LIGHT_WATER
-            return backGround * exp2(-waterTransmittanceCoefficient * length(endPosition - startPosition) * rLOG2);
+            return backGround * exp2(-waterTransmittanceCoefficient * distance(endPosition, startPosition) * rLOG2);
         #endif
 
         const int steps = VL_WATER_QUALITY;
