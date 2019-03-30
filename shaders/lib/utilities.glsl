@@ -12,7 +12,7 @@ const float rLOG2	= 1.0 / log(2.0);
 
 const float goldenAngle = TAU / PHI / PHI;
 
-#define anisotropicMultibounceConst 2.46694220692 //Σ PI^n where n = 0 limit = inf
+#define anisotropicMultibounceConst 1.46694220692 //Σ PI^n where n = 0 limit = inf
 
 #define clamp01(x) clamp(x, 0.0, 1.0)
 #define max0(x) max(x, 0.0)
