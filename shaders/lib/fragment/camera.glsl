@@ -28,5 +28,5 @@ float calculateExposure(float avg) {
     #endif
 
 
-    return EV100toExposure(exposureValue - exposureOffset) * pow2(hPI);
+    return EV100toExposure(exposureValue - exposureOffset);
 }
