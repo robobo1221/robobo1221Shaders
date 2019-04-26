@@ -26,6 +26,7 @@ varying vec3 moonColorClouds2D;
 varying vec3 skyColor;
 
 varying float transitionFading;
+varying float timeSunrise;
 
 uniform mat4 gbufferModelViewInverse;
 
@@ -55,6 +56,9 @@ void main() {
 	const float tTime = (1.0 / 50.0);
 	float wTime = float(worldTime);
 	transitionFading = clamp01(clamp01((wTime - 23215.0) * tTime) + (1.0 - clamp01((wTime - 12735.0) * tTime)) + clamp01((wTime - 12925.0) * tTime) * (1.0 - clamp01((wTime - 22975.0) * tTime)));
+	
+	const float endSunriseTime = 1.0 / 3000.0;
+	timeSunrise = clamp01(1.0 - clamp01(wTime * endSunriseTime) + clamp01((wTime - 23000.0) * endSunriseTime));
 
 	upVector = upPosition * 0.01;
 	sunVector = sunPosition * 0.01;

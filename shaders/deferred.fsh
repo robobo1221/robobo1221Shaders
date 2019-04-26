@@ -26,6 +26,7 @@ varying vec3 moonColorClouds;
 varying vec3 skyColor;
 
 varying float transitionFading;
+varying float timeSunrise;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;

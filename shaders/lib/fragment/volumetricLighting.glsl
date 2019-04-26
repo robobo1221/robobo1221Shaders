@@ -1,3 +1,9 @@
+float calculateMorningFog(float height){
+    const float density = 300.0;
+
+    return exp2(-max0(height - 63.0) * 0.05) * density * timeSunrise*timeSunrise;
+}
+
 vec2 calculateVolumetricLightOD(vec3 position){
     vec3 adjustedPosition = position + cameraPosition;
     float height = adjustedPosition.y;
@@ -6,6 +12,8 @@ vec2 calculateVolumetricLightOD(vec3 position){
     vec2 rayleighMie = exp2(-max0(height - 63.0) * sky_inverseScaleHeights * rLOG2 * vec2(ATMOSPHERE_SCALE, 1.0)) * ATMOSPHERE_SCALE;
 
     od += rayleighMie;
+    od.y += calculateMorningFog(height);
+
     //od.xy += exp2(-(height - 62.0) * 0.2) * vec2(500.0, 2500.0) * 3.0;
 
     return od;
