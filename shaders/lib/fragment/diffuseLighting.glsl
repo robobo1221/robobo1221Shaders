@@ -174,7 +174,7 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 	#endif
 
 	//fake bounced sunlight
-	skyCol += (sunColor + moonColor) * transitionFading * pow2(rPI) * 0.075;
+	skyCol += (sunColor + moonColor) * transitionFading * pow2(rPI) * 0.06;
 
 	return skyCol * lightmap * anisotropicMultibounceConst;
 }
