@@ -3,7 +3,7 @@ const float rShadowMapResolution = 1.0 / float(shadowMapResolution);
 const float shadowDistance = 120.0;
 
 #define sun_illuminance 128000.0
-#define moon_illuminance 2.0
+#define moon_illuminance 5.0
 
 #define sunColorBase (blackbody(5778.0) * sun_illuminance)
 #define moonColorBase (vec3(0.36333, 0.56333, 0.92333) * moon_illuminance )    //Fake Purkinje effect
