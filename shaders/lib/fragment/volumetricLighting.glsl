@@ -53,7 +53,7 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
         float shadowDepth1 = texture2D(shadowtex1, shadowPosition.xy).x;
         float volumetricShadow = calculateHardShadows(shadowDepth1, shadowPosition, 0.0);
 
-        directScattering += (scatterCoeffs * phase) * volumetricShadow * calculateVolumeLightTransmittance(position, wLightVector, volumetricShadow, 8) * transmittance;
+        directScattering += (scatterCoeffs * phase) * volumetricShadow * calculateVolumeLightTransmittance(position, wLightVector, volumetricShadow, 5) * transmittance;
         indirectScattering += (scatterCoeffs * vec2(0.25)) * transmittance;
     }
 
