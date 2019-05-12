@@ -147,9 +147,14 @@ float calculateCloudOD(vec3 position, const int octaves){
         float marchRange = (1.0 - clamp01((eyeAltitude - volumetric_cloudMaxHeight) * 0.1)) * (1.0 - clamp01((volumetric_cloudMinHeight - eyeAltitude) * 0.1));
               marchRange = mix(1.0, marchRange, float(depth >= 1.0));
 
+        float worldLength = inversesqrt(dot(worldPosition, worldPosition));
+
+        float inCloudRayDistance = (volumetric_cloudHeight / 32.0);
+              inCloudRayDistance = min(inCloudRayDistance, topSphere.y * worldLength);
+
         // Change the raymarcher's start and endposition when you fly through them or when geometry is behind it.
         startPosition = mix(startPosition, gbufferModelViewInverse[3].xyz, marchRange);
-        endPosition = mix(endPosition, worldPosition * (depth >= 1.0 ? (volumetric_cloudHeight / 32.0) : 1.0), marchRange);
+        endPosition = mix(endPosition, worldPosition * (depth >= 1.0 ? inCloudRayDistance : 1.0), marchRange);
 
         // Curve the cloud position around the Earth.
         startPosition = vec3(startPosition.x, length(startPosition + vec3(0.0, sky_planetRadius, 0.0)) - sky_planetRadius, startPosition.z);
