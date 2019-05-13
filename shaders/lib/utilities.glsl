@@ -39,6 +39,23 @@ const float goldenAngle = TAU / PHI / PHI;
 
 #define lumCoeff vec3(0.2125, 0.7154, 0.0721)
 
+float fCondition(const bool condition, const float whenTrue, const float whenFalse)
+{
+	return mix(whenFalse, whenTrue, float(condition));
+}
+vec2 fCondition(const bool condition, const vec2 whenTrue, const vec2 whenFalse)
+{
+	return mix(whenFalse, whenTrue, float(condition));
+}
+vec3 fCondition(const bool condition, const vec3 whenTrue, const vec3 whenFalse)
+{
+	return mix(whenFalse, whenTrue, float(condition));
+}
+vec4 fCondition(const bool condition, const vec4 whenTrue, const vec4 whenFalse)
+{
+	return mix(whenFalse, whenTrue, float(condition));
+}
+
 float facos(const float sx){
     float x = clamp(abs( sx ),0.,1.);
     float a = sqrt( 1. - x ) * ( -0.16882 * x + 1.56734 );

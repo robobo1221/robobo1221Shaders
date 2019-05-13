@@ -189,8 +189,8 @@ vec3 rayTaceReflections(vec3 viewPosition, float NoV, vec3 p, vec3 reflectedVect
 		rdepth = texture2D(depthtex1, rp.xy).x;
 		bool rayHit = rdepth < rp.z;
 
-		p = rayHit ? rp : p;
-		depth = rayHit ? rdepth : depth;
+		p = fCondition(rayHit, rp, p);
+		depth = fCondition(rayHit, rdepth, depth);
 
 		stepLength *= 0.5;
 
@@ -451,7 +451,7 @@ void main() {
 	}
 
 	if (isWater || isEyeInWater == 1) {
-		color = calculateVolumetricLightWater(color, isEyeInWater == 1 ? gbufferModelViewInverse[3].xyz : position[1], isEyeInWater == 1 ? position[1] : backPosition[1], wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
+		color = calculateVolumetricLightWater(color, fCondition(isEyeInWater == 1, gbufferModelViewInverse[3].xyz, position[1]), fCondition(isEyeInWater == 1, position[1], backPosition[1]), wLightVector, worldVector, dither, ambientFogOcclusion, vDotL);
 	}
 
 	if (depth < 1.0 && isEyeInWater == 0)

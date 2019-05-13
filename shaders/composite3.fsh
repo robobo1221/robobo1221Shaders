@@ -72,15 +72,15 @@ vec3 calculateClosestFragment(vec2 p, vec2 pixelSize){
 	vec3 depth8 = vec3(0.0, -pixelSize.y, sampleDepth(p + vec2(0.0, -pixelSize.y)));
 
 	vec3 depthMin = depth1;
-	depthMin = depthMin.z > depth2.z ? depth2 : depthMin;
-	depthMin = depthMin.z > depth3.z ? depth3 : depthMin;
+	depthMin = fCondition(depthMin.z > depth2.z, depth2, depthMin);
+	depthMin = fCondition(depthMin.z > depth3.z, depth3, depthMin);
 
-	depthMin = depthMin.z > depth4.z ? depth4 : depthMin;
-	depthMin = depthMin.z > depth5.z ? depth5 : depthMin;
-	depthMin = depthMin.z > depth6.z ? depth6 : depthMin;
+	depthMin = fCondition(depthMin.z > depth4.z, depth4, depthMin);
+	depthMin = fCondition(depthMin.z > depth5.z, depth5, depthMin);
+	depthMin = fCondition(depthMin.z > depth6.z, depth6, depthMin);
 
-	depthMin = depthMin.z > depth7.z ? depth7 : depthMin;
-	depthMin = depthMin.z > depth8.z ? depth8 : depthMin;
+	depthMin = fCondition(depthMin.z > depth7.z, depth7, depthMin);
+	depthMin = fCondition(depthMin.z > depth8.z, depth8, depthMin);
 
 	return vec3(depthMin.xy + p, depthMin.z);
 }
@@ -123,7 +123,7 @@ vec3 temporalReprojection(vec2 p, vec2 pixelSize, vec2 pixelResolution, vec3 pre
 		  blendWeight *= sqrt(pixelVelocity.x * pixelVelocity.y) * 0.125 + 0.875;
 
 	p -= velocity;
-	blendWeight = clamp01(p) != p ? 0.0 : blendWeight;
+	blendWeight = fCondition(clamp01(p) != p, 0.0, blendWeight);
 
 	vec3 sharpening = (1.0 - exp(-(currentCol - clamp(colAVG, colMin, colMax)))) * TAA_SHARPENING;
 
@@ -168,7 +168,7 @@ vec3 calculateTAA(vec2 p, vec2 pixelSize, vec2 pixelResolution, float dither){
 	vec3 closest = calculateClosestFragment(p, pixelSize);
 	vec2 velocity = calculateVelocityVector(closest);
 
-	velocity = handMask ? vec2(0.0) : velocity;
+	velocity = fCondition(handMask, vec2(0.0), velocity);
 
 	vec3 previousCol = samplePreviousFrame(p - velocity);
 	vec3 reprojectedColor = temporalReprojection(p, pixelSize, pixelResolution, previousCol, currentCol, velocity);

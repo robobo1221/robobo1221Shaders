@@ -26,7 +26,7 @@ vec3 calculateShadows(vec3 rawPosition, mat2x3 position, vec3 normal, vec3 shado
 	const float rSteps = 1.0 / steps;
 
 	float NdotL = dot(normal, lightVector);
-		  NdotL = isVegitation ? 0.5 : NdotL;
+		  NdotL = fCondition(isVegitation, 0.5, NdotL);
 
 	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL) * rShadowMapResolution;
 		  shadowBias = shadowBias * calculateDistFactor(rawPosition.xy) * 0.15;
@@ -61,7 +61,7 @@ vec3 calculateShadows(vec3 rawPosition, mat2x3 position, vec3 normal, vec3 shado
 
 		float waterMask = colorShadow1.a * 2.0 - 1.0;
 
-		shadowBias = (shadowDepth0 == shadowDepth1 && !(isVegitation || isLava)) ? (dot(shadowNormal, shadowSpaceNormal) > 0.1 ? shadowBias : 0.0) : shadowBias;
+		shadowBias = fCondition((shadowDepth0 == shadowDepth1 && !(isVegitation || isLava)), fCondition(dot(shadowNormal, shadowSpaceNormal) > 0.1, shadowBias, 0.0), shadowBias);
 
 		float shadow0 = calculateHardShadows(shadowDepth0, shadowPosition, shadowBias);
 		float shadow1 = calculateHardShadows(shadowDepth1, shadowPosition, shadowBias);
@@ -121,7 +121,7 @@ float calculateTorchLightAttenuation(float lightmap){
 			float normFactor = dot(samplePostion, samplePostion);
 			vec3 sampleVector = samplePostion * inversesqrt(normFactor);
 			float SoN = clamp01(dot(sampleVector, shadowSpaceNormal));
-				  SoN = isVegitation ? 1.0 : SoN;
+				  SoN = fCondition(isVegitation, 1.0, SoN);
 
 			if (SoN <= 0.0) continue;
 
@@ -202,12 +202,12 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 
 		float OdotN = dot(offsetViewCoord, normal);
 		float tangent = PdotN / OdotN;
-              tangent = OdotN >= 0.0 ? 16.0 : tangent;
+              tangent = fCondition(OdotN >= 0.0, 16.0, tangent);
 
 		float depthAware = smoothstep(0.0, 1.0, radius / abs(offsetViewCoord.z - position[0].z));
 
         float correction = mix(tangent, min(1.0, tangent), depthAware);
-              correction = clamp01(coord) != coord ? 1.0 : correction;
+              correction = fCondition(clamp01(coord) != coord, 1.0, correction);
 
 		float nDotL = dot(normal, normalize(offsetViewCoord * correction - position[0]));
 		d += nDotL;

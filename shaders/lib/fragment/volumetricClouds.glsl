@@ -136,8 +136,8 @@ float calculateCloudOD(vec3 position, const int octaves){
         vec2 topSphere = rsi(vec3(0.0, 1.0, 0.0) * sky_planetRadius + eyeAltitude, worldVector, sky_planetRadius + volumetric_cloudMaxHeight);
 
         // Get the distance from the eye to the start and endposition.
-        float startDistance = (eyeAltitude > volumetric_cloudMaxHeight ? topSphere.x : bottomSphere.y);
-        float endDistance = (eyeAltitude > volumetric_cloudMaxHeight ? bottomSphere.x : topSphere.y);
+        float startDistance = fCondition(eyeAltitude > volumetric_cloudMaxHeight, topSphere.x, bottomSphere.y);
+        float endDistance = fCondition(eyeAltitude > volumetric_cloudMaxHeight, bottomSphere.x, topSphere.y);
 
         // Multiply the direction and distance by eachother to.
         vec3 startPosition = worldVector * startDistance;
@@ -154,7 +154,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
         // Change the raymarcher's start and endposition when you fly through them or when geometry is behind it.
         startPosition = mix(startPosition, gbufferModelViewInverse[3].xyz, marchRange);
-        endPosition = mix(endPosition, worldPosition * (depth >= 1.0 ? inCloudRayDistance : 1.0), marchRange);
+        endPosition = mix(endPosition, worldPosition * fCondition(depth >= 1.0, inCloudRayDistance, 1.0), marchRange);
 
         // Curve the cloud position around the Earth.
         startPosition = vec3(startPosition.x, length(startPosition + vec3(0.0, sky_planetRadius, 0.0)) - sky_planetRadius, startPosition.z);
@@ -234,7 +234,7 @@ float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
     float fade = smoothstep(0.125, 0.075, abs(direction.y));
 
     // Make sure the shadows keep on going even after we absorbed through the cloud.
-    position += position.y <= volumetric_cloudMinHeight ? direction * (volumetric_cloudMinHeight - position.y) / direction.y : vec3(0.0);
+    position += fCondition(position.y <= volumetric_cloudMinHeight, direction * (volumetric_cloudMinHeight - position.y) / direction.y, vec3(0.0));
 
     float transmittance = 0.0;
 
