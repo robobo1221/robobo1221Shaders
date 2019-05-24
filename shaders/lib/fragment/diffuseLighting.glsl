@@ -213,7 +213,7 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 		d += nDotL;
 	}
 
-	float ao = clamp01(facos(d * rSteps) - 0.5);
+	float ao = 1.0 - clamp01(d * rSteps);
 
 	return pow2(ao);
 }
