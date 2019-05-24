@@ -71,9 +71,9 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     float calculateCloudTransmittanceDepthSky(vec3 position){
-        float gradient = min(volumetric_cloudMinHeight - position.y, volumetric_cloudMinHeight) * volumetric_cloudScale * (1.0 / volumetric_cloudThicknessMult) * 0.01;
+        float gradient = min(volumetric_cloudMinHeight - position.y - volumetric_cloudThickness, volumetric_cloudMinHeight) * volumetric_cloudScale * (1.0 / volumetric_cloudThicknessMult) * 0.01;
 
-        return gradient * 1.11 * rLOG2 * 0.11;
+        return gradient * 1.11 * rLOG2 * 0.07;
     }
 
 
@@ -153,12 +153,14 @@ float calculateCloudOD(vec3 position, const int octaves){
               inCloudRayDistance = min(inCloudRayDistance, topSphere.y * worldLength);
 
         // Change the raymarcher's start and endposition when you fly through them or when geometry is behind it.
-        startPosition = mix(startPosition, gbufferModelViewInverse[3].xyz, marchRange);
+        startPosition = startPosition *  (1.0 - marchRange);
         endPosition = mix(endPosition, worldPosition * fCondition(depth >= 1.0, inCloudRayDistance, 1.0), marchRange);
 
         // Curve the cloud position around the Earth.
         startPosition = vec3(startPosition.x, length(startPosition + vec3(0.0, sky_planetRadius, 0.0)) - sky_planetRadius, startPosition.z);
         endPosition = vec3(endPosition.x, length(endPosition + vec3(0.0, sky_planetRadius, 0.0)) - sky_planetRadius, endPosition.z);
+
+        startPosition += gbufferModelViewInverse[3].xyz;
 
         // Calculate the ray increment and the ray position.
         vec3 increment = (endPosition - startPosition) * rSteps;
