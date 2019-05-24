@@ -1,5 +1,5 @@
 #define a 0.5
-#define b 0.25
+#define b 0.5
 #define c 0.7
 
 float calculateCloudShape2D(vec2 cloudPosition, float wind, const int octaves){
@@ -46,13 +46,13 @@ float calculateTransmittanceDepth2D(vec3 position, vec3 direction, float dither,
         od += calculateCloudOD2D(position);
     }
 
-    return od * rayLength * 1.11 * rLOG2;
+    return od * rayLength * rLOG2;
 }
 
 float calculateCloudTransmittanceDepthSky2D(vec3 position){
     float gradient = min(clouds2D_cloudHeight - position.y, clouds2D_cloudHeight) * volumetric_cloudScale * 0.01;
 
-    return gradient * 1.11 * rLOG2 * 0.11;
+    return gradient * rLOG2 * 0.11;
 }
 
 void calculateCloudScattering2D(vec3 position, float scatterCoeff, float powder, float transmittanceDepth, float transmittanceDepthSky, float phase, float bn, inout float directScattering, inout float skylightScattering){
@@ -61,12 +61,12 @@ void calculateCloudScattering2D(vec3 position, float scatterCoeff, float powder,
 }
 
 void calculateCloudScattering2D(vec3 position, vec3 wLightVector, float transmittance, float vDotL, float dither, inout float directScattering, inout float skylightScattering, const int dlSteps){
-    float scatterCoeff = calculateScatterIntergral(transmittance, 1.11);
+    float scatterCoeff = calculateScatterIntergral(transmittance, 1.0);
 
     float transmittanceDepth = calculateTransmittanceDepth2D(position, wLightVector, dither, dlSteps);
     float transmittanceDepthSky = calculateCloudTransmittanceDepthSky2D(position);
 
-    float powder = 1.0;//calculatePowderEffect(transmittanceDepth * (1.0 / 1.11));
+    float powder = 1.0;//calculatePowderEffect(transmittanceDepth);
 
     for (int i = 0; i < C2D_MULTISCAT_QUALITY; ++i) {
         float n = float(i);
@@ -94,7 +94,7 @@ vec3 calculateClouds2D(vec3 backGround, vec3 sky, vec3 worldVector, vec3 wLightV
     float od = calculateCloudOD2D(position);
     //if (od <= 0.0) return backGround;
 
-    float transmittance = exp2(-od * 1.11 * rLOG2 * clouds2D_cloudThickness);
+    float transmittance = exp2(-od * rLOG2 * clouds2D_cloudThickness);
 
     vec3 lightingDir = normalize(wLightVector - wLightVector * dot(wLightVector, worldVector));
 

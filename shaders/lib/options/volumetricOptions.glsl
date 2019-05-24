@@ -18,7 +18,7 @@ const float volumetric_cloudMaxHeight = volumetric_cloudMinHeight + volumetric_c
 
 #define C2D_MULTISCAT_QUALITY 6
 #define clouds2D_cloudHeight 6000.0
-#define clouds2D_cloudDensity 0.005
+#define clouds2D_cloudDensity 0.002
 #define clouds2D_cloudThickness 250.0
 
 #define VOLUMETRIC_LIGHT
