@@ -4,6 +4,8 @@ screen.SCREEN_SURFACE=Surface Options
 screen.SCREEN_LIGHTING=Lighting Options
 screen.SCREEN_SHADOWS=Shadow Options
 screen.SCREEN_GI=Global Illumination Options
+screen.SCREEN_AO=Ambient Occlusion Options
+screen.SCREEN_SPECULAR=Specular Options
 screen.SCREEN_PARALLAX=Parallax Options
 
 screen.SCREEN_CAMERA=Camera Options
@@ -23,11 +25,17 @@ screen.SCREEN_MISC=Misc
 
 option.REFRACTION=Refraction
 option.shadowMapResolution= Shadow Resolution
+option.SHADOW_QUALITY=Quality
 option.COLOURED_SHADOWS=Coloured Shadows
 option.SHADOW_PENUMBRA=Penumbra Shadows
 option.GI=Global Illumination
 option.GI_RADIUS=Radius
 option.GI_STEPS=Quality
+option.AMBIENT_OCCLUSION=Ambient Occlusion
+option.AO_QUALITY=Quality
+option.SPECULAR_FORMAT=Specular Format
+option.POM=Parallax Occlusion Mapping
+option.POM_DEPTH=Depth
 option.PARALLAX_WATER=Parallax Water
 option.ADVANCED_PARALLAX_WATER=Advanced Parallax Water
 option.PARALLAX_WATER_QUALITY=Quality
@@ -62,5 +70,11 @@ option.VL_QUALITY=Quality
 option.VL_WATER_QUALITY=Quality
 option.WATER_DENSITY=Density
 option.WATER_MURKYNESS=Murkyness
+
+# Values #
+
+value.SPECULAR_FORMAT.SPEC_NEW=New
+value.SPECULAR_FORMAT.SPEC_OLD=Old
+value.SPECULAR_FORMAT.SPEC_GRAYSCALE=Grayscale
 
 

@@ -49,7 +49,7 @@ void main() {
 	tileSize = abs(texcoord - midcoord) * 2.0;
 	color = gl_Color;
 
-	pomDepth = length(tileSize) * 0.2;
+	pomDepth = length(tileSize) * POM_DEPTH;
 
 	vec3 viewSpacePosition = transMAD(gl_ModelViewMatrix, gl_Vertex.xyz);
 
@@ -115,10 +115,13 @@ void main() {
 	#endif
 
 	tbn = mat3(tangent, cross(tangent, normal), normal);
+	mat3 tbnFix = tbn;
 
-	vec2 atlasSize = vec2(textureSize2D(texture, 0));
+	#ifdef POM
+		vec2 atlasSize = vec2(textureSize2D(texture, 0));
 
-	mat3 tbnFix = mat3(tbn[0] * atlasSize.y / atlasSize.x, tbn[1], tbn[2]);
+		tbnFix = mat3(tbn[0] * atlasSize.y / atlasSize.x, tbn[1], tbn[2]);
+	#endif
 
 	tangentVec = -normalize((viewSpacePosition * gl_NormalMatrix) * tbnFix);
 	tangentVecView = (viewSpacePosition * gl_NormalMatrix) * tbnFix;

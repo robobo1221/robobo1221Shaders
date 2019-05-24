@@ -22,7 +22,7 @@ vec3 calculateShadows(vec3 rawPosition, mat2x3 position, vec3 normal, vec3 shado
 	if (any(greaterThanEqual(earlyOutPosition, vec3(1.0))) ||
 		any(lessThanEqual(earlyOutPosition, vec3(0.0)))) return vec3(1.0);
 	
-	const int steps = 4;
+	const int steps = SHADOW_QUALITY;
 	const float rSteps = 1.0 / steps;
 
 	float NdotL = dot(normal, lightVector);
@@ -180,7 +180,8 @@ vec3 calculateSkyLighting(float lightmap, vec3 normal){
 }
 
 float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
-	const int steps = 4;
+
+	const int steps = AO_QUALITY;
 	const float rSteps = 1.0 / steps;
 
 	const float radius = 0.5;
@@ -234,6 +235,8 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 			shadows *= cloudShadows;
 		#endif
 
+	float ao = 1.0;
+
 	#if defined program_deferred
 		vec3 diffuse = vec3(1.0);
 
@@ -242,11 +245,12 @@ vec3 calculateDirectLighting(vec3 albedo, mat2x3 position, vec3 normal, vec3 vie
 		} else {
 			diffuse = GeometrySmithGGX(albedo, normal, viewVector, shadowLightVector, roughness);
 		}
-			 
-		float ao = calculateRoboboAO(texcoord, position, normal, dither);
+		
+		#ifdef AMBIENT_OCCLUSION
+			ao = calculateRoboboAO(texcoord, position, normal, dither);
+		#endif
 	#else
 		float diffuse = clamp01(dot(normal, shadowLightVector)) * rPI;	//Lambert for stained glass
-		float ao = 1.0;
 	#endif
 	
 	vec3 directionalLighting = shadows * diffuse * transitionFading;

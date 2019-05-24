@@ -13,10 +13,17 @@ const float shadowDistance = 120.0;
 
 //#define COLOURED_SHADOWS
 #define SHADOW_PENUMBRA
+#define SHADOW_QUALITY 4        //[2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 48 64]
+
+#define AMBIENT_OCCLUSION
+#define AO_QUALITY 4            //[2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 48 64]
 
 //#define GI
 #define GI_RADIUS 50.0          //[25.0 50.0 75.0 100.0 125.0 150.0 175.0 200.0]        // How far will the bounced light reach.
 #define GI_STEPS 12             //[2 4 6 8 10 12 14 16 18 20 24 28 32 48 64]      // The quality of Global Illumination
+
+#define POM
+#define POM_DEPTH 0.2          //[0.01 0.02 0.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2 0.24 0.28 0.32 0.36 0.4]
 
 #define PARALLAX_WATER              // Parallax water
 //#define ADVANCED_PARALLAX_WATER     // Makes the geometry have actual deformations by the wave. HAS SOME BUGS!

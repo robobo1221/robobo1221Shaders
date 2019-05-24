@@ -119,7 +119,7 @@ void main() {
 
 	float pomShadow = 1.0;
 
-	#if defined program_gbuffers_terrain
+	#if defined program_gbuffers_terrain && defined POM
 		vec2 pomcoord = calculatePom(texcoord, texD, pomShadow);
 		vec2 wrapcoord = calculateWrapCoord(pomcoord);
 	#else
