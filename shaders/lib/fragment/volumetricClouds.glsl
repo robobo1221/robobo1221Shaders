@@ -67,13 +67,13 @@ float calculateCloudOD(vec3 position, const int octaves){
             od += calculateCloudOD(position, VC_NOISE_OCTAVES);
         }
 
-        return od * rayLength * 1.11 * rLOG2;
+        return od * rayLength * rLOG2;
     }
 
     float calculateCloudTransmittanceDepthSky(vec3 position){
         float gradient = min(volumetric_cloudMinHeight - position.y - volumetric_cloudThickness, volumetric_cloudMinHeight) * volumetric_cloudScale * (1.0 / volumetric_cloudThicknessMult) * 0.01;
 
-        return gradient * 1.11 * rLOG2 * 0.07;
+        return gradient * rLOG2 * 0.07;
     }
 
 
@@ -91,7 +91,7 @@ float calculateCloudOD(vec3 position, const int octaves){
 
     void calculateCloudScattering(vec3 position, vec3 wLightVector, float od, float vDotL, float transmittance, float stepTransmittance, inout float directScattering, inout float skylightScattering, const int dlSteps, const int msSteps){
         // Scattering intergral.
-        float scatterCoeff = calculateScatterIntergral(stepTransmittance, 1.11);
+        float scatterCoeff = calculateScatterIntergral(stepTransmittance, 1.0);
 
         // Depth for directional transmittance
         float transmittanceDepth = calculateCloudTransmittanceDepth(position, wLightVector, dlSteps);
@@ -190,7 +190,7 @@ float calculateCloudOD(vec3 position, const int octaves){
             //float rayDepth = length(cloudPosition);
             //cloudDepth = cloudDepth < rayDepth - cloudDepth && cloudDepth <= 0.0 ? rayDepth : cloudDepth;
 
-            float stepTransmittance = exp2(-od * 1.11 * rLOG2);
+            float stepTransmittance = exp2(-od * rLOG2);
             calculateCloudScattering(cloudPosition, wLightVector, od, vDotL, transmittance, stepTransmittance, directScattering, skylightScattering, dlSteps, msSteps);
 
             transmittance *= stepTransmittance;
@@ -243,7 +243,7 @@ float calculateCloudShadows(vec3 position, vec3 direction, const int steps){
     for (int i = 0; i < steps; ++i, position += increment){
         transmittance += calculateCloudOD(position, 3);
     }
-    return exp2(-transmittance * 1.11 * rLOG2 * stepSize) * (1.0 - fade) + fade;
+    return exp2(-transmittance * rLOG2 * stepSize) * (1.0 - fade) + fade;
 }
 
 #undef a
