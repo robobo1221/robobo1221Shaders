@@ -196,7 +196,7 @@ float calculateRoboboAO(vec2 coord, mat2x3 position, vec3 normal, float dither){
 
 	for (int i = 0; i < steps; ++i){
 		vec3 offset = circlemapL((dither + float(i)) * rSteps, 4096.0 * float(steps));
-		offset *= offsetMul * offset.z;
+		offset *= offsetMul * offset.z * offset.z;
 
 		vec3 offsetCoord = vec3(texcoord + offset.xy, texture2D(depthtex1, texcoord + offset.xy).x);
 		vec3 offsetViewCoord = calculateViewSpacePosition(offsetCoord.xy, offsetCoord.z);
