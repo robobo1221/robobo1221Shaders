@@ -7,7 +7,7 @@ varying vec4 color;
 
 varying float pomDepth;
 
-flat varying mat3 tbn;
+varying mat3 tbn;
 
 varying vec3 tangentVec;
 varying vec3 tangentVecView;
