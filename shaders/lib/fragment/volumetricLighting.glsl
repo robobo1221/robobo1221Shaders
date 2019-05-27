@@ -142,8 +142,8 @@ vec3 calculateWaterTransmittance(vec3 worldPosition, float shadowWaterMask, floa
 
         float phase = phaseG(vDotL, 0.5);
 
-        vec3 scatterCoeff = waterScatterCoefficient * calculateScatterIntergral(rayLength, waterTransmittanceCoefficient);
         vec3 stepTransmittance = exp2(-waterTransmittanceCoefficient * rayLength * rLOG2);
+        vec3 scatterCoeff = waterScatterCoefficient * calculateScatterIntergral(stepTransmittance, waterTransmittanceCoefficient);
 
         for (int i = 0; i < steps; ++i, rayPosition += increment, shadowPosition += shadowIncrement){
 

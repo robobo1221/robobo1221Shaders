@@ -4,6 +4,12 @@ float calculateScatterIntergral(float stepTransmittance, const float coeff){
     return stepTransmittance * a - a;
 }
 
+vec3 calculateScatterIntergral(vec3 stepTransmittance, const vec3 coeff){
+    const vec3 a = -1.0 / coeff;
+
+    return stepTransmittance * a - a;
+}
+
 vec3 calculateScatterIntergral(float opticalDepth, const vec3 coeff){
     const vec3 a = -coeff * rLOG2;
     const vec3 b = -1.0 / coeff;
