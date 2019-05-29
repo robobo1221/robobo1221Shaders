@@ -28,8 +28,8 @@ float calculateCloudOD(vec3 position, const int octaves){
         localCoverage = clamp01(localCoverage * 3.0 - 0.75) * 0.5 + 0.5;
     #endif
 
-    float wind = TIME * 0.025;
-    vec3 windDirection = vec3(-wind, 0.0, -wind);
+    float wind = TIME * -0.025;
+    vec3 windDirection = vec3(wind, 0.0, wind);
 
     vec3 cloudPos = position * 0.00045 * volumetric_cloudScale + windDirection;
 
@@ -56,7 +56,7 @@ float calculateCloudOD(vec3 position, const int octaves){
     }
 
     float calculateCloudTransmittanceDepth(vec3 position, vec3 direction, const int steps){
-        float rayLength = volumetric_cloudThickness / steps;
+        float rayLength = (volumetric_cloudThickness / steps);
 
         vec3 increment = direction * rayLength;
         //position += 0.5 * increment;
@@ -149,11 +149,11 @@ float calculateCloudOD(vec3 position, const int octaves){
 
         float worldLength = inversesqrt(dot(worldPosition, worldPosition));
 
-        float inCloudRayDistance = (volumetric_cloudHeight / 32.0);
+        float inCloudRayDistance = volumetric_cloudHeight * 0.03125;
               inCloudRayDistance = min(inCloudRayDistance, topSphere.y * worldLength);
 
         // Change the raymarcher's start and endposition when you fly through them or when geometry is behind it.
-        startPosition = startPosition *  (1.0 - marchRange);
+        startPosition = startPosition * (1.0 - marchRange);
         endPosition = mix(endPosition, worldPosition * fCondition(depth >= 1.0, inCloudRayDistance, 1.0), marchRange);
 
         // Curve the cloud position around the Earth.
