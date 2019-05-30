@@ -17,16 +17,16 @@ float findBlocker(vec3 rawPosition, float shadowBias, float dither, float maxSpr
 }
 
 vec3 calculateShadows(vec3 rawPosition, mat2x3 position, vec3 normal, vec3 shadowSpaceNormal, vec3 lightVector, float dither, bool isVegitation, bool isLava) {
+	float NdotL = dot(normal, lightVector);
+		  NdotL = fCondition(isVegitation, 0.5, NdotL);
 	vec3 earlyOutPosition = remapShadowMap(rawPosition);
 	
 	if (any(greaterThanEqual(earlyOutPosition, vec3(1.0))) ||
-		any(lessThanEqual(earlyOutPosition, vec3(0.0)))) return vec3(1.0);
+		any(lessThanEqual(earlyOutPosition, vec3(0.0))) ||
+		NdotL <= 0.0) return vec3(1.0);
 	
 	const int steps = SHADOW_QUALITY;
 	const float rSteps = 1.0 / steps;
-
-	float NdotL = dot(normal, lightVector);
-		  NdotL = fCondition(isVegitation, 0.5, NdotL);
 
 	float shadowBias = sqrt(sqrt(1.0 - NdotL * NdotL) / NdotL) * rShadowMapResolution;
 		  shadowBias = shadowBias * calculateDistFactor(rawPosition.xy) * 0.15;
